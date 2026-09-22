@@ -1,0 +1,97 @@
+402
+application/json; charset=utf-8
+cache: private, private, no-store, must-revalidate
+---
+{
+  "accessBadge": {
+    "kind": "gated",
+    "priceUsd": "0.25",
+    "rule": "Every read is paid, human or agent."
+  },
+  "body": null,
+  "jsonld": {
+    "@context": "https://schema.org",
+    "@id": "https://musebook.dev/p/the-gated-article#post",
+    "@type": "Article",
+    "author": {
+      "@type": "Person",
+      "name": "Author One",
+      "url": "https://musebook.dev/@author-one"
+    },
+    "dateModified": "2026-09-22T12:00:00Z",
+    "datePublished": "2026-09-22T12:00:00Z",
+    "description": "Every read is paid.",
+    "hasPart": {
+      "@type": "WebPageElement",
+      "cssSelector": ".musebook-paywall",
+      "isAccessibleForFree": false
+    },
+    "headline": "The Always-Paid Article",
+    "inLanguage": "en",
+    "isAccessibleForFree": false,
+    "keywords": "musebook, x402",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "mainEntityOfPage": {
+      "@id": "https://musebook.dev/p/the-gated-article",
+      "@type": "WebPage"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Musebook",
+      "url": "https://musebook.dev"
+    },
+    "usageInfo": "https://musebook.dev/api/posts/00000000-0000-4000-8000-000000000003/license"
+  },
+  "payment": {
+    "priceAsset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+    "priceAtomic": "250000",
+    "priceNetwork": "eip155:8453",
+    "priceUsd": "0.25",
+    "required": true
+  },
+  "paymentRequired": {
+    "accepts": [
+      {
+        "amount": "250000",
+        "asset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+        "extra": {
+          "name": "USD Coin",
+          "version": "2"
+        },
+        "maxTimeoutSeconds": 60,
+        "network": "eip155:8453",
+        "payTo": "0x769900f8faad0000000000000000000000000001",
+        "scheme": "exact"
+      }
+    ],
+    "error": "PAYMENT-SIGNATURE header is required",
+    "resource": {
+      "description": "Every read is paid.",
+      "url": "https://musebook.dev/p/the-gated-article"
+    },
+    "x402Version": 2
+  },
+  "post": {
+    "author": {
+      "displayName": "Author One",
+      "handle": "author-one"
+    },
+    "contentHash": "9ece894f03754d19cf087b9717f85e1cd7da0da84229b82f7d67ed077cf4c5ac",
+    "kind": "article",
+    "language": "en",
+    "license": "CC-BY-4.0",
+    "postId": "00000000-0000-4000-8000-000000000003",
+    "publishedAt": "2026-09-22T12:00:00Z",
+    "slug": "the-gated-article",
+    "summary": "Every read is paid.",
+    "tags": [
+      "musebook",
+      "x402"
+    ],
+    "title": "The Always-Paid Article",
+    "updatedAt": "2026-09-22T12:00:00Z",
+    "url": "https://musebook.dev/p/the-gated-article"
+  },
+  "preview": "# The Always-Paid Article\n\nEvery read is paid — human or agent. The teaser is all you get for free.\n\nA second block of padding so the paid tail sits well past the preview boundary. This paragraph exists only to push the marker beyond four hundred characters, the deterministic teaser's cutoff used by every stub port in this suite.\n\n<!-- musebook:paywall -->",
+  "schema": "musebook-post-v1"
+}

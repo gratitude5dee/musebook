@@ -1,0 +1,70 @@
+200
+application/json; charset=utf-8
+cache: public, public, s-maxage=300, stale-while-revalidate=86400
+---
+{
+  "accessBadge": {
+    "kind": "toll",
+    "priceUsd": "0.00",
+    "rule": "Free for people. Agents pay once to crawl it."
+  },
+  "body": "# The Human-Free Agent-Paid Article\n\nHumans read this at 200. Agents get a 402 with a preview.\n\nA second block of padding so the paid tail sits well past the preview boundary. This paragraph exists only to push the marker beyond four hundred characters, the deterministic teaser's cutoff used by every stub port in this suite.\n\nThe tail of the body, which a denied render must never emit: MUSEBOOK_PAID_BODY_MARKER_7f3a",
+  "jsonld": {
+    "@context": "https://schema.org",
+    "@id": "https://musebook.dev/p/the-hfap-article#post",
+    "@type": "Article",
+    "author": {
+      "@type": "Person",
+      "name": "Author One",
+      "url": "https://musebook.dev/@author-one"
+    },
+    "dateModified": "2026-09-22T12:00:00Z",
+    "datePublished": "2026-09-22T12:00:00Z",
+    "description": "Free for humans; agents pay once per content_hash.",
+    "headline": "The Human-Free Agent-Paid Article",
+    "inLanguage": "en",
+    "isAccessibleForFree": true,
+    "keywords": "musebook, x402",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "mainEntityOfPage": {
+      "@id": "https://musebook.dev/p/the-hfap-article",
+      "@type": "WebPage"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Musebook",
+      "url": "https://musebook.dev"
+    },
+    "usageInfo": "https://musebook.dev/api/posts/00000000-0000-4000-8000-000000000002/license"
+  },
+  "payment": {
+    "priceAsset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+    "priceAtomic": "2000",
+    "priceNetwork": "eip155:8453",
+    "priceUsd": "0.00",
+    "required": true
+  },
+  "post": {
+    "author": {
+      "displayName": "Author One",
+      "handle": "author-one"
+    },
+    "contentHash": "6bcb233f16e8a892225c487c6596e10fa9813ad42477cd1a12dd4ebbf1f11409",
+    "kind": "article",
+    "language": "en",
+    "license": "CC-BY-4.0",
+    "postId": "00000000-0000-4000-8000-000000000002",
+    "publishedAt": "2026-09-22T12:00:00Z",
+    "slug": "the-hfap-article",
+    "summary": "Free for humans; agents pay once per content_hash.",
+    "tags": [
+      "musebook",
+      "x402"
+    ],
+    "title": "The Human-Free Agent-Paid Article",
+    "updatedAt": "2026-09-22T12:00:00Z",
+    "url": "https://musebook.dev/p/the-hfap-article"
+  },
+  "preview": null,
+  "schema": "musebook-post-v1"
+}

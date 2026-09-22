@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@musebook/schema": "workspace:*",
-    "@musebook/kernel": "workspace:*",
     "@modelcontextprotocol/server": "2.0.0",
     "agents": "0.24.0",
     "pg": "catalog:"
