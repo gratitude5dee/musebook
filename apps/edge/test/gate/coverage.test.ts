@@ -125,8 +125,8 @@ describe("ops + telemetry privacy path (ops.ts, salt.ts, privacy.ts)", () => {
             event_id: crypto.randomUUID(),
             t: Date.now(),
             action: "impression",
-            post_id: "44444444-4444-4444-8444-000000000004",
-            content_hash: "e31155826556dd6b2c73920c6a57a597e85e837fcd1166c9733a270ac5592aca",
+            post_id: "44444444-4444-4444-8444-000000000001",
+            content_hash: "a2ba373945f6b8c993cf55036bb86ba00a6c2a43a0e903c1b2e201fe9b48baa0",
             surface: "explore",
             slate_id: "55555555-5555-4555-8555-000000000001",
             position: 0,
@@ -154,7 +154,7 @@ describe("enqueueJob (enqueue.ts)", () => {
     const ctx = createExecutionContext();
     const dedupeKey = `test-cov-${crypto.randomUUID()}`;
     const id = await enqueueJob(env, ctx, "classify", dedupeKey, {
-      content_hash: "e31155826556dd6b2c73920c6a57a597e85e837fcd1166c9733a270ac5592aca",
+      content_hash: "a2ba373945f6b8c993cf55036bb86ba00a6c2a43a0e903c1b2e201fe9b48baa0",
     });
     await waitOnExecutionContext(ctx);
     expect(id).not.toBeNull();
@@ -431,8 +431,8 @@ describe("feed + events arms", () => {
             event_id: crypto.randomUUID(),
             t: Date.now(),
             action: "impression",
-            post_id: "44444444-4444-4444-8444-000000000004",
-            content_hash: "e31155826556dd6b2c73920c6a57a597e85e837fcd1166c9733a270ac5592aca",
+            post_id: "44444444-4444-4444-8444-000000000001",
+            content_hash: "a2ba373945f6b8c993cf55036bb86ba00a6c2a43a0e903c1b2e201fe9b48baa0",
             surface: "explore",
             slate_id: "55555555-5555-4555-8555-000000000001",
             position: 0,
@@ -459,8 +459,8 @@ describe("feed + events arms", () => {
             event_id: crypto.randomUUID(),
             t: Date.now(),
             action: "impression",
-            post_id: "44444444-4444-4444-8444-000000000004",
-            content_hash: "e31155826556dd6b2c73920c6a57a597e85e837fcd1166c9733a270ac5592aca",
+            post_id: "44444444-4444-4444-8444-000000000001",
+            content_hash: "a2ba373945f6b8c993cf55036bb86ba00a6c2a43a0e903c1b2e201fe9b48baa0",
             surface: "explore",
             slate_id: "55555555-5555-4555-8555-000000000001",
             position: 0,
@@ -489,8 +489,8 @@ describe("feed + events arms", () => {
               event_id: crypto.randomUUID(),
               t: Date.now(),
               action: "impression",
-              post_id: "44444444-4444-4444-8444-000000000004",
-              content_hash: "e31155826556dd6b2c73920c6a57a597e85e837fcd1166c9733a270ac5592aca",
+              post_id: "44444444-4444-4444-8444-000000000001",
+              content_hash: "a2ba373945f6b8c993cf55036bb86ba00a6c2a43a0e903c1b2e201fe9b48baa0",
               surface: "explore",
               slate_id: "55555555-5555-4555-8555-000000000001",
               position: 0,
