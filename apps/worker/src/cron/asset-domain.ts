@@ -30,7 +30,7 @@ async function ethCall(rpc: string, to: string, data: string): Promise<string> {
       params: [{ to, data }, "latest"],
     }),
   });
-  const j = (await res.json()) as { result?: string; error?: { message: string } };
+  const j: { result?: string; error?: { message: string } } = await res.json();
   if (j.result === undefined) throw new Error(j.error?.message ?? "eth_call failed");
   return j.result;
 }
