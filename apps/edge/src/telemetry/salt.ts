@@ -16,13 +16,12 @@ export async function getDailySalt(env: Env): Promise<Buffer> {
   const db = pgFresh(env);
   try {
     const rows = await db.query<{ salt: Buffer }>(
-      `insert into public.telemetry_salts (day) values ($1::date)
-       on conflict (day) do update set day = excluded.day
-       returning salt`,
+      `select app.telemetry_salt_for_day($1::date) as salt`,
       [day],
     );
     const row = rows.rows[0];
-    if (row === undefined) throw new Error("telemetry_salts returned no salt row");
+    if (row === undefined || row.salt === null)
+      throw new Error("telemetry_salts returned no salt row");
     cached = { day, salt: row.salt };
     return cached.salt;
   } finally {

@@ -35,4 +35,21 @@ describe("proxy origin lockdown", () => {
     const res = proxy(req());
     expect(res.status).not.toBe(404);
   });
+
+  it("404s a wrong secret in production", () => {
+    const res = proxy(req({ "x-musebook-edge": "not-the-secret" }));
+    expect(res.status).toBe(404);
+  });
+
+  it("passes /.well-known/ untouched in production with no header", () => {
+    const res = proxy(new NextRequest("https://musebook.dev/.well-known/acme-challenge/x"));
+    expect(res.status).not.toBe(404);
+  });
+
+  it("accepts the previous secret with no current secret configured", () => {
+    vi.stubEnv("MUSEBOOK_EDGE_SECRET", "");
+    vi.stubEnv("MUSEBOOK_EDGE_SECRET_PREVIOUS", "old-secret");
+    const res = proxy(req({ "x-musebook-edge": "old-secret" }));
+    expect(res.status).not.toBe(404);
+  });
 });
