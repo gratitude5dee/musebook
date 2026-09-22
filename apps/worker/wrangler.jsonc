@@ -33,13 +33,12 @@
   "hyperdrive": [
     {
       "binding": "HYPERDRIVE_FRESH",
-      "id": "00000000000000000000000000000000",
+      "id": "5288b46cce7340438e840e1d0daeb23d",
       "localConnectionString": "postgres://postgres:postgres@127.0.0.1:54322/postgres"
     },
-    // TODO(M0/H3): real Hyperdrive ids — creation blocked on CF token perm Account → Hyperdrive → Edit. Placeholder keeps cf:types/cf:dry working.
     {
       "binding": "HYPERDRIVE_CACHED",
-      "id": "00000000000000000000000000000000",
+      "id": "48c4c1c7cc734a8cb4031bd546160eae",
       "localConnectionString": "postgres://postgres:postgres@127.0.0.1:54322/postgres"
     }
   ],

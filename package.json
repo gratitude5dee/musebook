@@ -27,7 +27,10 @@
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "fix": "turbo run fix",
-    "prepare": "husky"
+    "prepare": "husky",
+    "db:assert-rls": "tsx scripts/db-assert-rls.ts",
+    "db:rls-suite": "supabase test db",
+    "db:seed-r2": "tsx scripts/db-seed-r2.ts"
   },
   "devDependencies": {
     "@changesets/cli": "2.31.1",
@@ -50,7 +53,8 @@
     "typescript": "catalog:",
     "typescript-eslint": "8.70.0",
     "vitest": "catalog:",
-    "wrangler": "catalog:"
+    "wrangler": "catalog:",
+    "pg": "catalog:"
   },
   "lint-staged": {
     "*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}": [

@@ -148,10 +148,10 @@ export const UNIVERSAL = [
   {
     id: "G-DRIFT",
     activeFrom: "M2",
-    kind: "sh",
+    kind: "fn",
     name: "db-drift",
     desc: "no schema drift",
-    run: "supabase db diff --linked --schema public | (! grep .)",
+    run: checks.dbDrift,
   },
   {
     id: "G-BUNDLE",
@@ -530,16 +530,16 @@ export const GATES = {
   M2: [
     {
       id: "M2.1",
-      kind: "sh",
+      kind: "fn",
       desc: "migrations replay from zero, twice",
-      run: "supabase db reset --linked && supabase db reset --linked",
+      run: checks.m2ResetTwice,
       prereq: "H2",
     },
     {
       id: "M2.2",
-      kind: "sh",
+      kind: "fn",
       desc: "no drift (G-DRIFT)",
-      run: "supabase db diff --linked --schema public | (! grep .)",
+      run: checks.dbDrift,
       prereq: "H2",
     },
     {
@@ -558,9 +558,9 @@ export const GATES = {
     },
     {
       id: "M2.5",
-      kind: "sh",
+      kind: "fn",
       desc: "no bare auth.uid() survives",
-      run: "! grep -rnE 'auth\\.uid\\(\\)' supabase/migrations/*.sql | grep -v '(select auth.uid())'",
+      run: checks.m2BareAuthUid,
       prereq: "H2",
     },
     {
@@ -617,9 +617,9 @@ export const GATES = {
     },
     {
       id: "M2.13",
-      kind: "sh",
+      kind: "fn",
       desc: "types generated, not written",
-      run: "supabase gen types typescript --linked > /tmp/mb-t.ts && diff -q /tmp/mb-t.ts packages/schema/src/database.types.ts",
+      run: checks.m2TypesGen,
       prereq: "H2",
     },
     {

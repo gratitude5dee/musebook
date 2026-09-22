@@ -235,6 +235,9 @@ importers:
       lint-staged:
         specifier: 17.5.1
         version: 17.5.1
+      pg:
+        specifier: 'catalog:'
+        version: 8.23.0
       prettier:
         specifier: 3.9.8
         version: 3.9.8

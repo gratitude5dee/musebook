@@ -104,11 +104,25 @@ async function runCheck(check, milestone, record, selfTest = false) {
       exitCode = 1;
     }
   } else if (check.kind === "sql") {
-    if (!process.env.SUPABASE_DB_URL) {
+    const docker = trySh(
+      "docker ps --format '{{.Names}}' --filter name=supabase_db 2>/dev/null | head -1",
+    ).out.trim();
+    const localUrl = "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+    const url = process.env.SUPABASE_DB_URL ?? (docker ? localUrl : "");
+    const hostPsql = trySh("command -v psql >/dev/null 2>&1").code === 0;
+    if (!url) {
       status = "block";
-      blocked = "SUPABASE_DB_URL unset";
+      blocked = "SUPABASE_DB_URL unset and no local stack";
+    } else if (!hostPsql && docker && /127\.0\.0\.1|localhost/.test(url)) {
+      const r = trySh(`docker exec ${docker} psql -U postgres -Atc ${JSON.stringify(check.sql)}`);
+      status = r.out.trim() === check.expect ? "pass" : "fail";
+      output = r.out;
+      exitCode = status === "pass" ? 0 : 1;
+    } else if (!hostPsql) {
+      status = "block";
+      blocked = "no psql binary and no supabase_db container";
     } else {
-      const r = trySh(`psql "$SUPABASE_DB_URL" -Atc ${JSON.stringify(check.sql)}`);
+      const r = trySh(`psql ${JSON.stringify(url)} -Atc ${JSON.stringify(check.sql)}`);
       status = r.out.trim() === check.expect ? "pass" : "fail";
       output = r.out;
       exitCode = status === "pass" ? 0 : 1;
