@@ -2,6 +2,14 @@ import { cloudflareTest } from "@cloudflare/vitest-plugin";
 import { defineProject } from "vitest/config";
 
 export default defineProject({
+  resolve: {
+    alias: {
+      // `pg` ships CJS + node: builtins; the workers pool can't transform it.
+      // Tests never reach the production query path — they inject deps.query —
+      // so the alias points at a typed stand-in instead of the real package.
+      pg: new URL("./test/stubs/pg.ts", import.meta.url).pathname,
+    },
+  },
   plugins: [
     cloudflareTest({
       // Bindings, routes, limits and compatibility_date all come from the REAL config

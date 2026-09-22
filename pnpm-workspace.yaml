@@ -20,6 +20,11 @@ allowBuilds:
   sharp: true
   core-js-pure: false
   "@swc/core": false
+  # thirdweb/supabase-js transitive natives — WASM fallbacks exist, but the
+  # native paths are the fast ones and both are from established publishers.
+  bufferutil: true
+  utf-8-validate: true
+  keccak: true
 catalog:
   react: "19.3.0"
   react-dom: "19.3.0"
@@ -34,6 +39,13 @@ catalog:
   msw: "2.15.0"
   undici: "8.10.2"
   "@playwright/test": "1.63.0"
+  # M3 identity stack (§5). thirdweb is EXACT 5.121.4 — ^5.115.3 spans a silent
+  # x402 v1→v2 flip (CF-SPINE §4); no caret here on purpose.
+  thirdweb: "5.121.4"
+  jose: "6.2.12"
+  "@supabase/supabase-js": "2.116.0"
+  server-only: "0.0.1"
+  "@types/pg": "8.23.1"
 
 minimumReleaseAgeExclude:
   - "@cloudflare/vitest-plugin@1.2.0"

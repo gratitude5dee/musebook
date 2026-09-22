@@ -1163,7 +1163,7 @@ insert into public.connectors
 select 'bbbbbbbb-bbbb-4bbb-8bbb-000000000001'::uuid, 'seed-echo-mcp', 'Seed Echo MCP', 'musebook', 'mcp_http',
        'https://seed-connector.musebook.dev/mcp', 'bearer',
        '{"name":"seed-echo-mcp","version":"0.0.0","tools":["echo"]}'::jsonb,
-       '{read:content}'::text[], false, true, c.epoch, c.epoch
+       '{feed:read,post:read}'::text[], false, true, c.epoch, c.epoch
 from seed_const c
 on conflict (id) do nothing;
 
@@ -1177,10 +1177,23 @@ insert into public.delegations
    generations_per_day, reputation, strikes, clean_approvals,
    first_publish_at, created_at, expires_at)
 select 'bbbbbbbb-bbbb-4bbb-8bbb-000000000002'::uuid, '11111111-1111-4111-8111-000000000003'::uuid, 'bbbbbbbb-bbbb-4bbb-8bbb-000000000001'::uuid, '33333333-3333-4333-8333-000000000001'::uuid,
-       'active'::delegation_state, '{read:content,write:post}'::text[],
+       'active'::delegation_state, '{feed:read,post:read,post:write}'::text[],
        app.sha256_hex('musebook-seed-delegation-token-0001'),
        1000000, interval '1 day', 120, false, 100000, 500000, 10,
        50, 0, 0, c.epoch, c.epoch, c.epoch + interval '90 days'
+from seed_const c
+on conflict (id) do nothing;
+
+-- A live human session; token_sha256 is the hash of the committed preimage
+-- 'musebook-seed-session-token-0001', so resolve-actor row 2 can be exercised
+-- end to end without a SIWE round trip in the fixture.
+insert into public.sessions
+  (id, user_id, actor, token_sha256, expires_at, ip_hash, user_agent, issued_at)
+select '11111111-1111-4111-8111-0000000000f1'::uuid, '11111111-1111-4111-8111-000000000001'::uuid,
+       'human_creator'::actor_class,
+       app.sha256_hex('musebook-seed-session-token-0001'),
+       c.epoch + interval '365 days',
+       app.sha256_hex('127.0.0.1'), 'seed', c.epoch
 from seed_const c
 on conflict (id) do nothing;
 -- ── distribution (pre-M10 safe) ───────────────────────────────────────────

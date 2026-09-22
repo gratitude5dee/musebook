@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./thirdweb/*": "./src/thirdweb/*.ts"
   },
   "scripts": {
     "build": "tsc --build --pretty",
@@ -15,7 +16,8 @@
   "dependencies": {
     "@musebook/schema": "workspace:*",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "thirdweb": "catalog:"
   },
   "devDependencies": {
     "@types/node": "26.6.2",

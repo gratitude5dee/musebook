@@ -6,7 +6,7 @@ import { z } from "zod";
 // evaluation time. If section 6 ever needs actorSchema at top level, move
 // paymentPayloadSchema and its dependencies into packages/schema/src/x402.ts and
 // import it from there in both files.
-import { paymentPayloadSchema } from "./kernel.js";
+import { paymentPayloadSchema } from "./kernel";
 
 /** How a claim about this principal was established. Ordered most → least reliable. */
 export const evidenceKind = z.enum([

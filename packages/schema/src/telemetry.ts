@@ -1,7 +1,7 @@
 // packages/schema/src/telemetry.ts
 import { z } from "zod";
-import { evidenceKind, type EvidenceKind } from "./actor.js";
-import { agentSurfaceSchema, humanSurfaceSchema } from "./surface.js";
+import { evidenceKind, type EvidenceKind } from "./actor";
+import { agentSurfaceSchema, humanSurfaceSchema } from "./surface";
 
 /** Actions the browser collector is allowed to report. All five are values of
  *  section 4.2's `action_kind`, which is the full Musebook set from day one;
