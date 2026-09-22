@@ -32,6 +32,9 @@ export default defineProject({
   test: {
     name: "worker",
     include: ["test/**/*.test.ts"],
+    // `db reset` recreates musebook_worker without a password — restore the
+    // localConnectionString convention before the first binding connects.
+    globalSetup: ["../../scripts/test/ensure-worker-role.mjs"],
     // Every suite shares the one local DB and resetSeed() clears effect/outbox
     // rows between tests — run files serially or a neighbor file's reset lands
     // mid-assertion (outbox-sweeper vs queue-idempotency raced green->red).

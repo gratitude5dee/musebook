@@ -65,6 +65,9 @@ export default defineProject({
   test: {
     name: "edge-gate",
     include: ["test/gate/**/*.test.ts"],
+    // `db reset` recreates musebook_worker without a password — restore the
+    // localConnectionString convention before the first binding connects.
+    globalSetup: ["../../scripts/test/ensure-worker-role.mjs"],
     // No `environment` key: the plugin IS the environment.
     // Istanbul — v8 needs node:inspector, which workerd does not implement
     // (the plugin rejects it). §17.14 measures apps/edge on this tier only.
