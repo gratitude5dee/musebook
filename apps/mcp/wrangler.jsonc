@@ -1,0 +1,116 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "musebook-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-21",
+  "placement": {
+    "mode": "targeted",
+    "region": "aws:us-east-1"
+  },
+  "routes": [
+    {
+      "pattern": "mcp.musebook.dev",
+      "custom_domain": true
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "head_sampling_rate": 1,
+      "persist": true
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 0.05,
+      "persist": false
+    }
+  },
+  "logpush": true,
+  "limits": {
+    "cpu_ms": 30000
+  },
+  "hyperdrive": [
+    // TODO(M0/H3): real Hyperdrive ids — creation blocked on CF token perm Account → Hyperdrive → Edit. Placeholder keeps cf:types/cf:dry working.
+    {
+      "binding": "HYPERDRIVE_CACHED",
+      "id": "00000000000000000000000000000000",
+      "localConnectionString": "postgres://postgres:postgres@127.0.0.1:54322/postgres"
+    },
+    {
+      "binding": "HYPERDRIVE_FRESH",
+      "id": "00000000000000000000000000000000",
+      "localConnectionString": "postgres://postgres:postgres@127.0.0.1:54322/postgres"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "OAUTH_KV",
+      "id": "7daede739ca44bb98df9429bcecffb8b"
+    },
+    {
+      "binding": "GRANTS",
+      "id": "f7f0e81c8e1f4eb190e366714ed6b0ad"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PUBLIC_MEDIA",
+      "bucket_name": "musebook-public"
+    },
+    {
+      "binding": "PAID_MEDIA",
+      "bucket_name": "musebook-paid"
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "Q_CLASSIFY",
+        "queue": "musebook-classify"
+      },
+      {
+        "binding": "Q_MEDIA",
+        "queue": "musebook-media"
+      },
+      {
+        "binding": "Q_MEDIA_FINALIZE",
+        "queue": "musebook-media-finalize"
+      },
+      {
+        "binding": "Q_AGENT_CANCEL",
+        "queue": "musebook-agent-cancel"
+      }
+    ]
+  },
+  "analytics_engine_datasets": [
+    {
+      "binding": "TELEMETRY",
+      "dataset": "musebook_telemetry"
+    }
+  ],
+  "vars": {
+    "MUSEBOOK_LOG_LEVEL": "info",
+    "MCP_ISSUER_URL": "https://mcp.musebook.dev",
+    "MCP_AUTH_SERVER_URL": "https://mcp.musebook.dev",
+    "MCP_OAUTH_ACCESS_TOKEN_TTL_S": "3600",
+    "MCP_OAUTH_AUTH_CODE_TTL_S": "600",
+    "PREVIEW_CHARS": "400",
+    "MB_RELEASE_SHA": "",
+    "MOLTBOOK_MODE": "production",
+    "MOLTBOOK_ALLOW_MOCK": "false",
+    "X402_MODE": "shadow",
+    "X402_NETWORK": "eip155:84532",
+    "X402_CHAIN_ID": "84532",
+    "X402_ASSET_ADDRESS": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    "X402_ASSET_EIP712_NAME": "USDC",
+    "X402_ASSET_DECIMALS": "6",
+    "X402_FACILITATOR_URL": "https://api.cdp.coinbase.com/platform/v2/x402",
+    "X402_GRANT_CACHE_TTL_S": "86400",
+    "MCP_JWT_KID": "",
+    "MCP_JWT_PUBLIC_JWKS": "",
+    "TELEMETRY_ENABLED": "true",
+    "SENTRY_DSN": ""
+  }
+}

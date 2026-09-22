@@ -1,0 +1,49 @@
+# preview-db.yml — present but DISABLED by default (§1.6, §3.10): a running
+# Supabase branch is ~$9.81/month. Only a PR carrying the `preview-db` label
+# gets one; teardown runs on every close.
+name: preview-db
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled, closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  branch:
+    # Present but disabled: only a PR carrying the `preview-db` label gets a branch (§1.6).
+    if: >-
+      github.event.action != 'closed' &&
+      contains(github.event.pull_request.labels.*.name, 'preview-db')
+    runs-on: ubuntu-24.04
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.117.0
+      - name: Link
+        run: supabase link --project-ref ${{ vars.SUPABASE_PROJECT_REF }}
+      - name: Create or reuse the branch for this PR
+        run: |
+          BRANCH="pr-${{ github.event.pull_request.number }}"
+          supabase branches get "$BRANCH" >/dev/null 2>&1 \
+            || supabase branches create "$BRANCH" --experimental
+      - name: Apply this PR's migrations to the branch
+        run: supabase db push --experimental
+
+  teardown:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-24.04
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+    steps:
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.117.0
+      - name: Delete the branch
+        run: supabase branches delete "pr-${{ github.event.pull_request.number }}" --experimental

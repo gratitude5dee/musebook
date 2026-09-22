@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "allowJs": true,
+    "checkJs": false,
+    "types": ["node"],
+    "declaration": false,
+    "composite": false,
+    "declarationMap": false
+  },
+  "include": ["index.js", "rules/**/*.js", "rules/**/*.ts", "test/**/*.ts"],
+  "references": [],
+  "exclude": ["test/fixtures"]
+}

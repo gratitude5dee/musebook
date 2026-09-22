@@ -1,0 +1,89 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false # never cancel a half-finished deploy
+
+permissions:
+  contents: read
+
+jobs:
+  vercel:
+    name: 1. Vercel origin
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 12.5.1 }
+      - uses: actions/setup-node@v4
+        with: { node-version-file: .nvmrc, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Deploy apps/web
+        run: pnpm dlx vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID_WEB }}
+
+  workers:
+    name: 2. musebook-mcp + musebook-worker
+    needs: vercel
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      # Not a matrix over all three: musebook-edge is deliberately serialized
+      # after these two.
+      matrix:
+        app: [mcp, worker]
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 12.5.1 }
+      - uses: actions/setup-node@v4
+        with: { node-version-file: .nvmrc, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: wrangler deploy
+        working-directory: apps/${{ matrix.app }}
+        # MB_RELEASE_SHA is how a Worker log line and an action_events row can
+        # name the build they came from; there is no VERCEL_GIT_COMMIT_SHA here.
+        run: pnpm exec wrangler deploy --var MB_RELEASE_SHA:"$GITHUB_SHA"
+
+  edge:
+    name: 3. musebook-edge (request path, last)
+    needs: workers
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 12.5.1 }
+      - uses: actions/setup-node@v4
+        with: { node-version-file: .nvmrc, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+
+      # The paid buckets must still be sealed. A custom domain or a dev URL on
+      # musebook-paid makes every paid object public with no Worker in the path
+      # and no way to notice from the application side (CF-SPINE §5).
+      - name: r2-seal
+        run: pnpm gate --check r2-seal
+
+      - name: wrangler deploy
+        working-directory: apps/edge
+        run: pnpm exec wrangler deploy --var MB_RELEASE_SHA:"$GITHUB_SHA"
+
+      # startup_time_ms is the number to watch. Error 10021 ("Script startup
+      # exceeded CPU time limit") is a DEPLOY failure against a 1-second budget,
+      # and the documented common cause is a large schema at module scope.
+      - name: Record startup_time_ms
+        run: echo "Check the deploy output above for startup_time_ms; investigate anything over 400ms."

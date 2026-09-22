@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "lib": ["ES2023"],
+    "types": ["./worker-configuration.d.ts"]
+  },
+  "include": ["src/**/*.ts", "worker-configuration.d.ts"],
+  "references": [
+    {
+      "path": "../../packages/schema"
+    },
+    {
+      "path": "../../packages/kernel"
+    }
+  ]
+}

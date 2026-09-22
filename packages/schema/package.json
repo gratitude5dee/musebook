@@ -1,0 +1,26 @@
+{
+  "name": "@musebook/schema",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --build --pretty",
+    "typecheck": "tsc --build --pretty",
+    "lint": "eslint src --max-warnings 0",
+    "test": "vitest run",
+    "db:types": "supabase gen types typescript --local > src/database.types.ts"
+  },
+  "dependencies": {
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.2",
+    "@vitest/coverage-v8": "catalog:",
+    "@cloudflare/vitest-plugin": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

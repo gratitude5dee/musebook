@@ -1,0 +1,37 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "lib": ["ES2023"],
+    "types": ["./worker-configuration.d.ts"]
+  },
+  "include": ["src/**/*.ts", "worker-configuration.d.ts"],
+  "references": [
+    {
+      "path": "../../packages/schema"
+    },
+    {
+      "path": "../../packages/kernel"
+    },
+    {
+      "path": "../../packages/muse-mixer"
+    },
+    {
+      "path": "../../packages/distributor"
+    },
+    {
+      "path": "../../packages/classify"
+    },
+    {
+      "path": "../../packages/media"
+    },
+    {
+      "path": "../../packages/connectors"
+    },
+    {
+      "path": "../../packages/artifacts"
+    }
+  ]
+}

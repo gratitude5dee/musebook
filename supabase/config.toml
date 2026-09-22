@@ -1,0 +1,6 @@
+# musebook-prod — NOT the legacy shared project. §3.12: zero rows are migrated;
+# there is no credential for the legacy project anywhere in any scope.
+project_id = "rmcgtcsfrfrjxeyxoiin"
+
+[db]
+major_version = 17

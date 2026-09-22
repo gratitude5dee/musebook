@@ -1,0 +1,309 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "musebook-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-21",
+  "placement": {
+    "mode": "targeted",
+    "region": "aws:us-east-1"
+  },
+  "workers_dev": false,
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "head_sampling_rate": 1,
+      "persist": true
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 0.1,
+      "persist": false
+    }
+  },
+  "logpush": true,
+  "limits": {
+    "cpu_ms": 300000,
+    "subrequests": 10000
+  },
+  "triggers": {
+    "crons": ["* * * * *", "*/5 * * * *", "*/15 * * * *", "0 * * * *", "17 3 * * *", "0 4 * * 1"]
+  },
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE_FRESH",
+      "id": "00000000000000000000000000000000",
+      "localConnectionString": "postgres://postgres:postgres@127.0.0.1:54322/postgres"
+    },
+    // TODO(M0/H3): real Hyperdrive ids — creation blocked on CF token perm Account → Hyperdrive → Edit. Placeholder keeps cf:types/cf:dry working.
+    {
+      "binding": "HYPERDRIVE_CACHED",
+      "id": "00000000000000000000000000000000",
+      "localConnectionString": "postgres://postgres:postgres@127.0.0.1:54322/postgres"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PUBLIC_MEDIA",
+      "bucket_name": "musebook-public"
+    },
+    {
+      "binding": "PAID_MEDIA",
+      "bucket_name": "musebook-paid"
+    },
+    {
+      "binding": "ARTIFACTS",
+      "bucket_name": "musebook-artifacts"
+    },
+    {
+      "binding": "UPLOADS",
+      "bucket_name": "musebook-uploads"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "GRANTS",
+      "id": "f7f0e81c8e1f4eb190e366714ed6b0ad"
+    }
+  ],
+  "analytics_engine_datasets": [
+    {
+      "binding": "TELEMETRY",
+      "dataset": "musebook_telemetry"
+    },
+    {
+      "binding": "PAYWALL",
+      "dataset": "musebook_paywall"
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "Q_CLASSIFY",
+        "queue": "musebook-classify"
+      },
+      {
+        "binding": "Q_MEDIA",
+        "queue": "musebook-media"
+      },
+      {
+        "binding": "Q_MEDIA_FINALIZE",
+        "queue": "musebook-media-finalize"
+      },
+      {
+        "binding": "Q_DISTRIBUTE",
+        "queue": "musebook-distribute"
+      },
+      {
+        "binding": "Q_EMBED",
+        "queue": "musebook-embed"
+      },
+      {
+        "binding": "Q_AGENT_CANCEL",
+        "queue": "musebook-agent-cancel"
+      },
+      {
+        "binding": "Q_R2_EVENTS",
+        "queue": "musebook-r2-events"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "musebook-classify",
+        "max_batch_size": 25,
+        "max_batch_timeout": 10,
+        "max_retries": 5,
+        "retry_delay": 30,
+        "dead_letter_queue": "musebook-classify-dlq"
+      },
+      {
+        "queue": "musebook-media",
+        "max_batch_size": 1,
+        "max_batch_timeout": 5,
+        "max_retries": 3,
+        "retry_delay": 120,
+        "max_concurrency": 10,
+        "dead_letter_queue": "musebook-media-dlq"
+      },
+      {
+        "queue": "musebook-media-finalize",
+        "max_batch_size": 10,
+        "max_batch_timeout": 10,
+        "max_retries": 5,
+        "retry_delay": 60,
+        "dead_letter_queue": "musebook-media-finalize-dlq"
+      },
+      {
+        "queue": "musebook-distribute",
+        "max_batch_size": 10,
+        "max_batch_timeout": 15,
+        "max_retries": 5,
+        "retry_delay": 60,
+        "dead_letter_queue": "musebook-distribute-dlq"
+      },
+      {
+        "queue": "musebook-embed",
+        "max_batch_size": 100,
+        "max_batch_timeout": 30,
+        "max_retries": 5,
+        "retry_delay": 60,
+        "dead_letter_queue": "musebook-embed-dlq"
+      },
+      {
+        "queue": "musebook-agent-cancel",
+        "max_batch_size": 5,
+        "max_batch_timeout": 2,
+        "max_retries": 3,
+        "retry_delay": 10,
+        "dead_letter_queue": "musebook-agent-cancel-dlq"
+      },
+      {
+        "queue": "musebook-r2-events",
+        "max_batch_size": 20,
+        "max_batch_timeout": 10,
+        "max_retries": 3,
+        "retry_delay": 30,
+        "dead_letter_queue": "musebook-r2-events-dlq"
+      },
+      {
+        "queue": "musebook-classify-dlq",
+        "max_batch_size": 100,
+        "max_batch_timeout": 60,
+        "max_retries": 1
+      },
+      {
+        "queue": "musebook-media-dlq",
+        "max_batch_size": 100,
+        "max_batch_timeout": 60,
+        "max_retries": 1
+      },
+      {
+        "queue": "musebook-media-finalize-dlq",
+        "max_batch_size": 100,
+        "max_batch_timeout": 60,
+        "max_retries": 1
+      },
+      {
+        "queue": "musebook-distribute-dlq",
+        "max_batch_size": 100,
+        "max_batch_timeout": 60,
+        "max_retries": 1
+      },
+      {
+        "queue": "musebook-embed-dlq",
+        "max_batch_size": 100,
+        "max_batch_timeout": 60,
+        "max_retries": 1
+      },
+      {
+        "queue": "musebook-agent-cancel-dlq",
+        "max_batch_size": 100,
+        "max_batch_timeout": 60,
+        "max_retries": 1
+      },
+      {
+        "queue": "musebook-r2-events-dlq",
+        "max_batch_size": 100,
+        "max_batch_timeout": 60,
+        "max_retries": 1
+      }
+    ]
+  },
+  "vars": {
+    "MUSEBOOK_LOG_LEVEL": "info",
+    "DISTRIBUTION_ENABLED": "true",
+    "OUTBOX_SWEEP_MAX_ROWS": "500",
+    "MUSE_WEIGHTS_VERSION": "none",
+    "MUSE_RANKER_IMPL": "heuristic",
+    "CDN_HOST": "cdn.musebook.dev",
+    "MEDIA_HOST": "media.musebook.dev",
+    "MB_RELEASE_SHA": "",
+    "CF_ACCOUNT_ID": "e8f42c0430906e1515a2af01d5c1d2d1",
+    "THIRDWEB_SERVER_WALLET_ADDRESS": "",
+    "MOLTBOOK_MODE": "production",
+    "MOLTBOOK_ALLOW_MOCK": "false",
+    "X402_MODE": "shadow",
+    "X402_NETWORK": "eip155:84532",
+    "X402_CHAIN_ID": "84532",
+    "X402_RPC_URL": "",
+    "X402_ASSET_ADDRESS": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    "X402_ASSET_EIP712_NAME": "USDC",
+    "X402_ASSET_DECIMALS": "6",
+    "X402_PAYOUT_NETWORK": "eip155:8453",
+    "X402_PAYOUT_BATCH_MIN_ATOMIC": "5000000",
+    "X402_PAYOUT_NET_BPS": "9000",
+    "APECHAIN_PAYOUT_ENABLED": "false",
+    "APECHAIN_RPC_URL": "https://rpc.apechain.com/http",
+    "APECHAIN_PAYOUT_ASSET": "",
+    "TYPESAFE_BASE_URL": "https://api.typesafe.ai",
+    "TYPESAFE_DEFAULT_MODEL": "jev-latest",
+    "TYPESAFE_LOG_LEVEL": "warn",
+    "CLASSIFY_TAXONOMY_MODE": "walk",
+    "GEN_MODEL": "anthropic/claude-opus-5",
+    "REFORMAT_MODEL": "anthropic/claude-sonnet-5",
+    "REFORMAT_MAX_REPAIRS": "2",
+    "POSTIZ_URL": "http://localhost:4200",
+    "POSTIZ_MEDIA_DOMAIN": "media.postiz.musebook.dev",
+    "MEDIA_WEBHOOK_BASE_URL": "https://musebook.dev/api/media/webhook",
+    "MEDIA_BACKEND_REPLICATE_ENABLED": "false",
+    "MEDIA_LONGFORM_VIDEO_ENABLED": "false",
+    "MB_INTERNAL_KEY_ID": "",
+    "MB_INTERNAL_PUBLIC_KEYS": "",
+    "MB_INTERNAL_MAX_SKEW_S": "300",
+    "CONNECTOR_CRED_KEY_ID": "kek-2026-09",
+    "CONNECTOR_EGRESS_TIMEOUT_MS": "60000",
+    "CONNECTOR_EGRESS_MAX_BYTES": "8388608",
+    "CONNECTOR_CODEX_AGENTS_API_ENABLED": "false",
+    "REGISTRY_REVIEW_NOTIFY_EMAIL": "registry@musebook.dev",
+    "MUSE_RANKER_MODEL_ID": "muse-heuristic-2026-10",
+    "MUSE_RANKER_ONNX_PATH": "",
+    "MUSE_RANKER_MODEL_URL": "",
+    "MUSE_DIVERSITY_IMPL": "none",
+    "MUSE_RANKER_TIMEOUT_MS": "250",
+    "MUSE_RETRIEVAL_NEW_USER_ACTION_THRESHOLD": "20",
+    "MUSE_RETRIEVAL_NEW_USER_INDEX_ID": "cohort-centroid",
+    "MUSE_RANKER_NEW_USER_ACTION_THRESHOLD": "50",
+    "MUSE_TOPK_CANDIDATES": "100",
+    "MUSE_MAX_CANDIDATES_PER_SOURCE": "400",
+    "MUSE_MIN_CANDIDATES": "30",
+    "MUSE_SOURCE_TIMEOUT_MS": "180",
+    "MUSE_HYDRATOR_TIMEOUT_MS": "150",
+    "MUSE_SCORER_TIMEOUT_MS": "250",
+    "MUSE_SLATE_TTL_SECONDS": "900",
+    "MUSE_SCORE_CACHE_TTL_SECONDS": "600",
+    "MUSE_WEIGHTS_CACHE_TTL_SECONDS": "30",
+    "MUSE_HNSW_EF_SEARCH": "200",
+    "MUSE_BLOOM_CAPACITY": "10000",
+    "MUSE_BLOOM_ERROR_RATE": "0.01",
+    "MUSE_BLOOM_ROTATION": "weekly",
+    "MUSE_BLOOM_BYPASS_REMOVAL_RATIO": "0.70",
+    "MUSE_SEEN_EXACT_WINDOW": "500",
+    "MUSE_AGENT_CRAWL_MAX_PER_POST_PER_AGENT_PER_DAY": "3",
+    "MUSE_COLDSTART_ENABLED": "true",
+    "MUSE_COLDSTART_FOLLOWER_CAP": "5000",
+    "MUSE_COLDSTART_IMPRESSION_THRESHOLD": "1000",
+    "MUSE_COLDSTART_MAX_POST_AGE_MS": "172800000",
+    "MUSE_COLDSTART_MAX_POSITION_RATIO": "0.5",
+    "MUSE_COLDSTART_SLOT_MIN": "3",
+    "MUSE_COLDSTART_SLOT_MAX": "12",
+    "MUSE_COLDSTART_BETA_ALPHA0": "1.0",
+    "MUSE_COLDSTART_BETA_BETA0": "1.0",
+    "MUSE_COLDSTART_IMPRESSION_SCALE": "1.0",
+    "MUSE_COLDSTART_TS_TOP_K": "5",
+    "MUSE_VIEWER_EMBED_INTERVAL_H": "24",
+    "EMBEDDING_MODEL": "text-embedding-3-small",
+    "EMBEDDING_DIMENSIONS": "1536",
+    "TELEMETRY_ENABLED": "true",
+    "TELEMETRY_ANON_ID_RETENTION_DAYS": "30",
+    "TELEMETRY_IP_HASH_RETENTION_DAYS": "7",
+    "TELEMETRY_IMPRESSION_COMPACT_DAYS": "120",
+    "TELEMETRY_HUMAN_RETENTION_DAYS": "400",
+    "TELEMETRY_AGENT_RETENTION_DAYS": "90",
+    "ANALYTICS_MIN_COHORT": "5",
+    "ANALYTICS_AGENT_BREAKDOWN_CACHE_S": "900",
+    "SENTRY_DSN": "",
+    "ALERT_WEBHOOK_URL": "",
+    "SYNTHETIC_GATED_SLUG": ""
+  }
+}

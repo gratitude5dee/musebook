@@ -1,0 +1,27 @@
+{
+  "name": "@musebook/x402",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --build --pretty",
+    "typecheck": "tsc --build --pretty",
+    "lint": "eslint src --max-warnings 0",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@musebook/schema": "workspace:*",
+    "@x402/core": "2.26.0",
+    "@x402/evm": "2.26.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.2",
+    "@vitest/coverage-v8": "catalog:",
+    "@cloudflare/vitest-plugin": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

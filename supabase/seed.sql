@@ -1,0 +1,3 @@
+-- supabase/seed.sql — the deterministic seed (§4.15). Empty at M1: the real
+-- rows land at M2 with the schema, and supabase/SEED_HASH is written then by
+-- `pnpm db:seed-hash`. G-SEED blocks until both exist.

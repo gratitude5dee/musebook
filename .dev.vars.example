@@ -1,0 +1,69 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Musebook — Worker SECRETS for `wrangler dev`.  GENERATED; do not edit.
+# Copy to apps/<app>/.dev.vars.  .gitignore covers .dev.vars — never commit one.
+# Plaintext Worker `vars` are NOT here: they live in each wrangler.jsonc.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Application and the Vercel seam ───────────────────────────────────────────
+# The origin lockdown. <project>.vercel.app stays publicly reachable; proxy.ts 404s anything without this header (CF-SPINE 1.4).
+MUSEBOOK_EDGE_SECRET=""
+
+# ── Cloudflare platform ───────────────────────────────────────────────────────
+# Read-only + zone-settings scope for the AE SQL API and configure-cf.ts. NEVER the deploy token.
+CF_API_TOKEN=""
+# Scoped to musebook-uploads alone — a credential reaching musebook-paid is a paywall bypass.
+R2_ACCESS_KEY_ID=""
+R2_SECRET_ACCESS_KEY=""
+
+# ── thirdweb (identity) and Moltbook ──────────────────────────────────────────
+THIRDWEB_SECRET_KEY=""
+MOLTBOOK_APP_KEY=""
+
+# ── x402, settlement and payouts ──────────────────────────────────────────────
+# The treasury address — secret for INTEGRITY, not confidentiality.
+X402_PAY_TO=""
+# Facilitator auth — the Worker signs its own request JWT with WebCrypto; no cdp-sdk/viem in the bundle.
+CDP_API_KEY_ID=""
+CDP_API_KEY_SECRET=""
+
+# ── Typesafe / Jev (classification) and LLM generation ────────────────────────
+# TypeSafeClient throws in its CONSTRUCTOR — construct lazily inside the consumer or the deploy fails.
+TYPESAFE_API_KEY=""
+AI_GATEWAY_API_KEY=""
+# Musebook's own key — never an inbound token.
+ANTHROPIC_API_KEY=""
+
+# ── Postiz (distribution) ─────────────────────────────────────────────────────
+# Sent as a RAW `Authorization: <key>` — no Bearer prefix; the middleware feeds the whole header to findFirst().
+POSTIZ_API_KEY=""
+# Carried in the URL path (Postiz webhooks are unsigned). ≥32 random bytes, hex.
+POSTIZ_WEBHOOK_SECRET=""
+
+# ── Media generation, artifacts and storage ───────────────────────────────────
+# Optional subsystem — absent ⇒ disable the provider, do not crash.
+FAL_KEY=""
+REPLICATE_API_TOKEN=""
+# Absent ⇒ the handler rejects every delivery.
+REPLICATE_WEBHOOK_SECRET=""
+# Ed25519 PKCS#8 PEM.
+ARTIFACT_TICKET_SIGNING_KEY=""
+
+# ── MCP server, OAuth and WebMCP ──────────────────────────────────────────────
+# Ed25519 PKCS#8 PEM, base64. See the UNVERIFIED note in §3.6.1 — may be dead once workers-oauth-provider is confirmed to self-sign.
+MCP_JWT_SIGNING_KEY=""
+# 32 random bytes base64 — seals MRTR requestState. Absent ⇒ MRTR disabled outright.
+MCP_REQUEST_STATE_KEY=""
+
+# ── Internal calls between Vercel and Cloudflare ──────────────────────────────
+# Ed25519 PKCS#8 DER, base64. Signs the Worker→Vercel sandbox/C2PA calls.
+MB_INTERNAL_SIGNING_KEY=""
+
+# ── Connectors ────────────────────────────────────────────────────────────────
+# Ed25519 (not NODE-ED25519) — signs Musebook's own outbound fetches.
+CONNECTOR_SIGNING_PRIVATE_KEY=""
+# base64, 32 bytes. KEK for connector_credentials.
+CONNECTOR_CRED_KEK=""
+
+# ── Observability and alerting ────────────────────────────────────────────────
+ALERT_WEBHOOK_SECRET=""
+PAGERDUTY_ROUTING_KEY=""

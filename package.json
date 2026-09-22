@@ -1,0 +1,64 @@
+{
+  "name": "musebook",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.5.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "boundaries": "turbo boundaries",
+    "dev": "turbo run dev",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset --local",
+    "db:types": "pnpm -F @musebook/schema run db:types",
+    "db:seed-hash": "tsx scripts/db-seed-hash.ts",
+    "cf:types": "pnpm --filter musebook-edge --filter musebook-mcp --filter musebook-worker exec wrangler types worker-configuration.d.ts",
+    "cf:dry": "pnpm --filter 'musebook-*' run cf:dry",
+    "env:example": "node scripts/gen-env-example.mjs",
+    "env:check": "node scripts/check-env-manifest.mjs",
+    "gate": "node scripts/gate.mjs",
+    "verify": "pnpm build && pnpm typecheck && pnpm lint && pnpm boundaries && pnpm test && pnpm cf:dry",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "fix": "turbo run fix",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@changesets/cli": "2.31.1",
+    "@cloudflare/vitest-plugin": "catalog:",
+    "@cloudflare/workers-types": "catalog:",
+    "@eslint/js": "10.0.1",
+    "@musebook/eslint-plugin": "workspace:*",
+    "@next/eslint-plugin-next": "16.3.5",
+    "@types/node": "26.6.2",
+    "@vitest/coverage-v8": "catalog:",
+    "eslint": "10.11.0",
+    "eslint-config-prettier": "10.1.8",
+    "globals": "^17.12.0",
+    "husky": "9.1.7",
+    "lint-staged": "17.5.1",
+    "prettier": "3.9.8",
+    "supabase": "2.117.0",
+    "tsx": "4.23.15",
+    "turbo": "2.11.2",
+    "typescript": "catalog:",
+    "typescript-eslint": "8.70.0",
+    "vitest": "catalog:",
+    "wrangler": "catalog:"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,jsonc,yml,yaml,md,css}": [
+      "prettier --write"
+    ]
+  }
+}
