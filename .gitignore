@@ -31,3 +31,9 @@ test-results/
 *.log
 .DS_Store
 tmp/
+
+# Next 16 regenerates these per-run (agent docs + dev/build env types);
+# tracked copies make every `next dev` leave a dirty tree.
+apps/web/AGENTS.md
+apps/web/CLAUDE.md
+apps/web/next-env.d.ts
