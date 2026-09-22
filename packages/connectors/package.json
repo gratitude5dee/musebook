@@ -14,7 +14,12 @@
   },
   "dependencies": {
     "@musebook/schema": "workspace:*",
-    "pg": "catalog:"
+    "pg": "catalog:",
+    "zod": "4.6.5",
+    "web-bot-auth": "0.2.0",
+    "http-message-sig": "0.3.0",
+    "jsonwebkey-thumbprint": "0.1.0",
+    "structured-headers": "2.0.3"
   },
   "devDependencies": {
     "@types/node": "26.6.2",
@@ -22,6 +27,7 @@
     "@cloudflare/vitest-plugin": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
-    "@types/pg": "catalog:"
+    "@types/pg": "catalog:",
+    "fast-check": "catalog:"
   }
 }

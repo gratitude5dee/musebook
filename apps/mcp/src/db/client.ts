@@ -1,0 +1,49 @@
+// apps/mcp/src/db/client.ts — postgres.js, one client per request per binding.
+// NEVER a module-scope singleton: Hyperdrive clients may not cross requests
+// ("Cannot perform I/O on behalf of a different request"), so fetch() creates
+// these and release() tears them down inside ctx.waitUntil — §7.4.
+import postgres from "postgres";
+
+export type Sql = ReturnType<typeof postgres>;
+
+export function fresh(env: Env): Sql {
+  return postgres(env.HYPERDRIVE_FRESH.connectionString, { max: 5, fetch_types: false });
+}
+
+export function cached(env: Env): Sql {
+  return postgres(env.HYPERDRIVE_CACHED.connectionString, { max: 5, fetch_types: false });
+}
+
+export function release(ctx: ExecutionContext, ...clients: Sql[]): void {
+  for (const c of clients) ctx.waitUntil(c.end());
+}
+
+/**
+ * Kernel ports are written against the pg-style `{ query, end }` facade this
+ * whole codebase shares; postgres.js's `sql.unsafe(text, params)` answers the
+ * identical contract, so the adapter is three lines and the ports do not care
+ * which driver sits beneath them.
+ */
+export interface DbClient {
+  query<T = Record<string, unknown>>(
+    sql: string,
+    params?: readonly unknown[],
+  ): Promise<{ rows: T[] }>;
+  end(): Promise<void>;
+}
+
+export function asDb(sql: Sql): DbClient {
+  return {
+    query: <T = Record<string, unknown>>(text: string, params?: readonly unknown[]) =>
+      sql.unsafe(text, [...(params ?? [])] as never[]) as unknown as Promise<{ rows: T[] }>,
+    end: () => sql.end().then(() => undefined),
+  };
+}
+
+/** `wrangler types` marks every binding optional (a deploy MAY omit one). At
+ *  runtime a configured binding that reads undefined means the deploy is
+ *  misconfigured — fail loud at the use site, never silently. */
+export function bound<T>(v: T | undefined, name: string): T {
+  if (v === undefined) throw new Error(`binding ${name} is not configured`);
+  return v;
+}

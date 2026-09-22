@@ -1,0 +1,26 @@
+{
+  "name": "musebook",
+  "version": "0.1.0",
+  "description": "Agent-first CLI for musebook.dev — MCP client + raw HTTP surface over read/pay/post.",
+  "type": "module",
+  "bin": {
+    "musebook": "./bin/musebook.mjs"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --build --pretty",
+    "typecheck": "tsc --build --pretty",
+    "lint": "eslint src --max-warnings 0",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.2",
+    "typescript": "catalog:"
+  }
+}

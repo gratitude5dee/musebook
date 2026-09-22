@@ -19,6 +19,7 @@
     "@musebook/telemetry": "workspace:*",
     "@musebook/x402": "workspace:*",
     "aws4fetch": "1.0.20",
+    "musebook-worker": "workspace:*",
     "pg": "catalog:",
     "web-bot-auth": "0.2.0",
     "zod": "4.6.5"

@@ -11,6 +11,14 @@
     {
       "pattern": "mcp.musebook.dev",
       "custom_domain": true
+    },
+    {
+      "pattern": "musebook.dev/mcp*",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "musebook.dev/.well-known/oauth-protected-resource*",
+      "zone_name": "musebook.dev"
     }
   ],
   "observability": {
@@ -107,6 +115,7 @@
     "X402_ASSET_DECIMALS": "6",
     "X402_FACILITATOR_URL": "https://api.cdp.coinbase.com/platform/v2/x402",
     "X402_GRANT_CACHE_TTL_S": "86400",
+    "X402_IDEMPOTENT_WINDOW_SECONDS": "120",
     "MCP_JWT_KID": "",
     "MCP_JWT_PUBLIC_JWKS": "",
     "TELEMETRY_ENABLED": "true",

@@ -6,6 +6,13 @@ import { sweepOutbox } from "./cron/outbox.js";
 import { rebuildAnonSlates } from "./cron/slates.js";
 import { reconcileSettlements } from "./cron/settlements.js";
 import { assertAssetDomainCron } from "./cron/asset-domain.js";
+import { drainDueSchedules } from "./cron/agent-draft.js";
+import {
+  sweepHeldReservations,
+  reapBridgeTasks,
+  refreshConnectorTokens,
+} from "./cron/agent-maintenance.js";
+import { recomputeReputation } from "./cron/agent-reputation.js";
 import { dispatch } from "./consumers/index.js";
 import { SlateBuilder } from "./slate-builder.js";
 
@@ -36,9 +43,14 @@ export default {
         // §6.7's asset-domain drift check; §12's refreshPlatformConstraints joins it later.
         return assertAssetDomainCron(env);
       case "*/15 * * * *":
-        return noop(); // §10's agent maintenance lands at M10
+        // §10.15's order matters: release dead holds before claiming new work,
+        // so a stuck schedule cannot starve a cap it no longer needs.
+        await reapBridgeTasks(env);
+        await sweepHeldReservations(env);
+        await refreshConnectorTokens(env);
+        return drainDueSchedules(env, ctx);
       case "17 3 * * *":
-        return noop(); // §10.10.4's reputation pass
+        return recomputeReputation(env);
     }
   },
 } satisfies ExportedHandler<Env>;

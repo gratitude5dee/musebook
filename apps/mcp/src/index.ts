@@ -1,22 +1,30 @@
-// musebook-mcp — the remote MCP server on mcp.musebook.dev (§3.1, CF-SPINE §9).
-// agents/mcp/server + workers-oauth-provider; NO McpAgent, NO Durable Objects,
-// no Vercel behind it. Tools land at M9.
-export default {
-  fetch(_request: Request, env: Env): Response {
-    void env.HYPERDRIVE_CACHED;
-    void env.HYPERDRIVE_FRESH;
-    void env.OAUTH_KV;
-    void env.GRANTS;
-    void env.PUBLIC_MEDIA;
-    void env.PAID_MEDIA;
-    void env.Q_CLASSIFY;
-    void env.Q_MEDIA;
-    void env.Q_MEDIA_FINALIZE;
-    void env.Q_AGENT_CANCEL;
-    void env.TELEMETRY;
-    return new Response("musebook-mcp: not yet implemented (lands at M9)", {
-      status: 501,
-      headers: { "content-type": "text/plain; charset=utf-8" },
-    });
+// apps/mcp/src/index.ts — §7.2 entrypoint. Two surfaces in one Worker:
+//   1. apiHandler — the MCP endpoint (stateless handler from server.ts)
+//   2. defaultHandler — ConsentHandler: /authorize consent + PRM + healthz
+// The scheduled-agent drafting cron lives on musebook-worker (§4.7 single
+// cron owner); this Worker runs fetch-time only.
+import { OAuthProvider } from "@cloudflare/workers-oauth-provider";
+import { ConsentHandler } from "./auth/oauth.js";
+import { buildMcpHandler } from "./server.js";
+
+export default new OAuthProvider<Env>({
+  apiRoute: ["/mcp", "/mcp/"],
+  apiHandler: {
+    fetch: (request: Request, env: Env, ctx: ExecutionContext) =>
+      buildMcpHandler(env, ctx)(request),
   },
-};
+  defaultHandler: ConsentHandler,
+  authorizeEndpoint: "/authorize",
+  tokenEndpoint: "/token",
+  clientRegistrationEndpoint: "/register",
+  scopesSupported: [
+    "mcp",
+    "feed:read",
+    "graph:write",
+    "post:write",
+    "post:publish",
+    "analytics:read",
+    "wallet:spend",
+  ],
+  accessTokenTTL: 3_600,
+});

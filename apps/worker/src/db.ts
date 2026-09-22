@@ -15,14 +15,17 @@ export interface DbClient {
  *  transitions) must see committed state; the cached binding would re-read a
  *  stale set and re-enqueue it forever (§4.13). */
 export async function pgFresh(env: Env): Promise<DbClient> {
-  const client = new pg.Client({ connectionString: env.HYPERDRIVE_FRESH.connectionString });
+  // Bindings are optional in the generated Env on some apps that share this
+  // module (apps/edge's `?` declarations) — a missing one means the deploy is
+  // misconfigured, so fail loud at the use site.
+  const client = new pg.Client({ connectionString: env.HYPERDRIVE_FRESH!.connectionString });
   await client.connect();
   return client;
 }
 
 /** HYPERDRIVE_CACHED — read-mostly catalog paths (rare here). */
 export async function pgCached(env: Env): Promise<DbClient> {
-  const client = new pg.Client({ connectionString: env.HYPERDRIVE_CACHED.connectionString });
+  const client = new pg.Client({ connectionString: env.HYPERDRIVE_CACHED!.connectionString });
   await client.connect();
   return client;
 }

@@ -13,10 +13,15 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "@musebook/schema": "workspace:*",
+    "@cloudflare/workers-oauth-provider": "0.10.3",
     "@modelcontextprotocol/server": "2.0.0",
+    "@musebook/content": "workspace:*",
+    "@musebook/kernel": "workspace:*",
+    "@musebook/schema": "workspace:*",
+    "@musebook/x402": "workspace:*",
     "agents": "0.24.0",
-    "pg": "catalog:"
+    "postgres": "3.4.9",
+    "zod": "4.6.5"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "catalog:",
