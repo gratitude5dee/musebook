@@ -1,0 +1,42 @@
+packages:
+  - "apps/*"
+  # kernel, muse-mixer, content, distributor, connectors, x402, schema, ui (spine §6)
+  # + classify (§8.3), media, artifacts (§11.1) = eleven packages.
+  - "packages/*"
+  - "tools/eslint-plugin-musebook"
+
+# Keep transitive versions honest across one Next.js app and three Workers.
+# typescript, vitest and wrangler are pinned HERE and nowhere else (§3.2 table is canonical).
+# pg is a catalog entry for the same reason: apps/edge and apps/worker depend on it at
+# runtime (both through Hyperdrive) and packages/muse-mixer declares it as a peerDependency
+# — three consumers that must never disagree on the major.
+#
+# THERE IS DELIBERATELY NO `zod` ENTRY HERE. @x402/core needs ^3.24.2 and
+# @modelcontextprotocol/server needs ^4.2.0; a catalog entry would force one on both.
+# See "The zod split is load-bearing" above. Gate: `pnpm gate --check zod-split`.
+allowBuilds:
+  esbuild: true
+  workerd: true
+  sharp: true
+  core-js-pure: false
+  "@swc/core": false
+catalog:
+  react: "19.3.0"
+  react-dom: "19.3.0"
+  typescript: "6.0.3"
+  vitest: "4.1.11"
+  "@vitest/coverage-v8": "4.1.11"
+  wrangler: "4.136.1"
+  "@cloudflare/vitest-plugin": "1.2.0"
+  "@cloudflare/workers-types": "5.20260921.1"
+  pg: "8.23.0"
+  fast-check: "4.10.2"
+  msw: "2.15.0"
+  undici: "8.10.2"
+  "@playwright/test": "1.63.0"
+
+minimumReleaseAgeExclude:
+  - "@cloudflare/vitest-plugin@1.2.0"
+  - miniflare@5.20260921.0-alpha
+  - wrangler@4.136.0 || 4.136.1
+  - "@cloudflare/unenv-preset@2.16.2"

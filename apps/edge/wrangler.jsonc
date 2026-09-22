@@ -1,0 +1,259 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "musebook-edge",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-21",
+  "placement": {
+    "mode": "targeted",
+    "region": "aws:us-east-1"
+  },
+  "routes": [
+    {
+      "pattern": "musebook.dev/",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "musebook.dev/p/*",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "musebook.dev/@*",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "musebook.dev/feed*",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "musebook.dev/api/*",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "musebook.dev/llms*.txt",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "musebook.dev/.well-known/*",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "musebook.dev/authors.md",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "musebook.dev/atom.xml",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "musebook.dev/robots.txt",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "musebook.dev/sitemap*.xml",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "musebook.dev/security.txt",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "musebook.dev/crawlers.json",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "www.musebook.dev/*",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "media.musebook.dev/*",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "artifacts.musebook.dev/*",
+      "zone_name": "musebook.dev"
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "head_sampling_rate": 0.1,
+      "persist": true
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 0.01,
+      "persist": false
+    }
+  },
+  "logpush": true,
+  "limits": {
+    "cpu_ms": 5000,
+    "subrequests": 100
+  },
+  "hyperdrive": [
+    // TODO(M0/H3): real Hyperdrive ids — creation blocked on CF token perm Account → Hyperdrive → Edit. Placeholder keeps cf:types/cf:dry working.
+    {
+      "binding": "HYPERDRIVE_CACHED",
+      "id": "00000000000000000000000000000000",
+      "localConnectionString": "postgres://postgres:postgres@127.0.0.1:54322/postgres"
+    },
+    {
+      "binding": "HYPERDRIVE_FRESH",
+      "id": "00000000000000000000000000000000",
+      "localConnectionString": "postgres://postgres:postgres@127.0.0.1:54322/postgres"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PUBLIC_MEDIA",
+      "bucket_name": "musebook-public"
+    },
+    {
+      "binding": "PAID_MEDIA",
+      "bucket_name": "musebook-paid"
+    },
+    {
+      "binding": "ARTIFACTS",
+      "bucket_name": "musebook-artifacts"
+    },
+    {
+      "binding": "UPLOADS",
+      "bucket_name": "musebook-uploads"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "GRANTS",
+      "id": "f7f0e81c8e1f4eb190e366714ed6b0ad"
+    },
+    {
+      "binding": "WBA_DIR",
+      "id": "0d0153516ab24ceeb3a70f0c95b86a68"
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "Q_CLASSIFY",
+        "queue": "musebook-classify"
+      },
+      {
+        "binding": "Q_MEDIA",
+        "queue": "musebook-media"
+      },
+      {
+        "binding": "Q_MEDIA_FINALIZE",
+        "queue": "musebook-media-finalize"
+      },
+      {
+        "binding": "Q_DISTRIBUTE",
+        "queue": "musebook-distribute"
+      },
+      {
+        "binding": "Q_EMBED",
+        "queue": "musebook-embed"
+      },
+      {
+        "binding": "Q_AGENT_CANCEL",
+        "queue": "musebook-agent-cancel"
+      }
+    ]
+  },
+  "services": [
+    {
+      "binding": "MIXER",
+      "service": "musebook-worker",
+      "entrypoint": "SlateBuilder"
+    }
+  ],
+  "analytics_engine_datasets": [
+    {
+      "binding": "TELEMETRY",
+      "dataset": "musebook_telemetry"
+    },
+    {
+      "binding": "PAYWALL",
+      "dataset": "musebook_paywall"
+    }
+  ],
+  "cache": {
+    "enabled": true
+  },
+  "exports": {
+    "default": {
+      "type": "worker",
+      "cache": {
+        "enabled": false
+      }
+    },
+    "PaidMedia": {
+      "type": "worker",
+      "cache": {
+        "enabled": true
+      }
+    }
+  },
+  "alias": {
+    "viem": "./src/guards/forbid.ts",
+    "viem/node": "./src/guards/forbid.ts"
+  },
+  "vars": {
+    "MUSEBOOK_LOG_LEVEL": "info",
+    "ORIGIN_HOST": "musebook-web.vercel.app",
+    "CDN_HOST": "cdn.musebook.dev",
+    "MEDIA_HOST": "media.musebook.dev",
+    "ARTIFACT_HOST": "artifacts.musebook.dev",
+    "ARTIFACT_ORIGIN": "https://artifacts.musebook.dev",
+    "PREVIEW_CHARS": "400",
+    "X402_MODE": "shadow",
+    "X402_NETWORK": "eip155:84532",
+    "X402_CHAIN_ID": "84532",
+    "X402_ASSET_ADDRESS": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    "X402_ASSET_EIP712_NAME": "USDC",
+    "X402_ASSET_DECIMALS": "6",
+    "X402_IDEMPOTENT_WINDOW_SECONDS": "120",
+    "X402_GRANT_CACHE_TTL_S": "86400",
+    "WEB_BOT_AUTH_ENABLED": "true",
+    "WEB_BOT_AUTH_MAX_AGE_S": "300",
+    "WEB_BOT_AUTH_CLOCK_SKEW_S": "30",
+    "TELEMETRY_ENABLED": "true",
+    "TELEMETRY_IMPRESSION_SAMPLE": "1.0",
+    "MUSE_SLATE_TTL_SECONDS": "900",
+    "MB_RELEASE_SHA": "",
+    "CONSENT_BANNER_REGIONS": "",
+    "R2_PRESIGN_TTL_S": "900",
+    "MOLTBOOK_MODE": "production",
+    "MOLTBOOK_ALLOW_MOCK": "false",
+    "X402_FACILITATOR_URL": "https://api.cdp.coinbase.com/platform/v2/x402",
+    "WEB_BOT_AUTH_DIRECTORY_ALLOWLIST": "",
+    "FAL_WEBHOOK_JWKS_URL": "https://rest.alpha.fal.ai/.well-known/jwks.json",
+    "MEDIA_WEBHOOK_VERIFY_MODE": "enforce",
+    "MEDIA_LONGFORM_VIDEO_ENABLED": "false",
+    "ARTIFACT_TICKET_PUBLIC_KEY": "",
+    "LLMS_FULL_MAX_BYTES": "4000000",
+    "MUSEBOOK_BRIDGE_POLL_MAX_MS": "25000",
+    "MUSEBOOK_BRIDGE_MIN_VERSION": "1.0.0",
+    "TELEMETRY_BATCH_MAX_EVENTS": "16",
+    "TELEMETRY_IDLE_FLUSH_MS": "5000",
+    "TELEMETRY_CLOCK_SKEW_MAX_MS": "21600000",
+    "TELEMETRY_ANON_COOKIE_TTL_S": "86400",
+    "ANALYTICS_MIN_COHORT": "5",
+    "SENTRY_DSN": "",
+    "SYNTHETIC_GATED_SLUG": ""
+  },
+  "env": {
+    "preview": {
+      "name": "musebook-edge-preview",
+      "workers_dev": true,
+      "vars": {
+        "X402_MODE": "shadow",
+        "X402_NETWORK": "eip155:84532",
+        "X402_CHAIN_ID": "84532",
+        "X402_ASSET_ADDRESS": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+        "X402_ASSET_EIP712_NAME": "USDC"
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+pnpm-lock.yaml
+packages/schema/src/database.types.ts
+apps/*/worker-configuration.d.ts
+supabase/.temp/
+**/dist/
+**/.next/
+**/.wrangler/
+**/coverage/
+plan.md
+planning/
+skills/

@@ -1,0 +1,29 @@
+{
+  "name": "musebook-web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --build --pretty",
+    "lint": "eslint . --max-warnings 0",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "next": "16.3.5",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "@musebook/schema": "workspace:*",
+    "@musebook/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "16.3.5",
+    "@types/node": "26.6.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

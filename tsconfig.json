@@ -1,0 +1,20 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/schema" },
+    { "path": "./packages/content" },
+    { "path": "./packages/kernel" },
+    { "path": "./packages/muse-mixer" },
+    { "path": "./packages/x402" },
+    { "path": "./packages/connectors" },
+    { "path": "./packages/distributor" },
+    { "path": "./packages/classify" },
+    { "path": "./packages/media" },
+    { "path": "./packages/artifacts" },
+    { "path": "./packages/ui" },
+    { "path": "./apps/web" },
+    { "path": "./apps/edge" },
+    { "path": "./apps/mcp" },
+    { "path": "./apps/worker" }
+  ]
+}

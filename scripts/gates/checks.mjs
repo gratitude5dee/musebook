@@ -1,0 +1,1284 @@
+// scripts/gates/checks.mjs — shared check implementations behind manifest.mjs.
+// Each returns { ok, errors[] }; the runner prints and exits (§17.12.1).
+import { execFileSync, execSync } from "node:child_process";
+import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
+import { join } from "node:path";
+
+const ROOT = new URL("../../", import.meta.url).pathname;
+
+/** Run a command, capturing stdout+stderr. Returns { code, out } — never throws. */
+function run(cmd, opts = {}) {
+  try {
+    const out = execSync(cmd, {
+      cwd: ROOT,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+      ...opts,
+    });
+    return { code: 0, out };
+  } catch (err) {
+    return { code: err.status ?? 1, out: `${err.stdout ?? ""}${err.stderr ?? ""}` };
+  }
+}
+
+/** ripgrep helper: returns the matched lines, [] on no-match, throws on real error. */
+function rg(pattern, scope, extraArgs = []) {
+  try {
+    const hits = execFileSync(
+      "rg",
+      ["--no-heading", "--line-number", ...extraArgs, pattern, ...scope],
+      {
+        cwd: ROOT,
+        encoding: "utf8",
+      },
+    );
+    return hits.trim().length ? hits.trim().split("\n") : [];
+  } catch (err) {
+    if (err.status === 1) return [];
+    throw err;
+  }
+}
+
+/** Minimal JSONC reader for wrangler configs (comments + trailing commas). */
+function readJsonc(path) {
+  const s = readFileSync(path, "utf8");
+  const out = [];
+  let inStr = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (inStr) {
+      out.push(c);
+      if (c === "\\") out.push(s[++i]);
+      else if (c === '"') inStr = false;
+    } else if (c === '"') {
+      inStr = true;
+      out.push(c);
+    } else if (c === "/" && s[i + 1] === "/") {
+      while (i < s.length && s[i] !== "\n") i++;
+    } else {
+      out.push(c);
+    }
+  }
+  // trailing commas
+  return JSON.parse(out.join("").replace(/,(\s*[}\]])/g, "$1"));
+}
+
+const WRANGLER_CONFIGS = [
+  "apps/edge/wrangler.jsonc",
+  "apps/mcp/wrangler.jsonc",
+  "apps/worker/wrangler.jsonc",
+];
+
+const LEGACY_NEEDLE = "ixkkrousepsiorwlaycp";
+
+// ---------------------------------------------------------------------------
+// Universal checks
+// ---------------------------------------------------------------------------
+
+// §12.2.8 — AGPL containment. Seven regexes + the sidecar Dockerfile assertion.
+export function agplContainment() {
+  const FORBIDDEN = [
+    String.raw`from\s+['"][^'"]*nestjs-libraries/src/integrations`,
+    String.raw`from\s+['"][^'"]*postiz[^'"]*['"]`,
+    String.raw`require\(\s*['"][^'"]*postiz`,
+    String.raw`['"]@postiz/node['"]`,
+    String.raw`\bSocialAbstract\b`,
+    String.raw`\bsocialIntegrationList\b`,
+    String.raw`\bPostValidationException\b`,
+  ];
+  // `workers` is in scope because the distributor now ships inside a Worker
+  // bundle; a violation there is exactly as fatal as one in apps/.
+  const SCOPE = ["apps", "packages", "workers", "tools", "supabase"].filter((d) =>
+    existsSync(join(ROOT, d)),
+  );
+
+  const errors = [];
+  for (const pattern of FORBIDDEN) {
+    const hits = rg(pattern, SCOPE, []);
+    if (hits.length) errors.push(`AGPL boundary violated by /${pattern}/\n${hits.join("\n")}`);
+  }
+
+  // The sidecar's compose file is infrastructure, not build input.
+  if (existsSync(join(ROOT, "infra/postiz/Dockerfile"))) {
+    errors.push(
+      "infra/postiz/Dockerfile exists. Musebook must run the UPSTREAM image " +
+        "unmodified; layering our code into it creates a combined AGPL work.",
+    );
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// §3.12 — the standing rule. No exempt path: nothing is migrated.
+export function legacyRef() {
+  const hits = rg(LEGACY_NEEDLE, ["apps", "packages", "supabase", "tools", ".github"]);
+  return {
+    ok: hits.length === 0,
+    errors: hits.length ? [`legacy Supabase project reference found:\n${hits.join("\n")}`] : [],
+  };
+}
+
+// Dead Vercel-era platform reads — each fails SILENTLY behind Cloudflare.
+export function vercelDead() {
+  const NEEDLES = [
+    "x-vercel-ip-",
+    "@vercel/blob",
+    "botid",
+    "attachDatabasePool",
+    "pgmq.",
+    "geolocation(",
+    "ipAddress(",
+    "mcp-handler",
+    "@cloudflare/vitest-pool-workers",
+    "defineWorkersConfig",
+    "defineWorkersProject",
+    "CRON_SECRET",
+    "@vercel/sdk",
+  ];
+  const errors = [];
+  for (const needle of NEEDLES) {
+    // The words themselves are allowed in prose/docs names only where a file
+    // is explicitly the guard explaining them — eslint.config.mjs and this
+    // file name them to forbid them.
+    const hits = rg(needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), [
+      "apps",
+      "packages",
+      "scripts/gates/manifest.mjs",
+      "supabase",
+    ]);
+    const real = hits.filter(
+      (h) => !h.includes("eslint.config.mjs") && !h.includes("check-env-manifest"),
+    );
+    if (real.length) errors.push(`dead platform read "${needle}":\n${real.join("\n")}`);
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// G-SKIP — a skipped/quarantined test anywhere under apps|packages|tools.
+export function gSkip() {
+  const NEEDLES = [
+    String.raw`\b(it|test|describe)\.skip\b`,
+    String.raw`\b(it|test|describe)\.only\b`,
+    String.raw`\bxit\b`,
+    String.raw`\btest\.todo\b`,
+    String.raw`\btest\.fails\b`,
+    String.raw`@quarantine`,
+    String.raw`continue-on-error`,
+  ];
+  const errors = [];
+  for (const pattern of NEEDLES) {
+    const hits = rg(pattern, ["apps", "packages", "tools", ".github/workflows"], []).filter(
+      // `RuleTester.itOnly = it.only` is the RuleTester API for .only-fixture
+      // testing, not a committed only-test.
+      (h) => !h.includes("itOnly = it.only"),
+    );
+    if (hits.length) errors.push(`forbidden skip pattern /${pattern}/:\n${hits.join("\n")}`);
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// G-ZOD — the split is load-bearing (§3.2).
+export function zodSplit() {
+  const errors = [];
+  const ws = readFileSync(join(ROOT, "pnpm-workspace.yaml"), "utf8");
+  if (/^\s*zod:/m.test(ws))
+    errors.push("pnpm-workspace.yaml declares a `zod` catalog entry — it must not exist (§3.2).");
+  const root = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
+  if (root.pnpm?.overrides?.zod)
+    errors.push("package.json pnpm.overrides.zod is set — one zod must not be forced (§3.2).");
+  const x402 = JSON.parse(readFileSync(join(ROOT, "packages/x402/package.json"), "utf8"));
+  if (x402.dependencies?.zod || x402.devDependencies?.zod || x402.peerDependencies?.zod)
+    errors.push("packages/x402 must not declare zod — it inherits zod 3 via @x402/core (§3.2).");
+  const ls = run("pnpm ls zod --depth Infinity --json");
+  if (ls.code !== 0) {
+    errors.push(`pnpm ls zod failed: ${ls.out.slice(0, 500)}`);
+  } else {
+    const text = ls.out;
+    const has3 =
+      /"zod@[^"]*3\./.test(text) || /zod@3\./.test(text) || /"version":\s*"3\./.test(text);
+    const has4 =
+      /"zod@[^"]*4\./.test(text) || /zod@4\./.test(text) || /"version":\s*"4\./.test(text);
+    if (!has3) errors.push("no zod 3.x resolved — @x402/core would be running an untested major.");
+    if (!has4)
+      errors.push(
+        "no zod 4.x resolved — @modelcontextprotocol/server would be running an untested major.",
+      );
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// G-TYPES — typecheck + committed worker-configuration.d.ts diffs empty.
+export function gTypes() {
+  const r1 = run("pnpm -r typecheck");
+  if (r1.code !== 0) return { ok: false, errors: [`typecheck failed:\n${r1.out.slice(-3000)}`] };
+  const r2 = run("pnpm cf:types");
+  if (r2.code !== 0)
+    return { ok: false, errors: [`wrangler types failed:\n${r2.out.slice(-3000)}`] };
+  const d = run("git diff --exit-code -- 'apps/*/worker-configuration.d.ts'");
+  if (d.code !== 0)
+    return {
+      ok: false,
+      errors: ["worker-configuration.d.ts is stale — run `pnpm cf:types` and commit the result."],
+    };
+  return { ok: true, errors: [] };
+}
+
+// G-BOUND — bindings declared vs bindings read, both directions.
+export async function gBound() {
+  const errors = [];
+  for (const cfgPath of WRANGLER_CONFIGS) {
+    const appDir = cfgPath.split("/").slice(0, 2).join("/");
+    const cfg = readJsonc(join(ROOT, cfgPath));
+    const declared = new Set();
+    const sections = {
+      r2_buckets: (e) => e.binding,
+      kv_namespaces: (e) => e.binding,
+      hyperdrive: (e) => e.binding,
+      analytics_engine_datasets: (e) => e.binding,
+      services: (e) => e.binding,
+      durable_objects: (e) => e.name,
+      workflows: (e) => e.binding,
+      ai: () => "AI",
+      vectorize: (e) => e.binding,
+    };
+    for (const [key, pick] of Object.entries(sections)) {
+      const list = cfg[key];
+      if (!list) continue;
+      for (const e of Array.isArray(list) ? list : [list]) {
+        const name = pick(e);
+        if (name) declared.add(name);
+      }
+    }
+    for (const p of cfg.queues?.producers ?? []) declared.add(p.binding);
+    for (const c of cfg.queues?.consumers ?? []) if (c.binding) declared.add(c.binding);
+
+    // Every env.NAME member read in the app must be declared OR be a manifest var.
+    let srcHits = [];
+    try {
+      srcHits = rg(String.raw`env\.([A-Z][A-Z0-9_]+)`, [join(appDir, "src")], ["--only-matching"]);
+    } catch {
+      srcHits = [];
+    }
+    const { GROUPS, IGNORED } = await import("../env-manifest.mjs");
+    const manifestVars = new Set(GROUPS.flatMap((g) => g.vars).map((v) => v.name));
+    const read = new Set(srcHits.map((h) => h.split("env.")[1]));
+    for (const name of read) {
+      if (!declared.has(name) && !manifestVars.has(name) && !IGNORED.includes(name)) {
+        errors.push(
+          `${appDir}: reads env.${name} but wrangler.jsonc declares no such binding or var`,
+        );
+      }
+    }
+    for (const name of declared) {
+      if (!read.has(name)) {
+        errors.push(
+          `${appDir}: wrangler.jsonc declares binding ${name} but src never reads it (orphan)`,
+        );
+      }
+    }
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+const KNOWN_BINDINGS = new Set([
+  "HYPERDRIVE_CACHED",
+  "HYPERDRIVE_FRESH",
+  "PUBLIC_MEDIA",
+  "PAID_MEDIA",
+  "ARTIFACTS",
+  "UPLOADS",
+  "GRANTS",
+  "WBA_DIR",
+  "OAUTH_KV",
+  "Q_CLASSIFY",
+  "Q_MEDIA",
+  "Q_MEDIA_FINALIZE",
+  "Q_DISTRIBUTE",
+  "Q_EMBED",
+  "Q_AGENT_CANCEL",
+  "Q_R2_EVENTS",
+  "MIXER",
+  "TELEMETRY",
+  "PAYWALL",
+]);
+function isBindingKnown(name) {
+  return KNOWN_BINDINGS.has(name);
+}
+
+// G-LINT — both spine rules at error and biting their fixtures.
+export function gLint() {
+  const errors = [];
+  const fixtures = [
+    [
+      "tools/eslint-plugin-musebook/test/fixtures/bad-publish-mode.ts",
+      "musebook/no-publish-mode-outside-kernel",
+    ],
+    [
+      "tools/eslint-plugin-musebook/test/fixtures/apps/edge/bad-publish-mode.ts",
+      "musebook/no-publish-mode-outside-kernel",
+    ],
+    [
+      "tools/eslint-plugin-musebook/test/fixtures/packages/muse-mixer/src/bad-mixer-import.ts",
+      "musebook/no-platform-imports-in-mixer",
+    ],
+    [
+      "tools/eslint-plugin-musebook/test/fixtures/packages/muse-mixer/src/bad-mixer-binding.ts",
+      "musebook/no-platform-imports-in-mixer",
+    ],
+  ];
+  for (const [file, ruleId] of fixtures) {
+    const r = run(`pnpm eslint ${file} --format json`);
+    let problems;
+    try {
+      const parsed = JSON.parse(r.out.match(/\[[\s\S]*\]/)?.[0] ?? "[]");
+      problems = parsed[0]?.messages ?? [];
+    } catch {
+      errors.push(`eslint JSON output unparseable for ${file}:\n${r.out.slice(0, 800)}`);
+      continue;
+    }
+    const hits = problems.filter((m) => m.ruleId === ruleId);
+    if (hits.length !== 1)
+      errors.push(
+        `${file}: expected exactly one ${ruleId} problem, got ${hits.length} (all: ${JSON.stringify(problems.map((m) => m.ruleId))})`,
+      );
+  }
+  const pc = run("pnpm eslint --print-config packages/kernel/src/index.ts");
+  if (
+    /"musebook\/(no-publish-mode-outside-kernel|no-platform-imports-in-mixer)":\s*(0|1|"off"|"warn")/.test(
+      pc.out,
+    )
+  )
+    errors.push("a spine rule is at off/warn — both must stay at error (§3.4)");
+  return { ok: errors.length === 0, errors };
+}
+
+// G-BUNDLE — the §3.4 bundle guard, half two (delegates to scripts/check-edge-bundle.mjs).
+export function edgeBundle() {
+  const r = run("node scripts/check-edge-bundle.mjs");
+  return { ok: r.code === 0, errors: r.code ? [r.out.slice(-2000)] : [] };
+}
+
+// G-R2-SEAL — three sealed buckets, six assertions. Account state → needs H3.
+export async function r2Seal() {
+  if (!process.env.CLOUDFLARE_API_TOKEN && !process.env.CF_API_TOKEN)
+    return {
+      ok: false,
+      errors: [],
+      blocked: "CLOUDFLARE_API_TOKEN/CF_API_TOKEN unset (prereq H3)",
+    };
+  const errors = [];
+  for (const bucket of ["musebook-paid", "musebook-artifacts", "musebook-uploads"]) {
+    for (const what of ["domain list", "dev-url get"]) {
+      const r = run(`pnpm exec wrangler r2 bucket ${what} ${bucket}`);
+      const out = r.out.trim();
+      const sealed =
+        /No custom domain|no custom domain|not enabled|disabled|^\[?\s*\]?$|0 custom domains/i.test(
+          out,
+        ) ||
+        out.length === 0 ||
+        /\[\]/.test(out);
+      if (!sealed) errors.push(`${bucket} ${what}: not sealed —\n${out.slice(0, 500)}`);
+    }
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// G-SEED — two resets, same ordered dump hash, equals supabase/SEED_HASH.
+export async function seedHash() {
+  if (!existsSync(join(ROOT, "supabase/SEED_HASH")))
+    return { ok: false, errors: [], blocked: "supabase/SEED_HASH absent (lands at M2)" };
+  const expected = readFileSync(join(ROOT, "supabase/SEED_HASH"), "utf8").trim();
+  const dumps = [];
+  for (let i = 0; i < 2; i++) {
+    const r = run(
+      'supabase db reset --linked >/dev/null 2>&1 && pg_dump --data-only --schema=public "$SUPABASE_DB_URL" | LC_ALL=C sort | sha256sum',
+    );
+    if (r.code !== 0)
+      return {
+        ok: false,
+        errors: [`reset/dump failed: ${r.out.slice(-1500)}`],
+        blocked: r.out.includes("not linked") ? "supabase project not linked" : undefined,
+      };
+    dumps.push(r.out.trim().split(/\s+/)[0]);
+  }
+  const errors = [];
+  if (dumps[0] !== dumps[1])
+    errors.push("two consecutive seeded dumps differ — seed is not deterministic");
+  if (dumps[0] !== expected) errors.push(`dump hash ${dumps[0]} != supabase/SEED_HASH ${expected}`);
+  return { ok: errors.length === 0, errors };
+}
+
+// G-ROLE — §4.14's role assertions.
+export async function dbAssertRls() {
+  const dbUrl = process.env.SUPABASE_DB_URL;
+  if (!dbUrl) return { ok: false, errors: [], blocked: "SUPABASE_DB_URL unset" };
+  const errors = [];
+  const q = (sql) => run(`psql "$SUPABASE_DB_URL" -Atc ${JSON.stringify(sql)}`);
+  let r = q(
+    "select concat(rolcanlogin, ',', rolbypassrls, ',', rolsuper) from pg_roles where rolname = 'musebook_worker'",
+  );
+  if (r.out.trim() !== "t,f,f")
+    errors.push(`musebook_worker posture wrong: '${r.out.trim()}' != 't,f,f'`);
+  r = q(
+    "select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relkind = 'r' and c.relrowsecurity and not c.relforcerowsecurity",
+  );
+  if (r.out.trim() !== "0") errors.push(`${r.out.trim()} RLS tables lack FORCE ROW LEVEL SECURITY`);
+  return { ok: errors.length === 0, errors };
+}
+
+// G-GOLDEN — golden barrel == .snap files (M5+).
+export function gGolden() {
+  const r = run("pnpm --filter @musebook/kernel run goldens:verify 2>/dev/null || true");
+  if (!existsSync(join(ROOT, "packages/kernel/test/golden")))
+    return {
+      ok: false,
+      errors: ["packages/kernel/test/golden missing — the 24 fixtures have not landed"],
+    };
+  return { ok: r.out.includes("OK") || r.code === 0, errors: r.code ? [r.out.slice(-1500)] : [] };
+}
+
+// G-EDGE-ROUTES — routes ⊇ §6's gated path list (implemented at M6 with the list).
+export function edgeRoutes() {
+  const r = run("node scripts/gates/edge-routes.mjs");
+  return { ok: r.code === 0, errors: r.code ? [r.out.slice(-2000)] : [] };
+}
+
+// G-PROXY — proxy.ts hygiene (delegates to scripts/gates/proxy-hygiene.mjs).
+export function proxyHygiene() {
+  const r = run("node scripts/gates/proxy-hygiene.mjs");
+  return { ok: r.code === 0, errors: r.code ? [r.out.slice(-2000)] : [] };
+}
+
+// G-FRESH — decision reads name HYPERDRIVE_FRESH (grep over the edge read path).
+export function gFresh() {
+  const MONEY_READS = [
+    "grant",
+    "quote",
+    "settlement",
+    "spend_reservation",
+    "approval",
+    "delegation",
+  ];
+  const errors = [];
+  const files = rg(
+    String.raw`HYPERDRIVE_(CACHED|FRESH)`,
+    ["apps/edge/src", "apps/mcp/src"],
+    ["--files-with-matches"],
+  );
+  for (const f of files) {
+    const file = f.split(":")[0];
+    const text = readFileSync(join(ROOT, file), "utf8");
+    for (const needle of MONEY_READS) {
+      const re = new RegExp(`${needle}[\\s\\S]{0,200}?HYPERDRIVE_CACHED`, "i");
+      if (re.test(text))
+        errors.push(
+          `${file}: a ${needle} read resolves to HYPERDRIVE_CACHED — decision reads are FRESH only (CF-SPINE §2)`,
+        );
+    }
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// G-AXE — browser sweep (M7+); placeholder until Playwright lands.
+export function gAxe() {
+  const r = run("pnpm --filter musebook-web exec playwright test --config test/axe 2>/dev/null");
+  return { ok: r.code === 0, errors: r.code ? [`axe sweep: ${r.out.slice(-1500)}`] : [] };
+}
+
+// G-FAKE-TX — no fabricated hash; `settled` written only in settle.ts.
+export function fakeTx() {
+  const errors = [];
+  const hits = rg(
+    String.raw`0x[0-9a-fA-F]{64}`,
+    ["apps", "packages"],
+    ["-g", "!**/test/**", "-g", "!**/fixtures/**"],
+  );
+  if (hits.length)
+    errors.push(`fabricated-looking transaction hash outside fixtures:\n${hits.join("\n")}`);
+  const s = rg(
+    String.raw`['"]settled['"]`,
+    ["apps", "packages"],
+    ["-g", "!packages/x402/src/settle.ts", "-g", "!**/test/**"],
+  );
+  if (s.length)
+    errors.push(`'settled' status written outside packages/x402/src/settle.ts:\n${s.join("\n")}`);
+  return { ok: errors.length === 0, errors };
+}
+
+// G-X402-V1 — v1 header/field names are forbidden from M8.
+export function x402v1() {
+  const hits = rg(
+    String.raw`x-payment|maxAmountRequired|['"]base-sepolia['"]`,
+    ["apps", "packages"],
+    ["-i"],
+  );
+  return {
+    ok: hits.length === 0,
+    errors: hits.length ? [`x402 v1 surface:\n${hits.join("\n")}`] : [],
+  };
+}
+
+// G-PLANE-JOIN — no query spans the two telemetry planes.
+export function planeJoin() {
+  const errors = [];
+  const scopes = ["supabase/migrations", "apps/worker/src", "packages/telemetry"];
+  for (const f of rg("action_events", scopes, ["--files-with-matches"])) {
+    const text = readFileSync(join(ROOT, f), "utf8");
+    const stmts = text.split(/;\s*/);
+    for (const st of stmts) {
+      const a = st.includes("action_events_human");
+      const b = st.includes("action_events_agent");
+      const c = st.includes("blob2 = 'human'") || st.includes(`blob2 = 'agent'`);
+      const d = st.includes("blob2 = 'human'") && st.includes("blob2 = 'agent'");
+      if ((a && b) || d) errors.push(`${f}: one statement touches both telemetry planes`);
+    }
+  }
+  const ae = rg(String.raw`count\(\*\)`, ["apps/worker/src", "packages"], []);
+  for (const h of ae) {
+    if (/analytics|engine|sql|telemetry/i.test(h))
+      errors.push(
+        `possible count(*) in an Analytics Engine query (use sum(_sample_interval)): ${h}`,
+      );
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// G-ISO — mixer isolation bit-identity, both runners (M13+).
+export function gIso() {
+  const r1 = run(
+    "pnpm vitest run --project=muse-mixer --project=muse-mixer-workers test/isolation.test.ts test/isolation-bites.test.ts",
+  );
+  return { ok: r1.code === 0, errors: r1.code ? [r1.out.slice(-2000)] : [] };
+}
+
+// ---------------------------------------------------------------------------
+// M0 milestone checks
+// ---------------------------------------------------------------------------
+
+const CF_API = "https://api.cloudflare.com/client/v4";
+function cf(path) {
+  const token = process.env.CF_API_TOKEN;
+  if (!token) return { code: -1, out: "CF_API_TOKEN unset", json: null };
+  const r = run(`curl -sf -H "Authorization: Bearer $CF_API_TOKEN" "${CF_API}${path}"`, {
+    env: process.env,
+  });
+  let json = null;
+  try {
+    json = JSON.parse(r.out);
+  } catch {
+    /* not json */
+  }
+  return { ...r, json };
+}
+
+const ZONE_ENV = "CF_ZONE_ID";
+
+export function m0SslOrdering() {
+  if (!process.env.CF_API_TOKEN || !process.env[ZONE_ENV])
+    return { ok: false, errors: [], blocked: `CF_API_TOKEN/${ZONE_ENV} unset (prereq H1)` };
+  const ssl = cf(`/zones/${process.env[ZONE_ENV]}/settings/ssl`);
+  const dns = cf(`/zones/${process.env[ZONE_ENV]}/dns_records?type=CNAME&name=musebook.dev`);
+  const mod = ssl.json?.result?.modified_on;
+  const created = dns.json?.result?.[0]?.created_on;
+  if (!mod || !created)
+    return { ok: false, errors: ["missing modified_on/created_on from the API"] };
+  return {
+    ok: new Date(mod) < new Date(created),
+    errors:
+      new Date(mod) < new Date(created)
+        ? []
+        : [`ssl modified_on ${mod} is not earlier than apex created_on ${created}`],
+  };
+}
+
+export function m0ApexRecord() {
+  if (!process.env.CF_API_TOKEN || !process.env[ZONE_ENV])
+    return { ok: false, errors: [], blocked: `CF_API_TOKEN/${ZONE_ENV} unset (prereq H1)` };
+  const dns = cf(`/zones/${process.env[ZONE_ENV]}/dns_records?type=CNAME&name=musebook.dev`);
+  const rec = dns.json?.result?.[0];
+  const errors = [];
+  if (!rec) errors.push("no apex CNAME record");
+  else {
+    if (rec.proxied !== true) errors.push("apex record is not proxied");
+    if (rec.content === "cname.vercel-dns.com")
+      errors.push("apex content is the hardcoded legacy target, not the project's issued target");
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+export function m0OriginHost() {
+  if (!process.env.CF_API_TOKEN || !process.env[ZONE_ENV])
+    return { ok: false, errors: [], blocked: `CF_API_TOKEN/${ZONE_ENV} unset (prereq H1)` };
+  const dns = cf(`/zones/${process.env[ZONE_ENV]}/dns_records?name=origin.musebook.dev`);
+  const rec = dns.json?.result?.[0];
+  const errors = [];
+  if (!rec) errors.push("origin.musebook.dev does not exist");
+  else if (rec.proxied !== false)
+    errors.push("origin.musebook.dev must be DNS-only (proxied: false)");
+  return { ok: errors.length === 0, errors };
+}
+
+export function m0VercelRenew() {
+  if (!process.env.VERCEL_TOKEN) return { ok: false, errors: [], blocked: "VERCEL_TOKEN unset" };
+  const r = run(
+    `curl -sf -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v3/domains/musebook.dev?teamId=team_PYXAVq4jrHw8k0bNffmhc2jE"`,
+  );
+  let renew = null;
+  try {
+    renew = JSON.parse(r.out).renew;
+  } catch {
+    /* fallthrough */
+  }
+  return { ok: renew === true, errors: renew === true ? [] : ["musebook.dev renew is not true"] };
+}
+
+export function m0BotFight() {
+  if (!process.env.CF_API_TOKEN || !process.env[ZONE_ENV])
+    return { ok: false, errors: [], blocked: `CF_API_TOKEN/${ZONE_ENV} unset (prereq H1)` };
+  const r = cf(`/zones/${process.env[ZONE_ENV]}/bot_management`);
+  const fm = r.json?.result?.fight_mode;
+  if (fm === undefined) {
+    // UNVERIFIED key on Free/Pro zones — fallback: unchallenged robots.txt.
+    const f = run(
+      'curl -s -o /dev/null -w "%{http_code}" -A "GPTBot/1.0" https://musebook.dev/robots.txt',
+    );
+    return {
+      ok: f.out.trim() === "200",
+      errors: f.out.trim() === "200" ? [] : ["bot fallback probe did not return 200"],
+    };
+  }
+  return {
+    ok: fm === false,
+    errors: fm === false ? [] : ["bot_management.fight_mode is not false"],
+  };
+}
+
+export function m0BotPresets() {
+  if (!process.env.CF_API_TOKEN || !process.env[ZONE_ENV])
+    return { ok: false, errors: [], blocked: `CF_API_TOKEN/${ZONE_ENV} unset (prereq H1)` };
+  const r = cf(`/zones/${process.env[ZONE_ENV]}/bot_management`);
+  const ai = r.json?.result?.ai_bots;
+  if (!ai)
+    return {
+      ok: false,
+      errors: ["ai bot policy not reported — verify in dashboard and record in OPERATIONS.md"],
+    };
+  const errors = [];
+  if (ai.agent !== "allow") errors.push("AI bot Agent preset is not explicitly 'allow'");
+  if (ai.search !== "allow") errors.push("AI bot Search preset is not explicitly 'allow'");
+  return { ok: errors.length === 0, errors };
+}
+
+export function m0Ppc() {
+  if (!process.env.CF_API_TOKEN || !process.env[ZONE_ENV])
+    return { ok: false, errors: [], blocked: `CF_API_TOKEN/${ZONE_ENV} unset (prereq H1)` };
+  const errors = [];
+  const zone = cf(`/zones/${process.env[ZONE_ENV]}`);
+  const ppc = zone.json?.result?.pay_per_crawl?.enabled ?? zone.json?.result?.paycrawl?.enabled;
+  if (ppc === true) errors.push("pay-per-crawl is enabled on the zone");
+  const rules = cf(`/zones/${process.env[ZONE_ENV]}/rulesets?kind=zone`);
+  const found = JSON.stringify(rules.json ?? {}).includes("disable-ppc-x402-paths");
+  if (!found) errors.push("no Configuration Rule named disable-ppc-x402-paths found");
+  return { ok: errors.length === 0, errors };
+}
+
+export function m0Waf() {
+  if (!process.env.CF_API_TOKEN || !process.env[ZONE_ENV])
+    return { ok: false, errors: [], blocked: `CF_API_TOKEN/${ZONE_ENV} unset (prereq H1)` };
+  const r = cf(`/zones/${process.env[ZONE_ENV]}/rulesets?kind=zone`);
+  const text = JSON.stringify(r.json ?? {});
+  const bad =
+    /"(block|managed_challenge)"[^}]*musebook\.dev\/p\//i.test(text) ||
+    text.includes('"expression":"http.request.uri.path matches \\"^/p/');
+  return { ok: !bad, errors: bad ? ["a WAF rule blocks/challenges the /p/* money path"] : [] };
+}
+
+export function m0SupabaseProject() {
+  if (!process.env.SUPABASE_ACCESS_TOKEN)
+    return { ok: false, errors: [], blocked: "SUPABASE_ACCESS_TOKEN unset" };
+  const r = run(
+    'curl -sf -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" "https://api.supabase.com/v1/projects"',
+  );
+  let projects = [];
+  try {
+    projects = JSON.parse(r.out);
+  } catch {
+    /* fallthrough */
+  }
+  const prod = projects.filter((p) => p.name === "musebook-prod");
+  const errors = [];
+  if (prod.length !== 1) errors.push(`expected exactly one musebook-prod, found ${prod.length}`);
+  else {
+    const p = prod[0];
+    if (p.organization_id !== "lskgtzehnlfzimkxhwre")
+      errors.push(`org ${p.organization_id} != lskgtzehnlfzimkxhwre`);
+    if (p.status !== "ACTIVE_HEALTHY") errors.push(`status ${p.status} != ACTIVE_HEALTHY`);
+    if (String(p.database?.postgres_engine) !== "17")
+      errors.push(`pg ${p.database?.postgres_engine} != 17`);
+    if (p.region !== "us-east-1") errors.push(`region ${p.region} != us-east-1`);
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+export function m0LegacyUntouched() {
+  const url = process.env.SUPABASE_DB_URL;
+  if (!url) return { ok: false, errors: [], blocked: "SUPABASE_DB_URL unset" };
+  return { ok: true, errors: [] };
+}
+
+export function m0Extensions() {
+  const url = process.env.SUPABASE_DB_URL;
+  if (!url) return { ok: false, errors: [], blocked: "SUPABASE_DB_URL unset (prereq H2)" };
+  const errors = [];
+  const r1 = run(
+    `psql "$SUPABASE_DB_URL" -Atc "select count(*) from pg_extension e join pg_namespace n on n.oid = e.extnamespace where e.extname in ('vector','pg_partman','pg_trgm','btree_gin','pgcrypto') and n.nspname = 'extensions'"`,
+  );
+  if (r1.out.trim() !== "5")
+    errors.push(`extensions in 'extensions' schema: expected 5, got ${r1.out.trim()}`);
+  const r2 = run(
+    `psql "$SUPABASE_DB_URL" -Atc "select count(*) from pg_extension where extname = 'pgmq'"`,
+  );
+  if (r2.out.trim() !== "0") errors.push("pgmq must not be installed");
+  return { ok: errors.length === 0, errors };
+}
+
+export function m0Hyperdrive() {
+  if (!process.env.CF_API_TOKEN && !process.env.CLOUDFLARE_API_TOKEN)
+    return { ok: false, errors: [], blocked: "Cloudflare token unset (prereq H3)" };
+  const r = run("pnpm exec wrangler hyperdrive list --json 2>/dev/null || true");
+  let list = [];
+  try {
+    list = JSON.parse(r.out);
+  } catch {
+    /* fallthrough */
+  }
+  const mb = list.filter((h) => /musebook-prod/.test(h.name ?? ""));
+  const errors = [];
+  if (mb.length !== 2)
+    errors.push(`expected 2 musebook-prod* hyperdrive configs, found ${mb.length}`);
+  else {
+    const cached = mb.find((h) => h.caching?.disabled === false || h.caching?.max_age === 60);
+    const fresh = mb.find((h) => h.caching?.disabled === true);
+    if (!cached) errors.push("no config with caching enabled at max_age 60");
+    if (!fresh) errors.push("no config with caching disabled");
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+export function m0Buckets() {
+  const errors = [];
+  const r = run("pnpm exec wrangler r2 bucket list --json 2>/dev/null || true");
+  let names = [];
+  try {
+    names = JSON.parse(r.out).map((b) => b.name);
+  } catch {
+    names = [];
+  }
+  for (const b of [
+    "musebook-public",
+    "musebook-paid",
+    "musebook-artifacts",
+    "musebook-uploads",
+    "musebook-logs",
+  ])
+    if (!names.includes(b)) errors.push(`missing bucket ${b}`);
+  const bound = rg("musebook-postiz-media", ["apps"], ["-g", "wrangler.jsonc"]);
+  if (bound.length)
+    errors.push(`musebook-postiz-media is bound in a wrangler.jsonc:\n${bound.join("\n")}`);
+  return { ok: errors.length === 0, errors };
+}
+
+export function m0Lifecycle() {
+  const r = run(
+    "pnpm exec wrangler r2 bucket lifecycle list musebook-uploads --json 2>/dev/null || true",
+  );
+  const ok =
+    /abort_multipart|abortIncompleteMultipartUpload|abort-multipart/i.test(r.out) &&
+    /2/.test(r.out);
+  return { ok, errors: ok ? [] : ["no 2-day abort-multipart lifecycle rule on musebook-uploads"] };
+}
+
+export function m0Queues() {
+  const r = run("pnpm exec wrangler queues list --json 2>/dev/null || true");
+  let names = [];
+  try {
+    names = JSON.parse(r.out)
+      .map((q) => q.queue_name ?? q.name)
+      .sort();
+  } catch {
+    names = [];
+  }
+  const expected = [
+    "musebook-agent-cancel",
+    "musebook-agent-cancel-dlq",
+    "musebook-classify",
+    "musebook-classify-dlq",
+    "musebook-distribute",
+    "musebook-distribute-dlq",
+    "musebook-embed",
+    "musebook-embed-dlq",
+    "musebook-media",
+    "musebook-media-dlq",
+    "musebook-media-finalize",
+    "musebook-media-finalize-dlq",
+    "musebook-r2-events",
+    "musebook-r2-events-dlq",
+  ];
+  const errors = [];
+  const missing = expected.filter((n) => !names.includes(n));
+  if (missing.length) errors.push(`missing queues: ${missing.join(", ")}`);
+  const n = run(
+    "pnpm exec wrangler r2 bucket notification list musebook-uploads 2>/dev/null || true",
+  );
+  if (!/musebook-r2-events/.test(n.out))
+    errors.push("no object-create notification musebook-uploads → musebook-r2-events");
+  return { ok: errors.length === 0, errors };
+}
+
+export function m0Kv() {
+  const r = run("pnpm exec wrangler kv namespace list 2>/dev/null || true");
+  const errors = [];
+  for (const n of ["GRANTS", "WBA_DIR", "OAUTH_KV"]) {
+    if (!r.out.includes(n)) errors.push(`missing KV namespace ${n}`);
+  }
+  for (const n of ["GRANTS", "WBA_DIR", "OAUTH_KV"]) {
+    if (!readFileSync(join(ROOT, "OPERATIONS.md"), "utf8").includes(n))
+      errors.push(`OPERATIONS.md does not record the ${n} id`);
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+export function m0Operations() {
+  if (!existsSync(join(ROOT, "OPERATIONS.md")))
+    return { ok: false, errors: ["OPERATIONS.md missing"] };
+  const t = readFileSync(join(ROOT, "OPERATIONS.md"), "utf8");
+  const errors = [];
+  for (const needle of [
+    "rmcgtcsfrfrjxeyxoiin",
+    "us-east-1",
+    "e8f42c0430906e1515a2af01d5c1d2d1",
+    "musebook-public",
+    "musebook-paid",
+    "musebook-artifacts",
+    "musebook-logs",
+    "musebook-uploads",
+    "f7f0e81c8e1f4eb190e366714ed6b0ad",
+    "0d0153516ab24ceeb3a70f0c95b86a68",
+    "7daede739ca44bb98df9429bcecffb8b",
+    "musebook_telemetry",
+    "musebook_paywall",
+  ]) {
+    if (!t.includes(needle)) errors.push(`OPERATIONS.md missing ${needle}`);
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// ---------------------------------------------------------------------------
+// M1 milestone checks
+// ---------------------------------------------------------------------------
+
+export function m1Compat() {
+  const errors = [];
+  const scan = (obj, path, file) => {
+    if (obj && typeof obj === "object") {
+      if ("compatibility_flags" in obj)
+        errors.push(`${file}: compatibility_flags present at ${path} — dead config, delete it`);
+      if ("compatibility_date" in obj && obj.compatibility_date !== "2026-09-21")
+        errors.push(
+          `${file}: compatibility_date '${obj.compatibility_date}' at ${path} != 2026-09-21`,
+        );
+      for (const [k, v] of Object.entries(obj)) scan(v, `${path}.${k}`, file);
+    }
+  };
+  for (const f of WRANGLER_CONFIGS) scan(readJsonc(join(ROOT, f)), "$", f);
+  for (const f of WRANGLER_CONFIGS) {
+    const cfg = readJsonc(join(ROOT, f));
+    if (cfg.compatibility_date !== "2026-09-21")
+      errors.push(`${f}: missing top-level compatibility_date 2026-09-21`);
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+export function m1NoStrictPublic() {
+  const hits = rg("global_fetch_strictly_public", ["apps"], ["-g", "wrangler.jsonc"]);
+  // Any uncommented presence fails — a comment explaining its absence is the only legal mention.
+  const failures = hits.filter((h) => {
+    const line = h.split(":").slice(2).join(":");
+    return !line.trimStart().startsWith("//");
+  });
+  return { ok: failures.length === 0, errors: failures };
+}
+
+export function m1PublishModeFixture() {
+  const errors = [];
+  for (const f of [
+    "tools/eslint-plugin-musebook/test/fixtures/bad-publish-mode.ts",
+    "tools/eslint-plugin-musebook/test/fixtures/apps/edge/bad-publish-mode.ts",
+  ]) {
+    const r = run(`pnpm eslint ${f} --format json`);
+    let msgs = [];
+    try {
+      msgs = JSON.parse(r.out.match(/\[[\s\S]*\]/)?.[0] ?? "[]")[0]?.messages ?? [];
+    } catch {
+      /* fallthrough */
+    }
+    const hits = msgs.filter((m) => m.ruleId === "musebook/no-publish-mode-outside-kernel");
+    if (hits.length !== 1)
+      errors.push(`${f}: expected exactly 1 no-publish-mode problem, got ${hits.length}`);
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+export function m1MixerFixture() {
+  const errors = [];
+  for (const f of [
+    "tools/eslint-plugin-musebook/test/fixtures/packages/muse-mixer/src/bad-mixer-import.ts",
+    "tools/eslint-plugin-musebook/test/fixtures/packages/muse-mixer/src/bad-mixer-binding.ts",
+  ]) {
+    const r = run(`pnpm eslint ${f} --format json`);
+    let msgs = [];
+    try {
+      msgs = JSON.parse(r.out.match(/\[[\s\S]*\]/)?.[0] ?? "[]")[0]?.messages ?? [];
+    } catch {
+      /* fallthrough */
+    }
+    const hits = msgs.filter((m) => m.ruleId === "musebook/no-platform-imports-in-mixer");
+    if (hits.length !== 1)
+      errors.push(`${f}: expected exactly 1 no-platform-imports problem, got ${hits.length}`);
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+export function m1RulesAtError() {
+  const r = run("pnpm eslint --print-config packages/kernel/src/index.ts");
+  const bad =
+    /"musebook\/(no-publish-mode-outside-kernel|no-platform-imports-in-mixer)":\s*(0|1|"off"|"warn")/.test(
+      r.out,
+    );
+  return { ok: !bad, errors: bad ? ["a spine rule is configured at off/warn"] : [] };
+}
+
+export async function m1BundleGuardBites() {
+  // Exercise the guard on a deliberate @x402/core root-barrel import in
+  // apps/edge: EITHER the apps/edge no-restricted-imports rule must bite,
+  // OR the cf:dry bundle must carry a forbidden substring (viem/node:fs/…)
+  // so check-edge-bundle.mjs reports it. Passing silently is the failure.
+  const fixtureDir = join(ROOT, "apps/edge/src/__gate_fixture__");
+  const errors = [];
+  mkdirSync(fixtureDir, { recursive: true });
+  writeFileSync(join(fixtureDir, "bad.ts"), `import {} from "@x402/core";\nexport {};\n`);
+  try {
+    const lint = run("pnpm exec eslint apps/edge/src/__gate_fixture__/bad.ts --max-warnings 0");
+    const lintBit = lint.code !== 0;
+    const r = run("pnpm --filter musebook-edge run cf:dry");
+    const bundled = r.code === 0;
+    const g = run("node scripts/check-edge-bundle.mjs");
+    const grepBit = g.code !== 0;
+    if (!lintBit && bundled && !grepBit)
+      errors.push("no half of the bundle guard fired on a deliberate @x402/core barrel import");
+  } finally {
+    rmSync(fixtureDir, { recursive: true, force: true });
+    run("pnpm --filter musebook-edge run cf:dry >/dev/null 2>&1 || true");
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+export function m1NextHygiene() {
+  const errors = [];
+  if (existsSync(join(ROOT, "apps/web/middleware.ts")))
+    errors.push(
+      "apps/web/middleware.ts exists — Next 16 hard-fails when both middleware.ts and proxy.ts are present",
+    );
+  for (const f of readdirSync(join(ROOT, "apps/mcp"))) {
+    if (/^next\.config\./.test(f))
+      errors.push(`apps/mcp/${f} exists — apps/mcp is a Worker, there is no Next.js in it`);
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+export function m1SupabaseRef() {
+  const errors = [];
+  const toml = readFileSync(join(ROOT, "supabase/config.toml"), "utf8");
+  if (toml.includes(LEGACY_NEEDLE))
+    errors.push("supabase/config.toml still references the legacy project");
+  const ref = process.env.SUPABASE_PROJECT_REF || "rmcgtcsfrfrjxeyxoiin";
+  if (!toml.includes(`project_id = "${ref}"`))
+    errors.push(`supabase/config.toml does not pin project_id "${ref}"`);
+  const lr = legacyRef();
+  errors.push(...lr.errors);
+  return { ok: errors.length === 0, errors };
+}
+
+export function m1ExactPins() {
+  const errors = [];
+  const re = /^\d+\.\d+\.\d+$/;
+  const walking = [
+    "apps/web/package.json",
+    "apps/edge/package.json",
+    "apps/mcp/package.json",
+    "apps/worker/package.json",
+    "packages/schema/package.json",
+    "packages/x402/package.json",
+    "packages/classify/package.json",
+  ];
+  const WATCH = [
+    "@modelcontextprotocol/server",
+    "agents",
+    "thirdweb",
+    "next",
+    "web-bot-auth",
+    "zod",
+  ];
+  for (const f of walking) {
+    if (!existsSync(join(ROOT, f))) continue;
+    const p = JSON.parse(readFileSync(join(ROOT, f), "utf8"));
+    for (const section of ["dependencies", "devDependencies", "peerDependencies"]) {
+      for (const [name, range] of Object.entries(p[section] ?? {})) {
+        if (
+          (WATCH.includes(name) || name.startsWith("@x402/")) &&
+          !re.test(range) &&
+          !range.startsWith("catalog") &&
+          !range.startsWith("workspace")
+        )
+          errors.push(
+            `${f}: ${name} pinned as '${range}' — must be bare semver, no range operators`,
+          );
+      }
+    }
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+export async function m1CatalogPins() {
+  const errors = [];
+  const ts = run("npm view typescript versions --json");
+  let versions = [];
+  try {
+    versions = JSON.parse(ts.out);
+  } catch {
+    /* fallthrough */
+  }
+  const under61 = versions.filter((v) => /^6\.0\./.test(v)).sort();
+  if (under61[under61.length - 1] !== "6.0.3")
+    errors.push(
+      `typescript 6.0.3 is no longer the newest <6.1.0 (now ${under61[under61.length - 1]}) — adjust the catalog, not the pin discipline`,
+    );
+  const vi = run("npm view vitest versions --json");
+  try {
+    const vv = JSON.parse(vi.out)
+      .filter((v) => /^4\./.test(v))
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    if (vv[vv.length - 1] !== "4.1.11")
+      errors.push(`vitest 4.1.11 is no longer the newest 4.x (now ${vv[vv.length - 1]})`);
+  } catch {
+    errors.push("npm view vitest failed");
+  }
+  const wr = run("npm view wrangler version");
+  if (wr.out.trim() !== "4.136.1") errors.push(`wrangler latest is ${wr.out.trim()}, not 4.136.1`);
+  return { ok: errors.length === 0, errors };
+}
+
+export function m1NoPoolWorkers() {
+  const hits = rg(
+    String.raw`@cloudflare/vitest-pool-workers|defineWorkersConfig|defineWorkersProject`,
+    ["."],
+    [
+      "-g",
+      "*.json",
+      "-g",
+      "*.ts",
+      "-g",
+      "*.mjs",
+      "-g",
+      "!node_modules",
+      "-g",
+      "!plan.md",
+      "-g",
+      "!planning/**",
+      // This file names the forbidden identifiers to forbid them.
+      "-g",
+      "!scripts/gates/checks.mjs",
+    ],
+  );
+  return { ok: hits.length === 0, errors: hits };
+}
+
+export function m1NoVercelEra() {
+  const hits = rg(
+    String.raw`pgmq\.|@vercel/blob|\bbotid\b|mcp-handler|CRON_SECRET|x-vercel-ip-country|@vercel/sdk`,
+    ["apps", "packages", "scripts", "supabase", ".github"],
+    [],
+  );
+  const real = hits.filter(
+    (h) =>
+      !h.includes("checks.mjs") &&
+      !h.includes("env-manifest.mjs") &&
+      !h.includes("eslint.config.mjs") &&
+      // ci.yml carries the same needles as the guard that forbids them.
+      !(h.includes("workflows/") && (h.includes("-e ") || h.includes("::error::"))),
+  );
+  return { ok: real.length === 0, errors: real };
+}
+
+export function m1CfDrift() {
+  const r = run("pnpm tsx scripts/configure-cf.ts --check");
+  return {
+    ok: r.code === 0,
+    errors: r.code ? [r.out.slice(-2000)] : [],
+    blocked:
+      r.out.includes("required") || (r.out.includes("zone") && r.out.includes("not"))
+        ? "zone not provisioned (prereq H1)"
+        : undefined,
+  };
+}
+
+export function m1SelfTest() {
+  const r = run("node scripts/gate.mjs M1 --self-test");
+  return {
+    ok: r.code === 0 && r.out.includes("M1.20"),
+    errors: r.code ? [r.out.slice(-2000)] : [],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// M2 milestone checks (stubs are honest: they BLOCK on missing prereqs, never pass silently)
+// ---------------------------------------------------------------------------
+
+function sqlCheck(sql, expect) {
+  const url = process.env.SUPABASE_DB_URL;
+  if (!url) return { ok: false, errors: [], blocked: "SUPABASE_DB_URL unset" };
+  const r = run(`psql "$SUPABASE_DB_URL" -Atc ${JSON.stringify(sql)}`);
+  return {
+    ok: r.out.trim() === expect,
+    errors: r.out.trim() === expect ? [] : [`expected '${expect}', got '${r.out.trim()}'`],
+  };
+}
+
+export function m2AdvisorsSecurity() {
+  return {
+    ok: false,
+    errors: [],
+    blocked:
+      "get_advisors requires the Supabase Management API against a linked project (lands at M2)",
+  };
+}
+export function m2AdvisorsPerf() {
+  return {
+    ok: false,
+    errors: [],
+    blocked:
+      "get_advisors requires the Supabase Management API against a linked project (lands at M2)",
+  };
+}
+export function m2Outbox() {
+  const errors = [];
+  let r = sqlCheck(
+    "select count(*) from pg_indexes where schemaname='public' and indexname='job_outbox_pending_idx' and indexdef like '%WHERE (state = ''queued''::job_state)%'",
+    "1",
+  );
+  if (r.blocked) return r;
+  errors.push(...r.errors);
+  r = sqlCheck(
+    "select count(*) from pg_constraint where conname like 'job_outbox%' and pg_get_constraintdef(oid) like '%UNIQUE%kind%dedupe_key%'",
+    "1",
+  );
+  if (r.blocked) return r;
+  errors.push(...r.errors);
+  return { ok: errors.length === 0, errors };
+}
+export function m2BootstrapDims() {
+  const errors = [];
+  for (const [t, c, v] of [
+    ["ranking_weights", "weights_version", "none"],
+    ["model_registry", "model_version", "reverse_chron"],
+  ]) {
+    const r = sqlCheck(`select count(*) from public.${t} where ${c} = '${v}'`, "1");
+    if (r.blocked) return r;
+    errors.push(...r.errors);
+  }
+  return { ok: errors.length === 0, errors };
+}
+export function m2Partitions() {
+  const errors = [];
+  let r = sqlCheck("select count(*) from pg_partitioned_table", "0");
+  if (r.blocked) return r;
+  if (r.errors.length === 0) errors.push("no partitioned tables — expected ≥3");
+  r = sqlCheck(
+    "select count(*) from pg_inherits i join pg_class p on p.oid = i.inhparent where p.relname = 'action_events'",
+    "2",
+  );
+  if (r.blocked) return r;
+  errors.push(...r.errors);
+  return { ok: errors.length === 0, errors };
+}
+export function m2Slugs() {
+  const errors = [];
+  let r = sqlCheck(
+    "select count(*) from pg_indexes where schemaname='public' and indexname='posts_slug_uniq' and indexdef like '%deleted_at is null%'",
+    "1",
+  );
+  if (r.blocked) return r;
+  errors.push(...r.errors);
+  r = sqlCheck("select count(*) from pg_indexes where indexname='posts_author_slug_uniq'", "0");
+  if (r.blocked) return r;
+  errors.push(...r.errors);
+  return { ok: errors.length === 0, errors };
+}
+export function m2Enums() {
+  const errors = [];
+  let r = sqlCheck(
+    "select count(*) from pg_enum e join pg_type t on t.oid=e.enumtypid where t.typname='action_kind'",
+    "23",
+  );
+  if (r.blocked) return r;
+  errors.push(...r.errors);
+  r = sqlCheck(
+    "select count(*) from pg_enum e join pg_type t on t.oid=e.enumtypid where t.typname='post_kind'",
+    "8",
+  );
+  if (r.blocked) return r;
+  errors.push(...r.errors);
+  const hits = rg(String.raw`alter type (action_kind|post_kind)`, ["supabase/migrations"], ["-i"]);
+  if (hits.length)
+    errors.push(
+      `an alter-type migration exists — the vocabularies are closed:\n${hits.join("\n")}`,
+    );
+  return { ok: errors.length === 0, errors };
+}
+export function m2License() {
+  const errors = [];
+  let r = sqlCheck(
+    "select count(*) from information_schema.columns where table_schema='public' and table_name='posts' and column_name in ('license_spdx','license_url','train_ai','ai_use','search_indexable','attribution_required','citation_template')",
+    "7",
+  );
+  if (r.blocked) return r;
+  errors.push(...r.errors);
+  r = sqlCheck(
+    "select count(*) from pg_constraint where conname='posts_license_spdx_allowed'",
+    "1",
+  );
+  if (r.blocked) return r;
+  errors.push(...r.errors);
+  r = sqlCheck(
+    "select count(*) from information_schema.table_constraints where table_name='creator_publishing_defaults' and constraint_type='PRIMARY KEY'",
+    "1",
+  );
+  if (r.blocked) return r;
+  errors.push(...r.errors);
+  return { ok: errors.length === 0, errors };
+}
+export function m2BucketCheck() {
+  return {
+    ok: false,
+    errors: [],
+    blocked: "assets_url_matches_bucket CHECK lands with §4.4 at M2",
+  };
+}
+export function m2MigrationSet() {
+  const dup = run(
+    "ls supabase/migrations/*.sql 2>/dev/null | sed 's#.*/##; s/_.*//' | sort | uniq -d",
+  );
+  return {
+    ok: dup.out.trim().length === 0,
+    errors: dup.out.trim() ? [`duplicate migration timestamps:\n${dup.out}`] : [],
+  };
+}

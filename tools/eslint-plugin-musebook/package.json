@@ -1,0 +1,19 @@
+{
+  "name": "@musebook/eslint-plugin",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.js"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --build --pretty"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.2",
+    "@typescript-eslint/parser": "8.70.0",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

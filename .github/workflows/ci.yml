@@ -1,0 +1,181 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  verify:
+    name: typecheck / lint / test / build / bundle
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.5.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # `wrangler types` is a pure function of wrangler.jsonc and needs no
+      # Cloudflare credential. Regenerating here and diffing is what catches a
+      # binding added to a config without the Env type being updated.
+      - name: Generated Worker types are current
+        run: |
+          pnpm cf:types
+          if ! git diff --quiet -- 'apps/*/worker-configuration.d.ts'; then
+            echo "::error::worker-configuration.d.ts is stale. Run 'pnpm cf:types' and commit."
+            git --no-pager diff -- 'apps/*/worker-configuration.d.ts'
+            exit 1
+          fi
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format
+        run: pnpm format
+
+      - name: Unit + integration tests
+        run: pnpm test
+
+      - name: Build (Next.js)
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_SITE_URL: https://musebook.dev
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_THIRDWEB_CLIENT_ID: ${{ vars.NEXT_PUBLIC_THIRDWEB_CLIENT_ID }}
+          NEXT_PUBLIC_THIRDWEB_AUTH_DOMAIN: musebook.dev
+
+      # --dry-run needs no credential and no network. It is the only thing that
+      # catches an oversized script, a bundling failure or a forbidden
+      # transitive import BEFORE a deploy touches the request path.
+      - name: Bundle all three Workers (dry run)
+        run: pnpm cf:dry
+
+      - name: Edge bundle guard
+        run: pnpm gate --check edge-bundle
+
+  gates:
+    name: invariant gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.5.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # The gate's scan checks shell out to ripgrep (same as the plan's §12.2
+      # reference implementation).
+      - name: Install ripgrep
+        run: sudo apt-get update -qq && sudo apt-get install -y ripgrep
+
+      # Named checks from scripts/gates/manifest.mjs (§3.4, §17.12). Same code
+      # the milestone gate runs; CI runs the ones that need no credential.
+      - name: AGPL containment — no Postiz source in our bundle
+        run: pnpm gate --check agpl
+
+      - name: No legacy database reference
+        run: pnpm gate --check legacy-ref
+
+      - name: zod 3 and zod 4 both resolve, and neither is forced
+        run: pnpm gate --check zod-split
+
+      - name: No proxy/middleware collision
+        run: |
+          if [ -f apps/web/middleware.ts ] && [ -f apps/web/proxy.ts ]; then
+            echo "::error::Both middleware.ts and proxy.ts exist. Next 16.3.5 hard-throws on this at build."
+            exit 1
+          fi
+          if [ -f apps/web/proxy.ts ] && grep -qE "export (async )?function middleware" apps/web/proxy.ts; then
+            echo "::error::proxy.ts must export 'proxy', not 'middleware'. Next throws at build otherwise."
+            exit 1
+          fi
+          if [ -f apps/web/proxy.ts ] && grep -qE "runtime:\s*['\"](nodejs|edge)['\"]" apps/web/proxy.ts; then
+            echo "::error::Route segment config is not allowed in a Proxy file; Next throws. Proxy is always Node."
+            exit 1
+          fi
+
+      # The origin lockdown is the ONLY thing standing between an agent and the
+      # paywall, because <project>.vercel.app stays publicly reachable and that
+      # is not fixable with DNS (CF-SPINE §1.4). If proxy.ts stops demanding the
+      # header, the paywall is bypassable and nothing else will notice.
+      - name: Origin lockdown is enforced
+        run: |
+          if ! grep -q "x-musebook-edge" apps/web/proxy.ts; then
+            echo "::error::apps/web/proxy.ts must reject any request lacking 'x-musebook-edge' with 404. The .vercel.app origin is publicly reachable (CF-SPINE §1.4)."
+            exit 1
+          fi
+          if ! grep -qE "\b404\b" apps/web/proxy.ts; then
+            echo "::error::proxy.ts must answer an unauthenticated origin request with 404, not 401/403 — a 403 confirms the host is real."
+            exit 1
+          fi
+
+      - name: Proxy hygiene (x-mb-* stripping, twin rewrites)
+        run: pnpm gate --check proxy-hygiene
+
+      # No Vercel-era platform reads may come back. Each of these fails SILENTLY
+      # at runtime — a plausible wrong answer, never an error (CF-SPINE §1).
+      - name: No dead Vercel platform reads
+        run: |
+          if grep -rIn --include='*.ts' --include='*.tsx' \
+               -e 'x-vercel-ip-' -e '@vercel/blob' -e "from ['\"]botid" \
+               -e 'attachDatabasePool' -e 'pgmq' \
+               apps/ packages/; then
+            echo "::error::Dead behind Cloudflare: x-vercel-ip-* (Enterprise-only real client IP), @vercel/blob (→ R2), botid (→ web-bot-auth), attachDatabasePool (no Vercel pg pool), pgmq (→ Cloudflare Queues)."
+            exit 1
+          fi
+
+      # These two mirror the manifest's activeFrom (G-ISO from M13, golden from
+      # M5): before the test file exists the step is skipped, never
+      # green-by-accident, because vitest.config.ts sets passWithNoTests: false.
+      - name: Candidate isolation (spine invariant 2)
+        if: hashFiles('packages/muse-mixer/test/isolation.test.ts') != ''
+        run: pnpm --filter @musebook/muse-mixer test -- isolation
+
+      - name: Kernel golden fixtures — 3 modes x 2 actor classes x 4 representations
+        if: hashFiles('packages/kernel/test/golden.test.ts') != ''
+        run: pnpm --filter @musebook/kernel test -- golden
+
+      - name: Generated DB types are current
+        if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'preview-db')
+        run: |
+          pnpm exec supabase start
+          pnpm db:types
+          if ! git diff --quiet -- packages/schema/src/database.types.ts; then
+            echo "::error::packages/schema/src/database.types.ts is stale. Run 'pnpm db:types' and commit."
+            git --no-pager diff -- packages/schema/src/database.types.ts
+            exit 1
+          fi
+
+      - name: Env manifest is complete and both example files are generated from it
+        run: pnpm env:check
