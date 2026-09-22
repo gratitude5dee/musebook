@@ -74,9 +74,7 @@ describe("feed + html fallback arms", () => {
     expect(item.content_text).toBe("");
     expect(item.summary).toBeNull();
     const withSummary: Resource = { ...FREE, title: null };
-    expect((renderFeed(withSummary, ORIGIN) as Record<string, unknown>).title).toBe(
-      FREE.summary,
-    );
+    expect((renderFeed(withSummary, ORIGIN) as Record<string, unknown>).title).toBe(FREE.summary);
   });
 
   it("html: title/description fallbacks, canonical_url override, missing timestamps", () => {
@@ -98,7 +96,12 @@ describe("feed + html fallback arms", () => {
   });
 
   it("html empty bodyKind prints the reason on deny and blank on allow", () => {
-    const denyDoc = renderHtml(FREE, { ...DENY_PREVIEW_NO_CHALLENGE, bodyKind: "empty", httpStatus: 404, reason: "not_published" }, ORIGIN, 400);
+    const denyDoc = renderHtml(
+      FREE,
+      { ...DENY_PREVIEW_NO_CHALLENGE, bodyKind: "empty", httpStatus: 404, reason: "not_published" },
+      ORIGIN,
+      400,
+    );
     expect(denyDoc).toContain("<p>not_published</p>");
     const allowDoc = renderHtml(FREE, ALLOW_EMPTY, ORIGIN, 400);
     expect(allowDoc).toContain("<p></p>");
@@ -133,7 +136,12 @@ describe("markdown + preview arms", () => {
 describe("json + jsonld + mcp edge arms", () => {
   it("json empty bodyKind: reason on deny, 'unavailable' on allow", () => {
     expect(
-      renderJson(FREE, { ...DENY_PREVIEW_NO_CHALLENGE, bodyKind: "empty", reason: "blocked_agent" }, ORIGIN, 400),
+      renderJson(
+        FREE,
+        { ...DENY_PREVIEW_NO_CHALLENGE, bodyKind: "empty", reason: "blocked_agent" },
+        ORIGIN,
+        400,
+      ),
     ).toEqual({ error: "blocked_agent" });
     expect(renderJson(FREE, ALLOW_EMPTY, ORIGIN, 400)).toEqual({ error: "unavailable" });
   });
@@ -153,9 +161,16 @@ describe("json + jsonld + mcp edge arms", () => {
 
   it("jsonLdFor: licenseUrl beats spdxUrl; ARR drops license entirely", () => {
     const allow: AccessDecision = { ...ALLOW_EMPTY, bodyKind: "full" };
-    const withUrl = jsonLdFor({ ...FREE, licenseUrl: "https://x/deed" }, allow, ORIGIN) as Record<string, unknown>;
+    const withUrl = jsonLdFor({ ...FREE, licenseUrl: "https://x/deed" }, allow, ORIGIN) as Record<
+      string,
+      unknown
+    >;
     expect(withUrl.license).toBe("https://x/deed");
-    const arr = jsonLdFor({ ...FREE, licenseSpdx: "ARR", licenseUrl: null }, allow, ORIGIN) as Record<string, unknown>;
+    const arr = jsonLdFor(
+      { ...FREE, licenseSpdx: "ARR", licenseUrl: null },
+      allow,
+      ORIGIN,
+    ) as Record<string, unknown>;
     expect(arr.license).toBeNull();
     expect(arr.usageInfo).toContain("/api/posts/");
   });
@@ -175,7 +190,12 @@ describe("payerOf/agentIdOf tails via resolveAccess", () => {
         },
       },
     });
-    const withPayer: Actor = { ...HUMAN, plane: "agent", class: "crawler_agent", payerAddress: "0xAbCd" } as Actor;
+    const withPayer: Actor = {
+      ...HUMAN,
+      plane: "agent",
+      class: "crawler_agent",
+      payerAddress: "0xAbCd",
+    } as Actor;
     await kernel.resolveAccess(HFAP, withPayer);
     expect(seen).toEqual(["0xabcd"]);
   });
@@ -193,7 +213,12 @@ describe("payerOf/agentIdOf tails via resolveAccess", () => {
         },
       },
     });
-    const noPayer: Actor = { ...HUMAN, plane: "agent", class: "crawler_agent", payerAddress: null } as Actor;
+    const noPayer: Actor = {
+      ...HUMAN,
+      plane: "agent",
+      class: "crawler_agent",
+      payerAddress: null,
+    } as Actor;
     await kernel.resolveAccess(HFAP, noPayer);
     expect(seen).toEqual([null]);
   });
