@@ -859,7 +859,197 @@ export const GATES = {
     },
   ],
 
-  // M6–M19: transcribed from §16.5 at the start of each milestone.
+  // §16.5 M6 — musebook-edge read path. Item 2 is the universal G-PROXY
+  // (activeFrom M6 above); item 32 is the G-FAKE-TX skip (activeFrom M8).
+  M6: [
+    {
+      id: "M6.1",
+      kind: "fn",
+      desc: "Worker in the path + origin closed: proxy.ts 404s no/wrong x-musebook-edge",
+      run: checks.m6WorkerInPath,
+    },
+    // M6.2 — G-PROXY (universal): proxy-hygiene runs from this milestone on.
+    {
+      id: "M6.3",
+      kind: "fn",
+      desc: "twin byte-consistency on the wire: one hash, per-rep ETags, If-None-Match 304, Accept: text/markdown",
+      run: checks.m6TwinWire,
+    },
+    {
+      id: "M6.4",
+      kind: "fn",
+      desc: "twins worker-served only; ! test -e apps/web/app/api/twin",
+      run: checks.m6TwinsWorkerOnly,
+    },
+    {
+      id: "M6.5",
+      kind: "fn",
+      desc: "O3: zero action_events with null slate_id/position/weights_version/model_version",
+      run: checks.m6EventPositions,
+    },
+    {
+      id: "M6.6",
+      kind: "fn",
+      desc: "O3: all stored weights_version='none'/model_version='reverse_chron'; forged values still store 'none'",
+      run: checks.m6BootstrapLiterals,
+    },
+    {
+      id: "M6.7",
+      kind: "fn",
+      desc: "O3: every viewer-owned slate has action_events coverage (anon slates are AE-only by design)",
+      run: checks.m6SlateCoverage,
+    },
+    {
+      id: "M6.8",
+      kind: "fn",
+      desc: "O3: impression positions dense and zero-based per slate (no gaps, no dups)",
+      run: checks.m6PositionDensity,
+    },
+    {
+      id: "M6.9",
+      kind: "fn",
+      desc: "request path reads not scores: no muse-mixer import, no direct slates select, page-2 same slate",
+      run: checks.m6ReadNotScore,
+    },
+    {
+      id: "M6.10",
+      kind: "fn",
+      desc: "slate writes only under apps/worker/src (insert into public.slates)",
+      run: checks.m6SlateWriterPlacement,
+    },
+    {
+      id: "M6.11",
+      kind: "fn",
+      desc: "inbound x-mb-* never reaches the origin; x-mb-request-id minted by the Worker",
+      run: checks.m6ForgedTrustHeaders,
+    },
+    {
+      id: "M6.12",
+      kind: "fn",
+      desc: "x-mb-country = request.cf.country ?? 'XX'; no Vercel-era geo/IP helpers",
+      run: checks.m6GeoFromCf,
+    },
+    {
+      id: "M6.13",
+      kind: "fn",
+      desc: "DNT:1 writes zero action_events AND zero AE points; post_counters.impressions +1",
+      run: checks.m6DntOptOut,
+    },
+    {
+      id: "M6.14",
+      kind: "fn",
+      desc: "CF-Connecting-IP read in exactly apps/edge/src/index.ts + telemetry/privacy.ts",
+      run: checks.m6ClientIpScope,
+    },
+    {
+      id: "M6.15",
+      kind: "fn",
+      desc: "outbox write is one statement: no BEGIN; enqueue.ts calls app.enqueue_job",
+      run: checks.m6OneStatementOutbox,
+    },
+    {
+      id: "M6.16",
+      kind: "fn",
+      desc: "sweeper recovers a dropped enqueue: queued row becomes running/succeeded within ~60s",
+      run: checks.m6SweeperRecovery,
+    },
+    {
+      id: "M6.17",
+      kind: "fn",
+      desc: "DLQ consumer acts: job_outbox state='dead' + ops_events error on a poisoned message",
+      run: checks.m6DlqConsumed,
+    },
+    {
+      id: "M6.18",
+      kind: "fn",
+      desc: "consumers idempotent: same message twice = one side effect, keyed on dedupe_key",
+      run: checks.m6IdempotentConsumers,
+    },
+    {
+      id: "M6.19",
+      kind: "fn",
+      desc: "messages serialize under 128 KB and carry only ids/R2 keys",
+      run: checks.m6MessageSize,
+    },
+    {
+      id: "M6.20",
+      kind: "fn",
+      desc: "cdn.musebook.dev: Cache Everything + edge_ttl rule present, Smart Tiered on — Worker-free path",
+      run: checks.m6CdnCacheEverything,
+    },
+    {
+      id: "M6.21",
+      kind: "fn",
+      desc: "paid media only through the Worker: 402 no-grant zero bytes; 200 with grant; bucket sealed",
+      run: checks.m6PaidMediaGate,
+    },
+    {
+      id: "M6.22",
+      kind: "fn",
+      desc: "no presigned URL on a read path: ! grep aws4|X-Amz-Signature|presign in media.ts/routes",
+      run: checks.m6NoPresignReads,
+    },
+    {
+      id: "M6.23",
+      kind: "fn",
+      desc: "Range: 206 + Content-Range from R2Object.size; unsatisfiable precondition → 412 no body",
+      run: checks.m6RangeCorrectness,
+    },
+    {
+      id: "M6.24",
+      kind: "fn",
+      desc: "reels: surface='reels' slate serves; play/play_through land in Postgres AND AE",
+      run: checks.m6ReelsEvents,
+    },
+    {
+      id: "M6.25",
+      kind: "fn",
+      desc: "O9 telemetry split: every event in AE; label sample in Postgres; impression per §13.1.1",
+      run: checks.m6TelemetrySplit,
+    },
+    {
+      id: "M6.26",
+      kind: "fn",
+      desc: "AE holds no subjects: Point contract @ts-expect-error + one writeDataPoint site (ae.ts)",
+      run: checks.m6AeNoSubjects,
+    },
+    {
+      id: "M6.27",
+      kind: "fn",
+      desc: "firehose never through Queues: no Q_TELEMETRY/queue impression in apps/edge/src",
+      run: checks.m6NoTelemetryQueue,
+    },
+    {
+      id: "M6.28",
+      kind: "fn",
+      desc: "/_next/static/* not routed through the Worker (wrangler routes); G-EDGE-ROUTES superset",
+      run: checks.m6StaticNotRouted,
+    },
+    {
+      id: "M6.29",
+      kind: "fn",
+      desc: "/_next/image + /_vercel/image cached: rule with cache:true + deception armor; polish/mirage off",
+      run: checks.m6NextImageCached,
+    },
+    {
+      id: "M6.30",
+      kind: "fn",
+      desc: "vendor-prefixed cache headers only — never bare CDN-Cache-Control; no override_origin on gated paths",
+      run: checks.m6NoDoubleCache,
+    },
+    {
+      id: "M6.31",
+      kind: "fn",
+      desc: "no paid body in any crawl surface; §6.12.8's 7 always-free paths reachable via the two lists",
+      run: checks.m6CrawlNoPaidBytes,
+    },
+    {
+      id: "M6.32",
+      kind: "fn",
+      desc: "G-FAKE-TX activeFrom is M8 — prints SKIP at M6",
+      run: checks.m6FakeTxSkipped,
+    },
+  ],
 };
 
 export const MILESTONE_TITLES = {

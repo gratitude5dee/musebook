@@ -39,7 +39,7 @@ export default defineProject({
         bindings: {
           MUSEBOOK_EDGE_SECRET: "test-edge-secret-0000",
           ORIGIN_HOST: "origin.test",
-          X402_NETWORK: "eip155:8453",
+          X402_NETWORK: "eip155:84532",
           X402_PAY_TO: "0x0000000000000000000000000000000000000001",
         },
       },
@@ -47,10 +47,29 @@ export default defineProject({
   ],
   test: {
     name: "edge",
+    // test/gate/** belongs to the edge-gate project — it binds the live-DB pg
+    // shim and the x402/asset env tuple this project deliberately lacks.
     include: ["test/**/*.test.ts"],
+    exclude: ["test/gate/**"],
     // No `environment` key: the plugin IS the environment.
     // Istanbul — v8 needs node:inspector, which workerd does not implement
     // (the plugin rejects it). §17.14 measures apps/edge on this tier only.
     coverage: { provider: "istanbul" },
+    // postgres.js leaves read sockets open across pool teardown — the
+    // rejections it raises afterwards carry these strings and nothing else.
+    // Drop only them; every other unhandled error still fails the run.
+    onUnhandledError: (e: unknown) => {
+      try {
+        const m =
+          e instanceof Error
+            ? e.message
+            : typeof e === "object" && e !== null
+              ? JSON.stringify(e)
+              : String(e);
+        return !(m.includes("socket has been closed") || m.includes("SpanParent"));
+      } catch {
+        return true;
+      }
+    },
   },
 });

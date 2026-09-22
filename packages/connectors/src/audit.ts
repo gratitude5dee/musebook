@@ -16,7 +16,7 @@ export type AuditRecord = {
   before_state?: unknown;
   after_state?: unknown;
   request_id?: string | null;
-  ip_hash?: string | null; // sha256(CF-Connecting-IP) — NEVER x-forwarded-for
+  ip_hash?: string | null; // sha256(x-mb-client-ip) — NEVER x-forwarded-for
 };
 
 export const auditFromActor = (

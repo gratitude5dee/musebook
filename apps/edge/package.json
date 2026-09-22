@@ -13,21 +13,25 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
+    "@musebook/connectors": "workspace:*",
+    "@musebook/kernel": "workspace:*",
     "@musebook/schema": "workspace:*",
+    "@musebook/telemetry": "workspace:*",
     "@musebook/x402": "workspace:*",
-    "web-bot-auth": "0.2.0",
     "pg": "catalog:",
-    "@musebook/connectors": "workspace:*"
+    "web-bot-auth": "0.2.0",
+    "zod": "4.6.5"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "catalog:",
     "@cloudflare/workers-types": "catalog:",
     "@types/node": "26.6.2",
     "@types/pg": "catalog:",
+    "@vitest/coverage-istanbul": "catalog:",
     "@vitest/coverage-v8": "catalog:",
+    "postgres": "3.4.7",
     "typescript": "catalog:",
     "vitest": "catalog:",
-    "wrangler": "catalog:",
-    "@vitest/coverage-istanbul": "catalog:"
+    "wrangler": "catalog:"
   }
 }

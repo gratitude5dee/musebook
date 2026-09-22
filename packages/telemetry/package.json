@@ -1,0 +1,25 @@
+{
+  "name": "@musebook/telemetry",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --build --pretty",
+    "typecheck": "tsc --build --pretty",
+    "lint": "eslint src --max-warnings 0",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@musebook/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.2",
+    "@cloudflare/workers-types": "catalog:",
+    "@vitest/coverage-istanbul": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

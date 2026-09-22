@@ -68,6 +68,11 @@ await worker.connect();
 await run("axis B (musebook_worker planes)", worker, "scripts/sql/assert-rls-worker.sql");
 
 await worker.end();
+
+// Restore the localConnectionString convention (`postgres`) so the vitest
+// tiers and manual dev sessions that follow axis B can still authenticate.
+// Same out-of-band step as above — connection state, not schema drift.
+await admin.query(`alter role musebook_worker password 'postgres'`);
 await admin.end();
 console.log("db:assert-rls PASS");
 process.exit(0);

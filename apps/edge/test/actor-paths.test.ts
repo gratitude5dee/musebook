@@ -328,10 +328,17 @@ describe("production pg path (no deps.query)", () => {
   });
 });
 
-describe("index.fetch stub (M1 shape)", () => {
-  it("answers 501 with the not-yet-implemented body", async () => {
+describe("index.fetch pass-through", () => {
+  it("forwards a non-resource path to the origin untouched", async () => {
+    // M6's real fetch: / is not a resource URL, so the Worker proxies it — the
+    // stub returns a marker the origin is responsible for, byte for byte.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => Promise.resolve(new Response("origin-body", { status: 200 }))),
+    );
     const res = await worker.fetch(new Request("https://musebook.dev/"), testEnv());
-    expect(res.status).toBe(501);
-    expect(await res.text()).toContain("musebook-edge");
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe("origin-body");
+    expect(fetch).toHaveBeenCalledOnce();
   });
 });

@@ -3,6 +3,7 @@ export * from "./actor";
 export * from "./kernel";
 export * from "./surface";
 export * from "./telemetry";
+export * from "./view";
 export * from "./constants";
 export * from "./scopes";
 export type { Database, Json } from "./database.types";

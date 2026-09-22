@@ -96,12 +96,12 @@
     {
       "binding": "HYPERDRIVE_CACHED",
       "id": "48c4c1c7cc734a8cb4031bd546160eae",
-      "localConnectionString": "postgres://postgres:postgres@127.0.0.1:54322/postgres"
+      "localConnectionString": "postgres://musebook_worker:postgres@127.0.0.1:54322/postgres"
     },
     {
       "binding": "HYPERDRIVE_FRESH",
       "id": "5288b46cce7340438e840e1d0daeb23d",
-      "localConnectionString": "postgres://postgres:postgres@127.0.0.1:54322/postgres"
+      "localConnectionString": "postgres://musebook_worker:postgres@127.0.0.1:54322/postgres"
     }
   ],
   "r2_buckets": [
@@ -206,11 +206,15 @@
     "ARTIFACT_HOST": "artifacts.musebook.dev",
     "ARTIFACT_ORIGIN": "https://artifacts.musebook.dev",
     "PREVIEW_CHARS": "400",
-    "X402_MODE": "shadow",
-    "X402_NETWORK": "eip155:84532",
-    "X402_CHAIN_ID": "84532",
-    "X402_ASSET_ADDRESS": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-    "X402_ASSET_EIP712_NAME": "USDC",
+    // Prod is live + Base MAINNET (§3903's table); env.preview below is
+    // shadow + Sepolia — the two tuples always move together.
+    "X402_MODE": "live",
+    "X402_NETWORK": "eip155:8453",
+    "X402_CHAIN_ID": "8453",
+    "X402_ASSET_ADDRESS": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    // Base MAINNET USDC's EIP-712 name is "USD Coin"; "USDC" is the SEPOLIA
+    // name and makes every gated route unpayable (CF-SPINE §13.2).
+    "X402_ASSET_EIP712_NAME": "USD Coin",
     "X402_ASSET_DECIMALS": "6",
     "X402_IDEMPOTENT_WINDOW_SECONDS": "120",
     "X402_GRANT_CACHE_TTL_S": "86400",

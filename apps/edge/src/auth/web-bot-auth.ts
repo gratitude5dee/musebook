@@ -22,7 +22,7 @@ export const DIR_TIMEOUT_MS = 2_000;
 
 export type AgentVerdict =
   | { kind: "human" } // no Signature header at all
-  | { kind: "agent"; keyid: string; agentOrigin: string }
+  | { kind: "agent"; keyid: string; agentUri: string; agentOrigin: string }
   | { kind: "reject"; status: 401 | 503; reason: string };
 
 type CachedDir = { keys: JsonWebKey[]; fresh: number; stale: number };
@@ -149,6 +149,10 @@ export async function classifySignature(request: Request, env: IdentityEnv): Pro
     return {
       kind: "agent",
       keyid: result.keyid,
+      // The verified Signature-Agent URI itself (the directory URL the agent
+      // signs over) — this is the value agent_identities.signature_agent
+      // stores, and the raw header (`key1="..."`) is NOT a match for it.
+      agentUri: result.signatureAgent!.uri,
       agentOrigin: new URL(result.signatureAgent!.uri).origin,
     };
   } catch (e) {

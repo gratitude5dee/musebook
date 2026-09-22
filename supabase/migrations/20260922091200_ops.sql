@@ -139,10 +139,10 @@ begin
     raise exception 'publish_post: no publishable post %', p_post_id using errcode = '22023';
   end if;
 
-  select id into v_version
-    from public.post_versions
-   where post_id = p_post_id
-   order by version desc
+  select pv.id into v_version
+    from public.post_versions pv
+   where pv.post_id = p_post_id
+   order by pv.version desc
    limit 1;
 
   with ins as (

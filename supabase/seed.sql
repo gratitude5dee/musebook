@@ -1168,8 +1168,10 @@ from seed_const c
 on conflict (id) do nothing;
 
 -- Active delegation; token_sha256 is the hash of the committed preimage
--- 'musebook-seed-delegation-token-0001', so connector contract tests can
+-- 'mb_dlg_seed_delegation_token_0001', so connector contract tests can
 -- authenticate without a plaintext secret in the repo beyond the fixture.
+-- (The preimage MUST match DELEGATION_RE's mb_dlg_ prefix or resolve-actor
+-- row 1 never reaches app.resolve_delegation.)
 insert into public.delegations
   (id, owner_user_id, connector_id, agent_identity_id, state, scopes,
    token_sha256, spend_cap_atomic, spend_window, rate_limit_per_hour,
@@ -1178,7 +1180,7 @@ insert into public.delegations
    first_publish_at, created_at, expires_at)
 select 'bbbbbbbb-bbbb-4bbb-8bbb-000000000002'::uuid, '11111111-1111-4111-8111-000000000003'::uuid, 'bbbbbbbb-bbbb-4bbb-8bbb-000000000001'::uuid, '33333333-3333-4333-8333-000000000001'::uuid,
        'active'::delegation_state, '{feed:read,post:read,post:write}'::text[],
-       app.sha256_hex('musebook-seed-delegation-token-0001'),
+       app.sha256_hex('mb_dlg_seed_delegation_token_0001'),
        1000000, interval '1 day', 120, false, 100000, 500000, 10,
        50, 0, 0, c.epoch, c.epoch, c.epoch + interval '90 days'
 from seed_const c
