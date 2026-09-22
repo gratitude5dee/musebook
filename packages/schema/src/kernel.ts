@@ -228,3 +228,17 @@ export interface Rendered {
   /** Only populated for `as === 'mcp'`: the tool result's `_meta` object. */
   readonly mcpMeta: Readonly<Record<string, unknown>> | null;
 }
+
+// ─── AccessBadgeView (§14.1) ─────────────────────────────────────────────────
+// The ONE definition of both types; the kernel re-exports them, nothing redeclares.
+
+/** What the UI is allowed to know about access. Deliberately not the enum. */
+export type AccessBadgeKind = "open" | "toll" | "gated";
+
+export interface AccessBadgeView {
+  kind: AccessBadgeKind;
+  /** Decimal USD string, e.g. "0.25". Present for 'toll' and 'gated', absent for 'open'. */
+  priceUsd?: string;
+  /** Human-readable one-liner used as the badge's aria-label and tooltip. */
+  rule: string;
+}

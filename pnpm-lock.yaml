@@ -292,9 +292,6 @@ importers:
       '@musebook/connectors':
         specifier: workspace:*
         version: link:../../packages/connectors
-      '@musebook/kernel':
-        specifier: workspace:*
-        version: link:../../packages/kernel
       '@musebook/schema':
         specifier: workspace:*
         version: link:../../packages/schema
@@ -341,9 +338,6 @@ importers:
       '@modelcontextprotocol/server':
         specifier: 2.0.0
         version: 2.0.0
-      '@musebook/kernel':
-        specifier: workspace:*
-        version: link:../../packages/kernel
       '@musebook/schema':
         specifier: workspace:*
         version: link:../../packages/schema
@@ -442,9 +436,6 @@ importers:
       '@musebook/distributor':
         specifier: workspace:*
         version: link:../../packages/distributor
-      '@musebook/kernel':
-        specifier: workspace:*
-        version: link:../../packages/kernel
       '@musebook/media':
         specifier: workspace:*
         version: link:../../packages/media

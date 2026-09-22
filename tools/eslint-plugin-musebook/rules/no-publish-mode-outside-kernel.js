@@ -28,6 +28,8 @@ export default {
     const allow = context.options[0]?.allow ?? [
       "packages/kernel/src/",
       "packages/kernel/test/",
+      "packages/content/test/",
+      "packages/x402/test/",
       "packages/schema/src/kernel.ts",
       "packages/schema/src/database.types.ts",
       "supabase/migrations/",

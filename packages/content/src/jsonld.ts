@@ -4,7 +4,7 @@
 // This is the ACCESS-NEUTRAL base document only: `isAccessibleForFree` and
 // the `hasPart` paywall element are decision fields, and the kernel's
 // render/jsonld.ts (§6.6, M5) is the only code allowed to compute them —
-// this package never reads publish_mode (the no-publish-mode-outside-kernel
+// this package never reads the mode (the no-publish-mode-outside-kernel
 // lint makes that mechanical).
 import type { PostKind, Resource } from "@musebook/schema";
 

@@ -30,6 +30,7 @@ export default defineConfig({
       // M5 adds packages/kernel, M6 apps/{mcp,worker}, M8 packages/x402, …
       include: [
         "packages/content/src/**/*.ts",
+        "packages/kernel/src/**/*.ts",
         "packages/connectors/src/**/*.ts",
         "apps/edge/src/**/*.ts",
         "apps/web/proxy.ts",
@@ -56,6 +57,13 @@ export default defineConfig({
           branches: 88,
           functions: 92,
           lines: 92,
+        },
+        "packages/kernel/src/**": {
+          statements: 95,
+          branches: 92,
+          functions: 95,
+          lines: 95,
+          perFile: true,
         },
         "packages/connectors/src/**": {
           statements: 85,

@@ -790,7 +790,76 @@ export const GATES = {
     },
   ],
 
-  // M5–M19: transcribed from §16.5 at the start of each milestone.
+  M5: [
+    {
+      id: "M5.1",
+      kind: "fn",
+      desc: "all 24 golden fixtures pass (3 modes x 2 actors x 4 reps), byte-identical under node and workerd",
+      run: checks.m5GoldenFixtures,
+    },
+    {
+      id: "M5.2",
+      kind: "fn",
+      desc: "SECRET_MARKER: no denied body contains MUSEBOOK_PAID_BODY_MARKER_7f3a",
+      run: checks.m5SecretMarker,
+    },
+    {
+      id: "M5.3",
+      kind: "fn",
+      desc: "jsonld: 6 assertions on isAccessibleForFree/hasPart; feed: 3 on content_text === summary",
+      run: checks.m5JsonldFeed,
+    },
+    {
+      id: "M5.4",
+      kind: "fn",
+      desc: "fail-closed: throwing GrantPort AND PaymentPort each produce allow:false + zero-length body",
+      run: checks.m5FailClosed,
+    },
+    {
+      id: "M5.5",
+      kind: "fn",
+      desc: "preview determinism: 1,000 generated bodies byte-identical; never splits a fenced code block",
+      run: checks.m5PreviewDeterminism,
+    },
+    {
+      id: "M5.6",
+      kind: "fn",
+      desc: "cache posture: decision.cache.shared === false for every non-'free' allow reason; no CDN-Cache-Control",
+      run: checks.m5CachePosture,
+    },
+    {
+      id: "M5.7",
+      kind: "fn",
+      desc: "purity: index callable with stub ports in plain Node; no cloudflare:/pg/@cloudflare imports under packages/kernel/src",
+      run: checks.m5Purity,
+    },
+    {
+      id: "M5.8",
+      kind: "fn",
+      desc: "containment: publish_mode|publishMode only under packages/kernel/ + the two named schema files (file by file)",
+      run: checks.m5Containment,
+    },
+    {
+      id: "M5.9",
+      kind: "fn",
+      desc: "no app attached: grep finds no '@musebook/kernel' under apps/",
+      run: checks.m5NoAppImport,
+    },
+    {
+      id: "M5.10",
+      kind: "fn",
+      desc: 'ETag W/"sha256-<16hex>-<as>" per rep, six distinct, produced only in packages/kernel/src/headers.ts',
+      run: checks.m5EtagSingleProducer,
+    },
+    {
+      id: "M5.11",
+      kind: "fn",
+      desc: "mintsDurableGrant: true only for human_free_agent_paid",
+      run: checks.m5MintsDurableGrant,
+    },
+  ],
+
+  // M6–M19: transcribed from §16.5 at the start of each milestone.
 };
 
 export const MILESTONE_TITLES = {

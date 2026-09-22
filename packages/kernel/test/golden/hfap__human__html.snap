@@ -1,0 +1,31 @@
+200
+text/html; charset=utf-8
+cache: public, public, s-maxage=300, stale-while-revalidate=86400
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Human-Free Agent-Paid Article — Musebook</title>
+<meta name="description" content="Free for humans; agents pay once per content_hash.">
+<link rel="canonical" href="https://musebook.dev/p/the-hfap-article">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Human-Free Agent-Paid Article">
+<meta property="og:url" content="https://musebook.dev/p/the-hfap-article">
+<meta property="og:description" content="Free for humans; agents pay once per content_hash.">
+<meta property="article:published_time" content="2026-09-22T12:00:00Z">
+<meta property="article:author" content="https://musebook.dev/@author-one">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://musebook.dev/p/the-hfap-article#post","mainEntityOfPage":{"@type":"WebPage","@id":"https://musebook.dev/p/the-hfap-article"},"headline":"The Human-Free Agent-Paid Article","description":"Free for humans; agents pay once per content_hash.","inLanguage":"en","datePublished":"2026-09-22T12:00:00Z","dateModified":"2026-09-22T12:00:00Z","keywords":"musebook, x402","author":{"@type":"Person","name":"Author One","url":"https://musebook.dev/@author-one"},"publisher":{"@type":"Organization","name":"Musebook","url":"https://musebook.dev"},"isAccessibleForFree":true,"license":"https://creativecommons.org/licenses/by/4.0/","usageInfo":"https://musebook.dev/api/posts/00000000-0000-4000-8000-000000000002/license"}</script>
+<style>:root{--background:#FBFAF7;--foreground:#12100E;--muted-foreground:#5E584F;--card:#FFFFFF;--border-strong:#7D766B;--gate:#8A5A00;--gate-tint:#FBF2DF;--radius:0.625rem;--font-serif:ui-serif,Georgia,serif;--font-sans:ui-sans-serif,system-ui,sans-serif;}body{margin:0 auto;max-width:44rem;padding:2rem 1.25rem;background:var(--background);color:var(--foreground);font-family:var(--font-serif);font-size:1.0625rem;line-height:1.7;}h1{font-size:2rem;line-height:1.2;}a{color:var(--gate);}.musebook-paywall{margin-top:2.5rem;padding:1.5rem;border:1px solid var(--border-strong);border-radius:var(--radius);background:var(--gate-tint);font-family:var(--font-sans);}.musebook-paywall .unlock{display:inline-block;margin-top:0.75rem;padding:0.625rem 1.25rem;border:1px solid var(--border-strong);border-radius:var(--radius);background:var(--card);color:var(--foreground);text-decoration:none;font-weight:600;}.musebook-paywall .how{color:var(--muted-foreground);font-size:0.875rem;}</style>
+</head>
+<body>
+<article>
+<h1>The Human-Free Agent-Paid Article</h1>
+<h1>The Human-Free Agent-Paid Article</h1>
+<p>Humans read this at 200. Agents get a 402 with a preview.</p>
+<p>A second block of padding so the paid tail sits well past the preview boundary. This paragraph exists only to push the marker beyond four hundred characters, the deterministic teaser's cutoff used by every stub port in this suite.</p>
+<p>The tail of the body, which a denied render must never emit: MUSEBOOK_PAID_BODY_MARKER_7f3a</p>
+</article>
+</body>
+</html>

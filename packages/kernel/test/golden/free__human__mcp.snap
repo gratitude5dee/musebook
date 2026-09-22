@@ -1,0 +1,77 @@
+200
+application/json
+cache: public, public, s-maxage=300, stale-while-revalidate=86400
+---
+{
+  "content": [
+    {
+      "text": "# The Free Article\n\nFree for everyone — humans and agents alike. No quote, no signature, no 402.\n\nA second block of padding so the paid tail sits well past the preview boundary. This paragraph exists only to push the marker beyond four hundred characters, the deterministic teaser's cutoff used by every stub port in this suite.\n\nThe tail of the body, which a denied render must never emit: MUSEBOOK_PAID_BODY_MARKER_7f3a",
+      "type": "text"
+    }
+  ],
+  "structuredContent": {
+    "accessBadge": {
+      "kind": "open",
+      "rule": "Free for everyone, human and machine."
+    },
+    "body": "# The Free Article\n\nFree for everyone — humans and agents alike. No quote, no signature, no 402.\n\nA second block of padding so the paid tail sits well past the preview boundary. This paragraph exists only to push the marker beyond four hundred characters, the deterministic teaser's cutoff used by every stub port in this suite.\n\nThe tail of the body, which a denied render must never emit: MUSEBOOK_PAID_BODY_MARKER_7f3a",
+    "jsonld": {
+      "@context": "https://schema.org",
+      "@id": "https://musebook.dev/p/the-free-article#post",
+      "@type": "Article",
+      "author": {
+        "@type": "Person",
+        "name": "Author One",
+        "url": "https://musebook.dev/@author-one"
+      },
+      "dateModified": "2026-09-22T12:00:00Z",
+      "datePublished": "2026-09-22T12:00:00Z",
+      "description": "Free for everyone.",
+      "headline": "The Free Article",
+      "inLanguage": "en",
+      "isAccessibleForFree": true,
+      "keywords": "musebook, x402",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "mainEntityOfPage": {
+        "@id": "https://musebook.dev/p/the-free-article",
+        "@type": "WebPage"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Musebook",
+        "url": "https://musebook.dev"
+      },
+      "usageInfo": "https://musebook.dev/api/posts/00000000-0000-4000-8000-000000000001/license"
+    },
+    "payment": {
+      "priceAsset": null,
+      "priceAtomic": "0",
+      "priceNetwork": null,
+      "priceUsd": null,
+      "required": false
+    },
+    "post": {
+      "author": {
+        "displayName": "Author One",
+        "handle": "author-one"
+      },
+      "contentHash": "97e99cbe926959ccfc95d34cdb430689e3e01c333b4a10fb8c68de769b458b98",
+      "kind": "article",
+      "language": "en",
+      "license": "CC-BY-4.0",
+      "postId": "00000000-0000-4000-8000-000000000001",
+      "publishedAt": "2026-09-22T12:00:00Z",
+      "slug": "the-free-article",
+      "summary": "Free for everyone.",
+      "tags": [
+        "musebook",
+        "x402"
+      ],
+      "title": "The Free Article",
+      "updatedAt": "2026-09-22T12:00:00Z",
+      "url": "https://musebook.dev/p/the-free-article"
+    },
+    "preview": null,
+    "schema": "musebook-post-v1"
+  }
+}
