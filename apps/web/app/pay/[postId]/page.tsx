@@ -10,14 +10,13 @@ export default async function PayPage({ params }: { params: Promise<{ postId: st
   const { postId } = await params;
   const { data: post } = await serviceDb
     .from("posts")
-    .select("slug, price_atomic, publish_mode, author_user_id")
+    .select("slug, price_atomic, author_user_id")
     .eq("id", postId)
     .in("status", ["published", "unlisted"])
     .maybeSingle()
     .returns<{
       slug: string;
       price_atomic: string;
-      publish_mode: string;
       author_user_id: string;
     }>();
   if (post === null) notFound();

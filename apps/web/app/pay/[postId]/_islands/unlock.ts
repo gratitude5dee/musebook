@@ -81,11 +81,14 @@ export async function unlock(
   if (paid.status === 402) {
     const err = paid.headers.get("PAYMENT-REQUIRED");
     const again = err === null ? null : decodePaymentRequired(err);
-    const code = (again?.error as string | undefined) ?? "payment_invalid";
+    const code = again?.error ?? "payment_invalid";
+    const rawPrice = again?.accepts[0]?.extra?.priceUsd;
     const newPrice =
-      again?.accepts[0]?.extra?.priceUsd !== undefined
-        ? String(again.accepts[0].extra.priceUsd)
-        : undefined;
+      typeof rawPrice === "string"
+        ? rawPrice
+        : typeof rawPrice === "number"
+          ? String(rawPrice)
+          : undefined;
     return { kind: "error", code, ...(newPrice !== undefined ? { newPriceUsd: newPrice } : {}) };
   }
   if (paid.status === 409) return { kind: "error", code: "replay_in_flight" };

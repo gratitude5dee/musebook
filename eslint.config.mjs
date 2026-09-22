@@ -15,6 +15,9 @@ export default tseslint.config(
       "**/node_modules/**",
       "**/worker-configuration.d.ts",
       "packages/schema/src/database.types.ts",
+      // Static assets served verbatim; unlock.js is the no-JS checkout script
+      // and lives in no tsconfig.
+      "apps/web/public/**",
     ],
   },
 
