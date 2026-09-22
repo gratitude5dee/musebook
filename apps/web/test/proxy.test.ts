@@ -52,4 +52,20 @@ describe("proxy origin lockdown", () => {
     const res = proxy(req({ "x-musebook-edge": "old-secret" }));
     expect(res.status).not.toBe(404);
   });
+
+  it("404s a wrong secret when only the previous secret is configured", () => {
+    vi.stubEnv("MUSEBOOK_EDGE_SECRET", "");
+    vi.stubEnv("MUSEBOOK_EDGE_SECRET_PREVIOUS", "old-secret");
+    const res = proxy(req({ "x-musebook-edge": "wrong" }));
+    expect(res.status).toBe(404);
+  });
+
+  it("404s when neither secret is configured at all", () => {
+    // `?? ""` arms: the env vars absent, not empty — stubEnv("") would leave
+    // them defined and never exercise the defaults.
+    vi.stubEnv("MUSEBOOK_EDGE_SECRET", undefined);
+    vi.stubEnv("MUSEBOOK_EDGE_SECRET_PREVIOUS", undefined);
+    const res = proxy(req({ "x-musebook-edge": "anything" }));
+    expect(res.status).toBe(404);
+  });
 });

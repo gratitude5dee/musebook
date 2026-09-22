@@ -151,9 +151,13 @@ begin
     values
       (p_settlement_id, p_content_hash, p_post_id, lower(p_payer),
        p_subject_agent_id, p_subject_user_id, p_expires_at)
-    on conflict on constraint access_grants_payer_hash_uniq
-      do nothing
-    returning id, settlement_id, content_hash, payer, expires_at;
+    -- No arbiter: the OUT param named `payer` makes a column arbiter
+    -- ambiguous, and access_grants_payer_hash_uniq is the only reachable
+    -- conflict anyway.
+    on conflict do nothing
+    returning access_grants.id, access_grants.settlement_id,
+              access_grants.content_hash, access_grants.payer,
+              access_grants.expires_at;
 end;
 $$;
 
@@ -349,7 +353,8 @@ security definer
 set search_path = public, pg_temp
 as $$
 begin
-  perform app.enter('musebook_public_reader');
+  -- No app.enter() here: SET ROLE is illegal inside a DEFINER function, and
+  -- this helper already runs as the owner — that IS the plane switch (D39).
   return query
     select pr.handle, pr.display_name, pr.bio, pr.avatar_url,
            (select count(*) from public.posts p
