@@ -224,7 +224,7 @@ export interface Rendered {
    * and render/feed.ts also populate it, since they are JSON documents too. `body`
    * and `structured` are two projections of one value and MUST agree — §7.4 asserts it.
    */
-  readonly structured: unknown | null;
+  readonly structured: unknown; // `| null` is redundant — `unknown` already includes null
   /** Only populated for `as === 'mcp'`: the tool result's `_meta` object. */
   readonly mcpMeta: Readonly<Record<string, unknown>> | null;
 }
