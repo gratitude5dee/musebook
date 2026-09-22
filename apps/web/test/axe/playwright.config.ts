@@ -37,8 +37,9 @@ const supabaseSecret = (): string => {
     encoding: "utf8",
   });
   const m = /^SECRET_KEY="([^"]+)"/m.exec(out);
-  if (!m) throw new Error("supabase status -o env: SECRET_KEY not found");
-  return m[1];
+  const key = m?.[1];
+  if (key === undefined) throw new Error("supabase status -o env: SECRET_KEY not found");
+  return key;
 };
 
 export const EDGE_ORIGIN = EDGE_BASE;
