@@ -789,6 +789,10 @@ $$;
 
 -- ── grants ───────────────────────────────────────────────────────────────────
 
+-- Functions default to EXECUTE for PUBLIC; nothing in app.* is client-facing
+-- (§4.14: anon gets nothing, the Worker role is the only caller).
+revoke all on all functions in schema app from public, anon, authenticated;
+
 grant execute on function app.load_resource_by_slug(text, uuid)   to musebook_worker;
 grant execute on function app.load_resource_by_post_id(uuid, uuid) to musebook_worker;
 grant execute on function app.find_live_grant(text, text, uuid, uuid, uuid) to musebook_worker;

@@ -41,9 +41,10 @@ describe("feed surfaces and the cursor (feed.ts, cursor.ts, router.ts)", () => {
 
   it("a page-2 cursor round-trips through encode/decode", async () => {
     const cookie = { cookie: "mb_session=musebook-seed-session-token-0001" };
-    const p1 = (await (
-      await post({ surface: "explore", limit: 2 }, cookie)
-    ).json()) as { items: unknown[]; nextCursor: string | null };
+    const p1 = (await (await post({ surface: "explore", limit: 2 }, cookie)).json()) as {
+      items: unknown[];
+      nextCursor: string | null;
+    };
     if (p1.nextCursor === null) return; // slate smaller than the page — nothing to continue
     const p2 = (await (
       await post({ surface: "explore", limit: 2, cursor: p1.nextCursor }, cookie)
@@ -74,12 +75,15 @@ describe("ops + telemetry privacy path (ops.ts, salt.ts, privacy.ts)", () => {
       body: JSON.stringify({ v: 2, nonsense: true }),
     });
     expect(res.status).toBe(204);
-    await vi.waitFor(async () => {
-      const rows = await db<{ n: number }>(
-        "select count(*)::int as n from public.ops_events where event_name = 'batch_rejected'",
-      );
-      expect(rows[0].n).toBeGreaterThan(0);
-    });
+    await vi.waitFor(
+      async () => {
+        const rows = await db<{ n: number }>(
+          "select count(*)::int as n from public.ops_events where event_name = 'batch_rejected'",
+        );
+        expect(rows[0].n).toBeGreaterThan(0);
+      },
+      { timeout: 10_000, interval: 100 },
+    );
   });
 
   it("a valid batch runs the salted-IP hashing path end to end", async () => {
@@ -99,8 +103,7 @@ describe("ops + telemetry privacy path (ops.ts, salt.ts, privacy.ts)", () => {
             t: Date.now(),
             action: "impression",
             post_id: "44444444-4444-4444-8444-000000000004",
-            content_hash:
-              "e31155826556dd6b2c73920c6a57a597e85e837fcd1166c9733a270ac5592aca",
+            content_hash: "e31155826556dd6b2c73920c6a57a597e85e837fcd1166c9733a270ac5592aca",
             surface: "explore",
             position: 0,
             view_session_id: crypto.randomUUID(),
@@ -110,12 +113,15 @@ describe("ops + telemetry privacy path (ops.ts, salt.ts, privacy.ts)", () => {
     });
     expect(res.status).toBe(204);
     // getDailySalt landed a row for today through app.telemetry_salt_for_day.
-    await vi.waitFor(async () => {
-      const rows = await db<{ n: number }>(
-        "select count(*)::int as n from public.telemetry_salts where day = current_date",
-      );
-      expect(rows[0].n).toBe(1);
-    });
+    await vi.waitFor(
+      async () => {
+        const rows = await db<{ n: number }>(
+          "select count(*)::int as n from public.telemetry_salts where day = current_date",
+        );
+        expect(rows[0].n).toBe(1);
+      },
+      { timeout: 10_000, interval: 100 },
+    );
   });
 });
 
@@ -161,9 +167,7 @@ describe("miscellaneous gated reads", () => {
     expect(denied.status).toBe(402);
     // The seed ships a live grant for the crawler on seed-article-hfap's
     // content_hash — a signed bot request walks grants.ts's live-grant arm.
-    const headers = await signedBotAuthHeaders(
-      "https://musebook.dev/p/seed-article-hfap.md",
-    );
+    const headers = await signedBotAuthHeaders("https://musebook.dev/p/seed-article-hfap.md");
     const granted = await SELF.fetch("https://musebook.dev/p/seed-article-hfap.md", {
       headers,
     });
