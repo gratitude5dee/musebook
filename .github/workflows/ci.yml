@@ -58,6 +58,13 @@ jobs:
       - name: Format
         run: pnpm format
 
+      # The worker suite (outbox sweeper, queue idempotency) and any future
+      # live-DB suite connect to the local Supabase Postgres on 127.0.0.1:54322.
+      # `supabase start` applies migrations and seed.sql — the same path the
+      # gates job's db:types step already uses on this runner.
+      - name: Start local Supabase
+        run: pnpm exec supabase start
+
       - name: Unit + integration tests
         run: pnpm test
 
