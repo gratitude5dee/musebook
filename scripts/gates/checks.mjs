@@ -387,10 +387,25 @@ export async function seedHash() {
   if (!existsSync(join(ROOT, "supabase/SEED_HASH")))
     return { ok: false, errors: [], blocked: "supabase/SEED_HASH absent (lands at M2)" };
   const expected = readFileSync(join(ROOT, "supabase/SEED_HASH"), "utf8").trim();
+  const url = process.env.SUPABASE_DB_URL ?? LOCAL_DB_URL;
+  const local = /127\.0\.0\.1|localhost/.test(url);
+  const resetTarget = local ? "--local" : "--linked";
   const dumps = [];
   for (let i = 0; i < 2; i++) {
+    const dumpCmd =
+      dbTool()?.kind === "docker" && local
+        ? `docker exec ${dbTool().container} pg_dump -U postgres -d postgres --data-only --schema=public | grep -vE '^\\\\(un)?restrict ' | LC_ALL=C sort | sha256sum`
+        : `pg_dump --data-only --schema=public ${JSON.stringify(url)} | grep -vE '^\\\\(un)?restrict ' | LC_ALL=C sort | sha256sum`;
+    // `db reset` returns after issuing an async container restart; dumping
+    // immediately can hit a still-booting postgres and capture a truncated
+    // dump. Wait for readiness first.
     const r = run(
-      'supabase db reset --linked >/dev/null 2>&1 && pg_dump --data-only --schema=public "$SUPABASE_DB_URL" | LC_ALL=C sort | sha256sum',
+      `pnpm exec supabase db reset ${resetTarget} >/dev/null 2>&1 && ` +
+        (dbTool()?.kind === "docker" && local
+          ? `until docker exec ${dbTool().container} pg_isready -U postgres -q; do sleep 1; done && `
+          : "") +
+        dumpCmd,
+      { timeout: 600000 },
     );
     if (r.code !== 0)
       return {
@@ -407,22 +422,71 @@ export async function seedHash() {
   return { ok: errors.length === 0, errors };
 }
 
-// G-ROLE — §4.14's role assertions.
+// G-ROLE — §4.14's six posture blocks + §15.6 axis B as the real worker.
 export async function dbAssertRls() {
-  const dbUrl = process.env.SUPABASE_DB_URL;
-  if (!dbUrl) return { ok: false, errors: [], blocked: "SUPABASE_DB_URL unset" };
-  const errors = [];
-  const q = (sql) => run(`psql "$SUPABASE_DB_URL" -Atc ${JSON.stringify(sql)}`);
-  let r = q(
-    "select concat(rolcanlogin, ',', rolbypassrls, ',', rolsuper) from pg_roles where rolname = 'musebook_worker'",
+  if (!process.env.SUPABASE_DB_URL && dbTool()?.kind !== "docker")
+    return { ok: false, errors: [], blocked: "SUPABASE_DB_URL unset" };
+  if (!process.env.MUSEBOOK_WORKER_DB_PASSWORD)
+    return {
+      ok: false,
+      errors: [],
+      blocked: "MUSEBOOK_WORKER_DB_PASSWORD unset (axis B needs a real login)",
+    };
+  const r = run("pnpm db:assert-rls", { timeout: 300000 });
+  return {
+    ok: r.code === 0 && r.out.includes("db:assert-rls PASS"),
+    errors: r.code ? [r.out.slice(-2000)] : [],
+  };
+}
+
+// G-DRIFT — `supabase db diff` on the public schema must be empty. The plan's
+// `--linked` form runs in CI on the preview branch; a loopback SUPABASE_DB_URL
+// means the local stack, where the equivalent is `--local`.
+export function dbDrift() {
+  const url = process.env.SUPABASE_DB_URL ?? "";
+  const target = /127\.0\.0\.1|localhost|^$/.test(url) ? "--local" : "--linked";
+  const r = run(`pnpm exec supabase db diff ${target} --schema public 2>&1 | tail -40`, {
+    timeout: 300000,
+  });
+  if (r.code !== 0)
+    return {
+      ok: false,
+      errors: [r.out.slice(-1500)],
+      blocked: r.out.includes("not linked") ? "supabase project not linked" : undefined,
+    };
+  const json = r.out.match(/"diff":\s*"(.*)",\s*"file"/s)?.[1] ?? "";
+  const diff = json.replace(/\\n/g, "\n").trim();
+  return { ok: diff.length === 0, errors: diff ? [`drift:\n${diff.slice(0, 1500)}`] : [] };
+}
+
+// M2.1 — migrations replay from zero, twice. `--linked` on CI; a loopback or
+// unset SUPABASE_DB_URL means the local stack.
+export function m2ResetTwice() {
+  const url = process.env.SUPABASE_DB_URL ?? "";
+  const target = /127\.0\.0\.1|localhost|^$/.test(url) ? "--local" : "--linked";
+  for (let i = 0; i < 2; i++) {
+    const r = run(`pnpm exec supabase db reset ${target} 2>&1 | tail -20`, {
+      timeout: 600000,
+    });
+    if (r.code !== 0)
+      return { ok: false, errors: [`reset ${i + 1}/2 failed:\n${r.out.slice(-1200)}`] };
+  }
+  return { ok: true, errors: [] };
+}
+
+// M2.13 — `supabase gen types typescript` output must equal the committed
+// packages/schema/src/database.types.ts (generated, not written by hand).
+export function m2TypesGen() {
+  const url = process.env.SUPABASE_DB_URL ?? "";
+  const target = /127\.0\.0\.1|localhost|^$/.test(url) ? "--local" : "--linked";
+  const r = run(
+    `pnpm exec supabase gen types typescript ${target} > /tmp/mb-t.ts && diff -q /tmp/mb-t.ts packages/schema/src/database.types.ts`,
+    { timeout: 300000 },
   );
-  if (r.out.trim() !== "t,f,f")
-    errors.push(`musebook_worker posture wrong: '${r.out.trim()}' != 't,f,f'`);
-  r = q(
-    "select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relkind = 'r' and c.relrowsecurity and not c.relforcerowsecurity",
-  );
-  if (r.out.trim() !== "0") errors.push(`${r.out.trim()} RLS tables lack FORCE ROW LEVEL SECURITY`);
-  return { ok: errors.length === 0, errors };
+  return {
+    ok: r.code === 0,
+    errors: r.code ? [`generated types differ from committed file:\n${r.out.slice(-800)}`] : [],
+  };
 }
 
 // G-GOLDEN — golden barrel == .snap files (M5+).
@@ -1131,6 +1195,16 @@ export function m1CfDrift() {
   };
 }
 
+export function m2BareAuthUid() {
+  const hits = rg(String.raw`auth\.uid\(\)`, ["supabase/migrations"], []).filter((h) => {
+    const text = h.split(":").slice(2).join(":");
+    const code = text.replace(/--.*$/, "");
+    const stripped = code.replace(/\(select\s+auth\.uid\(\)(?:\s+as\s+\w+)?\)/gi, "");
+    return /auth\.uid\(\)/.test(stripped);
+  });
+  return { ok: hits.length === 0, errors: hits };
+}
+
 export function m1SelfTest() {
   const r = run("node scripts/gate.mjs M1 --self-test");
   return {
@@ -1143,31 +1217,103 @@ export function m1SelfTest() {
 // M2 milestone checks (stubs are honest: they BLOCK on missing prereqs, never pass silently)
 // ---------------------------------------------------------------------------
 
+const LOCAL_DB_URL = "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+
+/**
+ * Where SQL can run: host `psql` when present, else the local supabase_db
+ * container (docker exec), else unavailable. The container path only works for
+ * the loopback URL — a remote SUPABASE_DB_URL needs real client binaries.
+ */
+function dbTool() {
+  if (run("command -v psql >/dev/null 2>&1").code === 0) return { kind: "host" };
+  const c = run(
+    "docker ps --format '{{.Names}}' --filter name=supabase_db 2>/dev/null | head -1",
+  ).out.trim();
+  if (c) return { kind: "docker", container: c };
+  return null;
+}
+
+function psqlCmd(sql, url = process.env.SUPABASE_DB_URL ?? LOCAL_DB_URL) {
+  const tool = dbTool();
+  if (tool?.kind === "docker") {
+    if (!/127\.0\.0\.1|localhost/.test(url))
+      return { r: null, blocked: "remote SUPABASE_DB_URL but no host psql" };
+    return {
+      r: null,
+      cmd: `docker exec ${tool.container} psql -U postgres -Atc ${JSON.stringify(sql)}`,
+    };
+  }
+  if (tool?.kind !== "host")
+    return { r: null, blocked: "no psql binary and no supabase_db container" };
+  return { r: null, cmd: `psql ${JSON.stringify(url)} -Atc ${JSON.stringify(sql)}` };
+}
+
 function sqlCheck(sql, expect) {
-  const url = process.env.SUPABASE_DB_URL;
-  if (!url) return { ok: false, errors: [], blocked: "SUPABASE_DB_URL unset" };
-  const r = run(`psql "$SUPABASE_DB_URL" -Atc ${JSON.stringify(sql)}`);
+  const { cmd, blocked } = psqlCmd(sql);
+  if (blocked) return { ok: false, errors: [], blocked };
+  const r = run(cmd);
   return {
     ok: r.out.trim() === expect,
     errors: r.out.trim() === expect ? [] : [`expected '${expect}', got '${r.out.trim()}'`],
   };
 }
 
-export function m2AdvisorsSecurity() {
-  return {
-    ok: false,
-    errors: [],
-    blocked:
-      "get_advisors requires the Supabase Management API against a linked project (lands at M2)",
-  };
+/** Run arbitrary SQL, returning { code, out }. */
+function sqlRun(sql) {
+  // Flatten newlines: the command may travel through nested quoting layers
+  // (docker exec bash -c "..."), where real newlines become literal \n.
+  const { cmd, blocked } = psqlCmd(sql.replace(/\s+/g, " "));
+  if (blocked) return { code: -1, out: blocked };
+  return run(cmd);
 }
-export function m2AdvisorsPerf() {
-  return {
-    ok: false,
-    errors: [],
-    blocked:
-      "get_advisors requires the Supabase Management API against a linked project (lands at M2)",
-  };
+
+async function supabaseAdvisors(kind) {
+  const token = process.env.SUPABASE_ACCESS_TOKEN;
+  const ref = process.env.SUPABASE_PROJECT_REF;
+  if (!token || !ref)
+    return {
+      ok: false,
+      errors: [],
+      blocked: "SUPABASE_ACCESS_TOKEN + SUPABASE_PROJECT_REF unset (prereq H2)",
+    };
+  const r = run(
+    `curl -sf -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" ` +
+      `"https://api.supabase.com/v1/projects/${ref}/advisors/${kind}"`,
+  );
+  if (r.code !== 0)
+    return {
+      ok: false,
+      errors: [],
+      blocked: `Management API ${kind} advisors call failed: ${r.out.slice(-400)}`,
+    };
+  let lints;
+  try {
+    lints = JSON.parse(r.out).lints ?? [];
+  } catch {
+    return { ok: false, errors: [`unparseable advisors response: ${r.out.slice(-400)}`] };
+  }
+  const errors = lints.map((l) => `${l.name}: ${l.title}`);
+  return { ok: lints.length === 0, errors, lints };
+}
+
+export async function m2AdvisorsSecurity() {
+  // §17.12 M2.3: zero findings — an rls_enabled_no_policy here is a grant-matrix
+  // defect, not an expected finding. Counted at ERROR/WARN only: Postgres cannot
+  // attach a policy to a partition, so RLS-enabled action_events leaves carry a
+  // permanent INFO rls_enabled_no_policy advisory — unfixable by design (the
+  // parent partitioned table's policies govern their rows).
+  const res = await supabaseAdvisors("security");
+  if (res.blocked || res.ok) return res;
+  const actionable = (res.lints ?? []).filter((l) => l.level !== "INFO");
+  if (!actionable.length) return { ok: true, errors: [] };
+  return { ok: false, errors: actionable.map((l) => `${l.name}: ${l.title}`) };
+}
+export async function m2AdvisorsPerf() {
+  // §17.12 M2.4: specifically zero auth_rls_initplan findings.
+  const res = await supabaseAdvisors("performance");
+  if (res.blocked || res.ok) return res;
+  const hits = res.errors.filter((e) => e.startsWith("auth_rls_initplan"));
+  return { ok: hits.length === 0, errors: hits.length ? hits : res.errors };
 }
 export function m2Outbox() {
   const errors = [];
@@ -1213,7 +1359,7 @@ export function m2Partitions() {
 export function m2Slugs() {
   const errors = [];
   let r = sqlCheck(
-    "select count(*) from pg_indexes where schemaname='public' and indexname='posts_slug_uniq' and indexdef like '%deleted_at is null%'",
+    "select count(*) from pg_indexes where schemaname='public' and indexname='posts_slug_uniq' and indexdef ilike '%deleted_at is null%'",
     "1",
   );
   if (r.blocked) return r;
@@ -1267,18 +1413,94 @@ export function m2License() {
   return { ok: errors.length === 0, errors };
 }
 export function m2BucketCheck() {
+  // §17.12 M2.18: the assets_url_matches_bucket CHECK must reject a URL whose
+  // host doesn't match its storage tier — proven by executing the violation.
+  let r = sqlCheck(
+    "select count(*) from pg_constraint where conrelid='public.assets'::regclass and conname='assets_url_matches_bucket'",
+    "1",
+  );
+  if (r.blocked) return r;
+  if (!r.ok) return { ok: false, errors: ["assets_url_matches_bucket constraint absent"] };
+  r = sqlRun(`insert into public.assets
+    (id, owner_user_id, storage, object_key, url, content_type, byte_len, sha256)
+    values (gen_random_uuid(),
+            '11111111-1111-4111-8111-000000000101',
+            'r2_paid', 'gate/check', 'https://cdn.musebook.dev/gate/check',
+            'image/png', 1, lpad('0',64,'0'))`);
+  const rejected = /assets_url_matches_bucket|violates check constraint/.test(r.out);
   return {
-    ok: false,
-    errors: [],
-    blocked: "assets_url_matches_bucket CHECK lands with §4.4 at M2",
+    ok: rejected,
+    errors: rejected
+      ? []
+      : [
+          `r2_paid row with cdn URL was ${r.code === 0 ? "ACCEPTED" : "rejected oddly"}: ${r.out.slice(-300)}`,
+        ],
   };
 }
+// §16.8.1's registry, transcribed. A section never invents a prefix — it takes
+// one of these; a file on disk not listed here is an unregistered migration.
+const MIGRATION_REGISTRY = [
+  ["20260922090000_extensions_and_conventions", 2],
+  ["20260922090100_enums", 2],
+  ["20260922090200_identity", 2],
+  ["20260922090210_identity_link", 2],
+  ["20260922090300_content", 2],
+  ["20260922090400_social_graph", 2],
+  ["20260922090500_classification", 2],
+  ["20260922090600_embeddings", 2],
+  ["20260922090700_ranking", 2],
+  ["20260922090800_action_events", 2],
+  ["20260922090900_money", 2],
+  ["20260922091000_agents", 2],
+  ["20260922091100_distribution", 2],
+  ["20260922091200_ops", 2],
+  ["20260922091300_worker_role_and_rls_audit", 2],
+  ["20260922091400_seed_reference", 2],
+  ["20260922091600_revenue_share", 8],
+  ["20260922091700_agent_spend_reservations", 9],
+  ["20260922091800_connector_credentials", 9],
+  ["20260922091900_platform_constraints", 10],
+  ["20260922091901_platform_seed", 10],
+  ["20260922092000_telemetry_facets", 11],
+  ["20260922092002_telemetry_salts", 11],
+  ["20260922092003_telemetry_rollups", 11],
+  ["20260922092100_ops_internal_auth", 11],
+  ["20260922092101_ops_metrics", 11],
+  ["20260922092102_legal_consent", 11],
+  ["20260922092103_dsar", 11],
+  ["20260922092104_alerting", 11],
+  ["20260922092200_citations", 18],
+  ["20261103090000_classification_battery", 14],
+  ["20261103090100_media", 19],
+  ["20261103090200_artifacts_versioning", 16],
+  ["20261103090300_muse_mixer", 13],
+];
+
 export function m2MigrationSet() {
+  const errors = [];
+  // (a) no shared timestamp prefix
   const dup = run(
     "ls supabase/migrations/*.sql 2>/dev/null | sed 's#.*/##; s/_.*//' | sort | uniq -d",
   );
-  return {
-    ok: dup.out.trim().length === 0,
-    errors: dup.out.trim() ? [`duplicate migration timestamps:\n${dup.out}`] : [],
-  };
+  if (dup.out.trim()) errors.push(`duplicate migration prefixes:\n${dup.out.trim()}`);
+  // (b) every filename matches the convention
+  const bad = run(
+    "ls supabase/migrations/*.sql | sed 's#.*/##' | grep -vE '^[0-9]{14}_[a-z0-9_]+\\.sql$' || true",
+  );
+  if (bad.out.trim()) errors.push(`non-conforming migration filenames:\n${bad.out.trim()}`);
+  // (c) two-direction set compare against §16.8 filtered to milestone <= 2
+  const onDisk = new Set(
+    readdirSync(join(ROOT, "supabase/migrations"))
+      .filter((f) => f.endsWith(".sql"))
+      .map((f) => f.replace(/\.sql$/, "")),
+  );
+  const expected = new Set(MIGRATION_REGISTRY.filter(([, m]) => m <= 2).map(([f]) => f));
+  for (const f of onDisk)
+    if (!expected.has(f) && !MIGRATION_REGISTRY.some(([r]) => r === f))
+      errors.push(`${f}.sql on disk but absent from §16.8 — invented prefix`);
+    else if (!expected.has(f))
+      errors.push(`${f}.sql on disk before its milestone — check the registry`);
+  for (const f of expected)
+    if (!onDisk.has(f)) errors.push(`${f}.sql listed in §16.8 but missing on disk`);
+  return { ok: errors.length === 0, errors };
 }

@@ -9,3 +9,6 @@ supabase/.temp/
 plan.md
 planning/
 skills/
+
+supabase/seed-assets/
+supabase/seed.sql
