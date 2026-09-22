@@ -158,12 +158,7 @@ describe("resolveAccess — settle outcome branches", () => {
     ["in_flight", { kind: "in_flight" }, "replay_in_flight", 409],
     ["consumed", { kind: "consumed" }, "authorization_consumed", 402],
     ["quote_expired", { kind: "quote_expired" }, "quote_expired", 402],
-    [
-      "quote_mismatch",
-      { kind: "quote_mismatch", detail: "amount drifted" },
-      "quote_mismatch",
-      402,
-    ],
+    ["quote_mismatch", { kind: "quote_mismatch", detail: "amount drifted" }, "quote_mismatch", 402],
     ["invalid", { kind: "invalid", invalidReason: "bad sig" }, "payment_invalid", 402],
     ["unavailable", { kind: "unavailable" }, "facilitator_unavailable", 503],
   ] as const;

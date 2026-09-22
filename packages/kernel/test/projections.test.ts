@@ -37,9 +37,7 @@ describe("pricingLineFor", () => {
     expect(pricingLineFor(HFAP)).toBe(
       "Free for humans. Agents: 0.00 USDC once per content_hash (x402, eip155:8453).",
     );
-    expect(pricingLineFor(GATED)).toBe(
-      "0.25 USDC per fetch, human or agent (x402, eip155:8453).",
-    );
+    expect(pricingLineFor(GATED)).toBe("0.25 USDC per fetch, human or agent (x402, eip155:8453).");
   });
 });
 

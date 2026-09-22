@@ -29,15 +29,25 @@ describe("linkHeaderFor", () => {
   it("lists canonical, the three alternates, license, and llms.txt", () => {
     const link = linkHeaderFor(FREE, ORIGIN);
     expect(link).toContain(`<${ORIGIN}/p/the-free-article>; rel="canonical"`);
-    expect(link).toContain(`<${ORIGIN}/p/the-free-article.md>; rel="alternate"; type="text/markdown"`);
-    expect(link).toContain(`<${ORIGIN}/p/the-free-article.json>; rel="alternate"; type="application/json"`);
-    expect(link).toContain(`<${ORIGIN}/p/the-free-article.jsonld>; rel="alternate"; type="application/ld+json"`);
+    expect(link).toContain(
+      `<${ORIGIN}/p/the-free-article.md>; rel="alternate"; type="text/markdown"`,
+    );
+    expect(link).toContain(
+      `<${ORIGIN}/p/the-free-article.json>; rel="alternate"; type="application/json"`,
+    );
+    expect(link).toContain(
+      `<${ORIGIN}/p/the-free-article.jsonld>; rel="alternate"; type="application/ld+json"`,
+    );
     expect(link).toContain(`<https://creativecommons.org/licenses/by/4.0/>; rel="license"`);
     expect(link).toContain(`<${ORIGIN}/llms.txt>; rel="describedby"; type="text/plain"`);
   });
 
   it("prefers canonical_url when set and omits rel=license for ARR", () => {
-    const r = { ...FREE, canonicalUrl: "https://mirror.example/p/the-free-article", licenseSpdx: "ARR" as const };
+    const r = {
+      ...FREE,
+      canonicalUrl: "https://mirror.example/p/the-free-article",
+      licenseSpdx: "ARR" as const,
+    };
     const link = linkHeaderFor(r, ORIGIN);
     expect(link).toContain(`<https://mirror.example/p/the-free-article>; rel="canonical"`);
     expect(link).not.toContain('rel="license"');
@@ -90,9 +100,7 @@ describe("headersFor", () => {
       "index, follow, max-snippet:-1, max-image-preview:large",
     );
     const hidden = { ...FREE, searchIndexable: false };
-    expect(headersFor(hidden, ALLOW, "html", ORIGIN)["X-Robots-Tag"]).toBe(
-      "noindex, nofollow",
-    );
+    expect(headersFor(hidden, ALLOW, "html", ORIGIN)["X-Robots-Tag"]).toBe("noindex, nofollow");
     expect(headersFor(FREE, ALLOW, "json", ORIGIN)["X-Robots-Tag"]).toBeUndefined();
   });
 });

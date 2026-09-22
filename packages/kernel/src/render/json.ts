@@ -40,9 +40,7 @@ export function renderJson(
     accessBadge: toAccessBadge(resource),
     body: decision.bodyKind === "full" ? resource.canonicalMarkdown : null,
     preview:
-      decision.bodyKind === "preview"
-        ? previewOf(resource.canonicalMarkdown, previewChars)
-        : null,
+      decision.bodyKind === "preview" ? previewOf(resource.canonicalMarkdown, previewChars) : null,
     payment: {
       required: paid,
       priceAtomic: resource.priceAtomic,

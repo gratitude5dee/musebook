@@ -848,7 +848,7 @@ export const GATES = {
     {
       id: "M5.10",
       kind: "fn",
-      desc: "ETag W/\"sha256-<16hex>-<as>\" per rep, six distinct, produced only in packages/kernel/src/headers.ts",
+      desc: 'ETag W/"sha256-<16hex>-<as>" per rep, six distinct, produced only in packages/kernel/src/headers.ts',
       run: checks.m5EtagSingleProducer,
     },
     {

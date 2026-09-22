@@ -1,11 +1,5 @@
 // packages/kernel/src/index.ts — plan.md §6.3, verbatim.
-import type {
-  AccessDecision,
-  Actor,
-  Rendered,
-  Representation,
-  Resource,
-} from "@musebook/schema";
+import type { AccessDecision, Actor, Rendered, Representation, Resource } from "@musebook/schema";
 import type { KernelPorts } from "./ports.js";
 import { getPorts, setPorts } from "./registry.js";
 import { resolveAccessWith } from "./access.js";
@@ -23,8 +17,7 @@ export interface Kernel {
 export function createKernel(ports: KernelPorts): Kernel {
   return {
     resolveAccess: (resource, actor) => resolveAccessWith(ports, resource, actor),
-    renderResource: (resource, as, decision) =>
-      renderResourceWith(ports, resource, as, decision),
+    renderResource: (resource, as, decision) => renderResourceWith(ports, resource, as, decision),
   };
 }
 

@@ -26,23 +26,26 @@ export interface StubControls {
   logEvents?: Array<Record<string, unknown>>;
 }
 
-export const CHALLENGE: (resource: Resource, resourceUrl: string, error?: string) => PaymentRequired =
-  (resource, resourceUrl, error) => ({
-    x402Version: 2,
-    ...(error !== undefined ? { error } : {}),
-    resource: { url: resourceUrl, description: resource.summary ?? resource.slug },
-    accepts: [
-      {
-        scheme: "exact",
-        network: "eip155:8453",
-        amount: resource.priceAtomic,
-        asset: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-        payTo: "0x769900f8faad0000000000000000000000000001",
-        maxTimeoutSeconds: 60,
-        extra: { name: "USD Coin", version: "2" },
-      },
-    ],
-  });
+export const CHALLENGE: (
+  resource: Resource,
+  resourceUrl: string,
+  error?: string,
+) => PaymentRequired = (resource, resourceUrl, error) => ({
+  x402Version: 2,
+  ...(error !== undefined ? { error } : {}),
+  resource: { url: resourceUrl, description: resource.summary ?? resource.slug },
+  accepts: [
+    {
+      scheme: "exact",
+      network: "eip155:8453",
+      amount: resource.priceAtomic,
+      asset: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+      payTo: "0x769900f8faad0000000000000000000000000001",
+      maxTimeoutSeconds: 60,
+      extra: { name: "USD Coin", version: "2" },
+    },
+  ],
+});
 
 export function stubPorts(ctl: StubControls = {}): KernelPorts {
   let counter = 0;

@@ -25,7 +25,9 @@ const AUTHOR = {
   updated_at: "2026-09-22T12:00:00Z",
 };
 
-function row(over: Partial<ResourceRow> & Pick<ResourceRow, "slug" | "canonical_markdown">): ResourceRow {
+function row(
+  over: Partial<ResourceRow> & Pick<ResourceRow, "slug" | "canonical_markdown">,
+): ResourceRow {
   return {
     ...AUTHOR,
     kind: "article",

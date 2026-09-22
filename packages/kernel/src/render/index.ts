@@ -98,9 +98,7 @@ export async function renderResourceWith(
 
     case "jsonld": {
       const doc =
-        bodyKind === "empty"
-          ? { error: "not_available" }
-          : jsonLdFor(resource, decision, origin);
+        bodyKind === "empty" ? { error: "not_available" } : jsonLdFor(resource, decision, origin);
       return {
         status,
         mediaType: MEDIA_TYPES.jsonld,

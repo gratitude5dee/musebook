@@ -53,9 +53,7 @@ describe("shared-cache assertions", () => {
       await kernel.resolveAccess(FREE, { ...HUMAN, userId: FREE.authorUserId }),
     ];
     // grant_held needs a stub that answers a live grant
-    const heldKernel = createKernel(
-      stubPorts({ heldGrant: { id: "g-1", settlementId: "set-0" } }),
-    );
+    const heldKernel = createKernel(stubPorts({ heldGrant: { id: "g-1", settlementId: "set-0" } }));
     decisions.push(await heldKernel.resolveAccess(HFAP, AGENT));
     // idempotent_replay
     const idemKernel = createKernel(

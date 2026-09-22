@@ -57,8 +57,7 @@ export function loadResource(row: ResourceRow): Resource {
     contentHash: row.content_hash,
     canonicalMarkdown: row.canonical_markdown,
     priceAtomic: row.price_atomic,
-    priceUsd:
-      row.price_atomic === "0" ? null : formatPriceUsd(row.price_atomic, USDC_DECIMALS),
+    priceUsd: row.price_atomic === "0" ? null : formatPriceUsd(row.price_atomic, USDC_DECIMALS),
     priceAsset: row.price_asset,
     priceNetwork: row.price_network,
     revenueShareVersion: row.revenue_share_version,

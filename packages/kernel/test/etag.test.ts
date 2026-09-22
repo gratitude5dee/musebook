@@ -7,7 +7,7 @@ const REPS = ["html", "markdown", "json", "jsonld", "mcp", "feed"] as const;
 const SHAPE = /^W\/"sha256-[0-9a-f]{16}-(html|markdown|json|jsonld|mcp|feed)"$/;
 
 describe("etagFor", () => {
-  it("matches W/\"sha256-<16 hex>-<as>\" for all six representations", () => {
+  it('matches W/"sha256-<16 hex>-<as>" for all six representations', () => {
     for (const rep of REPS) {
       expect(etagFor(FREE, rep)).toMatch(SHAPE);
     }

@@ -24,8 +24,8 @@ describe("kernel registry", () => {
   it("module-level resolveAccess throws before configureKernel", async () => {
     // Fresh module graph: the registry cell starts null.
     const fresh = await import("../src/index.ts?fresh=registry-test");
-    await expect(
-      fresh.variantIntentFor("00000000-0000-4000-8000-000000000001"),
-    ).rejects.toThrow("configureKernel");
+    await expect(fresh.variantIntentFor("00000000-0000-4000-8000-000000000001")).rejects.toThrow(
+      "configureKernel",
+    );
   });
 });

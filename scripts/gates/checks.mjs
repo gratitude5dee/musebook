@@ -1746,10 +1746,7 @@ export function m5SecretMarker() {
 // M5.3 — jsonld (6 assertions on isAccessibleForFree/hasPart) + feed (3 on
 // content_text === summary).
 export function m5JsonldFeed() {
-  return vitestSlice(
-    `${KERNEL_NODE} test/golden.test.ts`,
-    "jsonld assertions|feed assertions",
-  );
+  return vitestSlice(`${KERNEL_NODE} test/golden.test.ts`, "jsonld assertions|feed assertions");
 }
 
 // M5.4 — fail-closed: throwing GrantPort AND PaymentPort each → allow:false +
@@ -1774,19 +1771,18 @@ export function m5CachePosture() {
 export function m5Purity() {
   const slice = vitestSlice(`${KERNEL_NODE} test/purity.test.ts`, "kernel purity");
   if (!slice.ok) return slice;
-  const hits = rg(String.raw`from '(cloudflare:|pg|@cloudflare/)`, [
-    "packages/kernel/src",
-  ]);
+  const hits = rg(String.raw`from '(cloudflare:|pg|@cloudflare/)`, ["packages/kernel/src"]);
   return { ok: hits.length === 0, errors: hits };
 }
 
 // M5.8 — containment: publish_mode|publishMode appears only inside the
 // kernel and the two named schema files, file by file.
 export function m5Containment() {
-  const hits = rg("publish_mode|publishMode", ["apps", "packages"], [
-    "-g", "*.ts",
-    "-g", "*.tsx",
-  ]).filter(
+  const hits = rg(
+    "publish_mode|publishMode",
+    ["apps", "packages"],
+    ["-g", "*.ts", "-g", "*.tsx"],
+  ).filter(
     (h) =>
       !h.startsWith("packages/kernel/") &&
       // D34: the §3.4 allow-list exempts TEST fixture dirs (the rule's own
@@ -1810,9 +1806,7 @@ export function m5NoAppImport() {
 export function m5EtagSingleProducer() {
   const slice = vitestSlice(`${KERNEL_NODE} test/etag.test.ts`, "etagFor");
   if (!slice.ok) return slice;
-  const hits = rg(String.raw`W/"\$\{|W/"sha256-`, ["apps", "packages"], [
-    "-g", "*.ts",
-  ]).filter(
+  const hits = rg(String.raw`W/"\$\{|W/"sha256-`, ["apps", "packages"], ["-g", "*.ts"]).filter(
     (h) => !h.startsWith("packages/kernel/src/headers.ts") && !h.includes("/test/"),
   );
   return { ok: hits.length === 0, errors: hits };

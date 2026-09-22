@@ -23,7 +23,10 @@ const body =
   `// Never hand-edit: G-GOLDEN diffs this against the .snap files and fails on drift.\n` +
   `export const GOLDEN: Record<string, string> = {\n` +
   snaps
-    .map((f) => `  ${JSON.stringify(f.replace(/\.snap$/, ""))}: ${JSON.stringify(readFileSync(join(GOLDEN_DIR, f), "utf8"))},`)
+    .map(
+      (f) =>
+        `  ${JSON.stringify(f.replace(/\.snap$/, ""))}: ${JSON.stringify(readFileSync(join(GOLDEN_DIR, f), "utf8"))},`,
+    )
     .join("\n") +
   `\n};\n`;
 
@@ -34,7 +37,9 @@ if (mode === "--verify") {
     process.stdout.write(`OK ${snaps.length} fixtures in barrel\n`);
     process.exit(0);
   }
-  process.stdout.write(`BARREL DRIFT: test/golden/index.ts does not match the ${snaps.length} .snap files\n`);
+  process.stdout.write(
+    `BARREL DRIFT: test/golden/index.ts does not match the ${snaps.length} .snap files\n`,
+  );
   process.exit(1);
 }
 if (snaps.length !== 24) {

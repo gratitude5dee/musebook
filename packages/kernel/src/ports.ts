@@ -56,11 +56,7 @@ export interface PaymentPort {
   }): Promise<PaymentRequired>;
 
   /** Verify -> insert replay row -> settle -> flip. See §6.6. */
-  settle(input: {
-    resource: Resource;
-    actor: Actor;
-    resourceUrl: string;
-  }): Promise<SettleOutcome>;
+  settle(input: { resource: Resource; actor: Actor; resourceUrl: string }): Promise<SettleOutcome>;
 }
 
 export interface PolicyPort {
