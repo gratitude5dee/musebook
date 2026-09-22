@@ -105,6 +105,7 @@ describe("ops + telemetry privacy path (ops.ts, salt.ts, privacy.ts)", () => {
             post_id: "44444444-4444-4444-8444-000000000004",
             content_hash: "e31155826556dd6b2c73920c6a57a597e85e837fcd1166c9733a270ac5592aca",
             surface: "explore",
+            slate_id: "55555555-5555-4555-8555-000000000001",
             position: 0,
             view_session_id: crypto.randomUUID(),
           },
