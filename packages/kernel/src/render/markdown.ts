@@ -1,7 +1,7 @@
 // packages/kernel/src/render/markdown.ts — the .md twin (§6.6).
 import type { AccessDecision, Resource } from "@musebook/schema";
 import { frontMatter } from "@musebook/content";
-import { previewOf } from "./preview.js";
+import { previewOf } from "./preview";
 
 /** Atomic units -> exact decimal display, e.g. "2000" at 6 decimals -> "0.002000". */
 function atomicDecimal(priceAtomic: string, decimals: number): string {

@@ -93,175 +93,175 @@ from (values
 
 A `note` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Note (HFAP)
 
 A `note` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Note (X402)
 
 A `note` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Article (Free)
 
 A `article` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Article (HFAP)
 
 A `article` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Article (X402)
 
 A `article` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Image (Free)
 
 A `image` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Image (HFAP)
 
 A `image` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Image (X402)
 
 A `image` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Video (Free)
 
 A `video` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Video (HFAP)
 
 A `video` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Video (X402)
 
 A `video` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Audio (Free)
 
 A `audio` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Audio (HFAP)
 
 A `audio` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Audio (X402)
 
 A `audio` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed App (Free)
 
 A `app` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed App (HFAP)
 
 A `app` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed App (X402)
 
 A `app` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Model3D (Free)
 
 A `model3d` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Model3D (HFAP)
 
 A `model3d` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Model3D (X402)
 
 A `model3d` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Thread (Free)
 
 A `thread` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Thread (HFAP)
 
 A `thread` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Thread (X402)
 
 A `thread` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$),
   ($$# Seed Article (X402)
 
 A `article` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 
 
@@ -292,168 +292,168 @@ from (values
 
 A `note` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 0, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-000000000002'::uuid, 'note', 'human_free_agent_paid', 'seed-note-hfap', 'Seed Note (HFAP)', 'Seed note in human_free_agent_paid mode.', '{seed,note}', app.sha256_hex($$# Seed Note (HFAP)
 
 A `note` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 2000, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-000000000003'::uuid, 'note', 'x402_always', 'seed-note-x402', 'Seed Note (X402)', 'Seed note in x402_always mode.', '{seed,note}', app.sha256_hex($$# Seed Note (X402)
 
 A `note` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 2000, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-000000000004'::uuid, 'article', 'free', 'seed-article-free', 'Seed Article (Free)', 'Seed article in free mode.', '{seed,article}', app.sha256_hex($$# Seed Article (Free)
 
 A `article` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 0, 'ARR'),
   ('44444444-4444-4444-8444-000000000005'::uuid, 'article', 'human_free_agent_paid', 'seed-article-hfap', 'Seed Article (HFAP)', 'Seed article in human_free_agent_paid mode.', '{seed,article}', app.sha256_hex($$# Seed Article (HFAP)
 
 A `article` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 2000, 'ARR'),
   ('44444444-4444-4444-8444-000000000006'::uuid, 'article', 'x402_always', 'seed-article-x402', 'Seed Article (X402)', 'Seed article in x402_always mode.', '{seed,article}', app.sha256_hex($$# Seed Article (X402)
 
 A `article` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 2, 2000, 'ARR'),
   ('44444444-4444-4444-8444-000000000007'::uuid, 'image', 'free', 'seed-image-free', 'Seed Image (Free)', 'Seed image in free mode.', '{seed,image}', app.sha256_hex($$# Seed Image (Free)
 
 A `image` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 0, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-000000000008'::uuid, 'image', 'human_free_agent_paid', 'seed-image-hfap', 'Seed Image (HFAP)', 'Seed image in human_free_agent_paid mode.', '{seed,image}', app.sha256_hex($$# Seed Image (HFAP)
 
 A `image` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 2000, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-000000000009'::uuid, 'image', 'x402_always', 'seed-image-x402', 'Seed Image (X402)', 'Seed image in x402_always mode.', '{seed,image}', app.sha256_hex($$# Seed Image (X402)
 
 A `image` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 2000, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-00000000000a'::uuid, 'video', 'free', 'seed-video-free', 'Seed Video (Free)', 'Seed video in free mode.', '{seed,video}', app.sha256_hex($$# Seed Video (Free)
 
 A `video` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 0, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-00000000000b'::uuid, 'video', 'human_free_agent_paid', 'seed-video-hfap', 'Seed Video (HFAP)', 'Seed video in human_free_agent_paid mode.', '{seed,video}', app.sha256_hex($$# Seed Video (HFAP)
 
 A `video` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 2000, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-00000000000c'::uuid, 'video', 'x402_always', 'seed-video-x402', 'Seed Video (X402)', 'Seed video in x402_always mode.', '{seed,video}', app.sha256_hex($$# Seed Video (X402)
 
 A `video` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 2000, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-00000000000d'::uuid, 'audio', 'free', 'seed-audio-free', 'Seed Audio (Free)', 'Seed audio in free mode.', '{seed,audio}', app.sha256_hex($$# Seed Audio (Free)
 
 A `audio` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 0, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-00000000000e'::uuid, 'audio', 'human_free_agent_paid', 'seed-audio-hfap', 'Seed Audio (HFAP)', 'Seed audio in human_free_agent_paid mode.', '{seed,audio}', app.sha256_hex($$# Seed Audio (HFAP)
 
 A `audio` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 2000, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-00000000000f'::uuid, 'audio', 'x402_always', 'seed-audio-x402', 'Seed Audio (X402)', 'Seed audio in x402_always mode.', '{seed,audio}', app.sha256_hex($$# Seed Audio (X402)
 
 A `audio` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 2000, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-000000000010'::uuid, 'app', 'free', 'seed-app-free', 'Seed App (Free)', 'Seed app in free mode.', '{seed,app}', app.sha256_hex($$# Seed App (Free)
 
 A `app` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 0, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-000000000011'::uuid, 'app', 'human_free_agent_paid', 'seed-app-hfap', 'Seed App (HFAP)', 'Seed app in human_free_agent_paid mode.', '{seed,app}', app.sha256_hex($$# Seed App (HFAP)
 
 A `app` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 2000, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-000000000012'::uuid, 'app', 'x402_always', 'seed-app-x402', 'Seed App (X402)', 'Seed app in x402_always mode.', '{seed,app}', app.sha256_hex($$# Seed App (X402)
 
 A `app` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 2000, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-000000000013'::uuid, 'model3d', 'free', 'seed-model3d-free', 'Seed Model3D (Free)', 'Seed model3d in free mode.', '{seed,model3d}', app.sha256_hex($$# Seed Model3D (Free)
 
 A `model3d` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 0, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-000000000014'::uuid, 'model3d', 'human_free_agent_paid', 'seed-model3d-hfap', 'Seed Model3D (HFAP)', 'Seed model3d in human_free_agent_paid mode.', '{seed,model3d}', app.sha256_hex($$# Seed Model3D (HFAP)
 
 A `model3d` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 2000, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-000000000015'::uuid, 'model3d', 'x402_always', 'seed-model3d-x402', 'Seed Model3D (X402)', 'Seed model3d in x402_always mode.', '{seed,model3d}', app.sha256_hex($$# Seed Model3D (X402)
 
 A `model3d` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 2000, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-000000000016'::uuid, 'thread', 'free', 'seed-thread-free', 'Seed Thread (Free)', 'Seed thread in free mode.', '{seed,thread}', app.sha256_hex($$# Seed Thread (Free)
 
 A `thread` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 0, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-000000000017'::uuid, 'thread', 'human_free_agent_paid', 'seed-thread-hfap', 'Seed Thread (HFAP)', 'Seed thread in human_free_agent_paid mode.', '{seed,thread}', app.sha256_hex($$# Seed Thread (HFAP)
 
 A `thread` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 2000, 'CC-BY-4.0'),
   ('44444444-4444-4444-8444-000000000018'::uuid, 'thread', 'x402_always', 'seed-thread-x402', 'Seed Thread (X402)', 'Seed thread in x402_always mode.', '{seed,thread}', app.sha256_hex($$# Seed Thread (X402)
 
 A `thread` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 1, 2000, 'CC-BY-4.0')
 ) as v(id, kind, mode, slug, title, summary, tags, chash, cv, price, spdx),
@@ -468,175 +468,175 @@ from (values
 
 A `note` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Note (Free)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000002'::uuid, '44444444-4444-4444-8444-000000000002'::uuid, 1, app.sha256_hex($$# Seed Note (HFAP)
 
 A `note` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Note (HFAP)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000003'::uuid, '44444444-4444-4444-8444-000000000003'::uuid, 1, app.sha256_hex($$# Seed Note (X402)
 
 A `note` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Note (X402)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000004'::uuid, '44444444-4444-4444-8444-000000000004'::uuid, 1, app.sha256_hex($$# Seed Article (Free)
 
 A `article` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Article (Free)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000005'::uuid, '44444444-4444-4444-8444-000000000005'::uuid, 1, app.sha256_hex($$# Seed Article (HFAP)
 
 A `article` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Article (HFAP)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000006'::uuid, '44444444-4444-4444-8444-000000000006'::uuid, 1, app.sha256_hex($$# Seed Article (X402)
 
 A `article` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Article (X402)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000007'::uuid, '44444444-4444-4444-8444-000000000007'::uuid, 1, app.sha256_hex($$# Seed Image (Free)
 
 A `image` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Image (Free)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000008'::uuid, '44444444-4444-4444-8444-000000000008'::uuid, 1, app.sha256_hex($$# Seed Image (HFAP)
 
 A `image` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Image (HFAP)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000009'::uuid, '44444444-4444-4444-8444-000000000009'::uuid, 1, app.sha256_hex($$# Seed Image (X402)
 
 A `image` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Image (X402)', null, 'initial publish'),
   ('55555555-5555-4555-8555-00000000000a'::uuid, '44444444-4444-4444-8444-00000000000a'::uuid, 1, app.sha256_hex($$# Seed Video (Free)
 
 A `video` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Video (Free)', null, 'initial publish'),
   ('55555555-5555-4555-8555-00000000000b'::uuid, '44444444-4444-4444-8444-00000000000b'::uuid, 1, app.sha256_hex($$# Seed Video (HFAP)
 
 A `video` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Video (HFAP)', null, 'initial publish'),
   ('55555555-5555-4555-8555-00000000000c'::uuid, '44444444-4444-4444-8444-00000000000c'::uuid, 1, app.sha256_hex($$# Seed Video (X402)
 
 A `video` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Video (X402)', null, 'initial publish'),
   ('55555555-5555-4555-8555-00000000000d'::uuid, '44444444-4444-4444-8444-00000000000d'::uuid, 1, app.sha256_hex($$# Seed Audio (Free)
 
 A `audio` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Audio (Free)', null, 'initial publish'),
   ('55555555-5555-4555-8555-00000000000e'::uuid, '44444444-4444-4444-8444-00000000000e'::uuid, 1, app.sha256_hex($$# Seed Audio (HFAP)
 
 A `audio` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Audio (HFAP)', null, 'initial publish'),
   ('55555555-5555-4555-8555-00000000000f'::uuid, '44444444-4444-4444-8444-00000000000f'::uuid, 1, app.sha256_hex($$# Seed Audio (X402)
 
 A `audio` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Audio (X402)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000010'::uuid, '44444444-4444-4444-8444-000000000010'::uuid, 1, app.sha256_hex($$# Seed App (Free)
 
 A `app` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed App (Free)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000011'::uuid, '44444444-4444-4444-8444-000000000011'::uuid, 1, app.sha256_hex($$# Seed App (HFAP)
 
 A `app` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed App (HFAP)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000012'::uuid, '44444444-4444-4444-8444-000000000012'::uuid, 1, app.sha256_hex($$# Seed App (X402)
 
 A `app` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed App (X402)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000013'::uuid, '44444444-4444-4444-8444-000000000013'::uuid, 1, app.sha256_hex($$# Seed Model3D (Free)
 
 A `model3d` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Model3D (Free)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000014'::uuid, '44444444-4444-4444-8444-000000000014'::uuid, 1, app.sha256_hex($$# Seed Model3D (HFAP)
 
 A `model3d` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Model3D (HFAP)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000015'::uuid, '44444444-4444-4444-8444-000000000015'::uuid, 1, app.sha256_hex($$# Seed Model3D (X402)
 
 A `model3d` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Model3D (X402)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000016'::uuid, '44444444-4444-4444-8444-000000000016'::uuid, 1, app.sha256_hex($$# Seed Thread (Free)
 
 A `thread` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Thread (Free)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000017'::uuid, '44444444-4444-4444-8444-000000000017'::uuid, 1, app.sha256_hex($$# Seed Thread (HFAP)
 
 A `thread` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Thread (HFAP)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000018'::uuid, '44444444-4444-4444-8444-000000000018'::uuid, 1, app.sha256_hex($$# Seed Thread (X402)
 
 A `thread` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$), 'Seed Thread (X402)', null, 'initial publish'),
   ('55555555-5555-4555-8555-000000000019'::uuid, '44444444-4444-4444-8444-000000000006'::uuid, 2, app.sha256_hex($$# Seed Article (X402)
 
 A `article` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 
 
@@ -807,168 +807,168 @@ from (values
 
 A `note` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Note (HFAP)
 
 A `note` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Note (X402)
 
 A `note` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Article (Free)
 
 A `article` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Article (HFAP)
 
 A `article` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Article (X402)
 
 A `article` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Image (Free)
 
 A `image` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Image (HFAP)
 
 A `image` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Image (X402)
 
 A `image` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Video (Free)
 
 A `video` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Video (HFAP)
 
 A `video` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Video (X402)
 
 A `video` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Audio (Free)
 
 A `audio` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Audio (HFAP)
 
 A `audio` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Audio (X402)
 
 A `audio` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed App (Free)
 
 A `app` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed App (HFAP)
 
 A `app` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed App (X402)
 
 A `app` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Model3D (Free)
 
 A `model3d` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Model3D (HFAP)
 
 A `model3d` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Model3D (X402)
 
 A `model3d` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Thread (Free)
 
 A `thread` post published in `free` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Thread (HFAP)
 
 A `thread` post published in `human_free_agent_paid` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$)),
   (app.sha256_hex($$# Seed Thread (X402)
 
 A `thread` post published in `x402_always` mode.
 
-This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest.
+This seed body exists so the 400-character preview boundary is exercised by real text rather than by a comment about it. The paywall preview ends before the marker below, so any representation that leaks past it leaks paid content. Filler sentence to keep the byte count honest, and then a second clause so the marker lands strictly past the boundary.
 
 MUSEBOOK_PAID_BODY_MARKER_7f3a$$))
 ) as v(chash),

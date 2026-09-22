@@ -1,6 +1,6 @@
 // packages/kernel/src/ports.ts — plan.md §6.3, verbatim.
 import type { Actor, PaymentRequired, Resource, SettleResponse } from "@musebook/schema";
-import type { ResourceRow } from "./load.js";
+import type { ResourceRow } from "./load";
 
 /** Runs packages/kernel/sql/load_resource.sql (or its by-id twin). Null when no live row. */
 export interface ResourcePort {

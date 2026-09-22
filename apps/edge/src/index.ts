@@ -12,6 +12,8 @@ import { renderedToResponse, notFound } from "./http.js";
 import { parseResourceUrl, STATIC_ROUTES } from "./router.js"; // §7.10.1
 import { handleEvents } from "./routes/events.js"; // §13.4.3
 import { handleFeedForYou, handleFeedReels, handleFeedScored } from "./routes/feed.js"; // §9.21
+import { handlePublishPost } from "./routes/posts.js"; // §6 flow C
+import { routeUploads } from "./routes/uploads.js"; // §11.7.3
 import { twin } from "./routes/twin.js"; // §7.11
 import { authorTwin } from "./routes/authors.js";
 import { authorFeed } from "./routes/feeds.js";
@@ -49,6 +51,19 @@ export default {
     // /api/* never reaches Vercel — §9.21's route table.
     const api = API_ROUTES[url.pathname];
     if (api !== undefined) return api(request, env, ctx);
+
+    // The composer's write edge (§6 flow C) + §11.7.3's signed-PUT orchestrator.
+    if (url.pathname.startsWith("/api/uploads/")) {
+      const uploads = routeUploads(url.pathname);
+      if (uploads !== null) return uploads(request, env, ctx);
+    }
+    const publishMatch = url.pathname.match(
+      /^\/api\/posts\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/publish$/,
+    );
+    const publishPostId = publishMatch?.[1];
+    if (publishPostId !== undefined) {
+      return handlePublishPost(request, env, ctx, publishPostId);
+    }
 
     // The crawl surface. §7.10.1 owns this table; the handlers render IN THE
     // WORKER and the response is never charged — the whole point, because
@@ -90,7 +105,7 @@ export default {
       if (row === null) return notFound();
       const resource = loadResource(row);
 
-      // THE decision. Nothing above this line reads publish_mode; nothing below
+      // THE decision. Nothing above this line reads the publishing mode; nothing below
       // it re-decides. A thrown check denies (spine invariant 9) inside resolveAccess.
       const decision = await kernel.resolveAccess(resource, actor);
 
@@ -166,7 +181,12 @@ async function toOrigin(
   // would loop the request into this same Worker.
   const url = new URL(request.url);
   const req = new Request(
-    new URL(url.pathname + url.search, `https://${env.ORIGIN_HOST}`),
+    new URL(
+      url.pathname + url.search,
+      // ORIGIN_SCHEME is only ever "http" for the local dev pair (wrangler dev
+      // → next dev); no wrangler.jsonc sets it, so deployed envs keep https.
+      `${env.ORIGIN_SCHEME ?? "https"}://${env.ORIGIN_HOST}`,
+    ),
     request,
   );
 

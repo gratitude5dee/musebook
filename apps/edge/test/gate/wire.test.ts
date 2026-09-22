@@ -15,7 +15,9 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest
 import { db, MARKER, SLUG } from "./helpers.js";
 
 const FREE_POST = "44444444-4444-4444-8444-000000000004";
-const FREE_HASH = "e31155826556dd6b2c73920c6a57a597e85e837fcd1166c9733a270ac5592aca";
+/** Resolved from posts in beforeAll — the seed's sha256 rotates with any
+ *  canonical_markdown edit, so a literal here falsifies the whole suite. */
+let FREE_HASH = "";
 const HOME_SLATE = "88888888-8888-4888-8888-000000000001";
 /** The seeded 'home' slate belongs to seeded user …0002 — give that user a
  *  session row so the seeded slate is reachable through the real actor path. */
@@ -25,6 +27,11 @@ const SLATE_USER = "11111111-1111-4111-8111-000000000002";
 const ETAG = /^W\/"sha256-([0-9a-f]{16})-([a-z]+)"$/;
 
 beforeAll(async () => {
+  const [{ content_hash }] = await db<{ content_hash: string }>(
+    `select content_hash from public.posts where id = $1`,
+    [FREE_POST],
+  );
+  FREE_HASH = content_hash;
   await db(
     `insert into public.sessions (id, user_id, actor, token_sha256, expires_at, ip_hash, user_agent, issued_at)
      values ('11111111-1111-4111-8111-0000000000f2'::uuid, $1::uuid, 'human_creator'::actor_class,

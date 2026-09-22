@@ -4,6 +4,7 @@
 // OTHER direction: the secret proves this hop came from the renderer, not an
 // agent that copied the twin URL.
 import "server-only";
+import { headers } from "next/headers";
 
 export interface TwinEnvelope {
   schema: string;
@@ -41,13 +42,18 @@ export interface TwinEnvelope {
  *  full access for this hop — it reads `x-musebook-edge` plus the forwarded
  *  `x-mb-plane` — so what comes back is either the full body or `error`. */
 export async function fetchJsonTwin(slug: string): Promise<TwinEnvelope | null> {
+  // Forward the inbound session cookie: the twin must resolve the SAME actor
+  // the outer request did, or an author's own gated post reads as anonymous
+  // (402) and the page falls to notFound(). x-musebook-edge authenticates the
+  // hop; the cookie carries the actor.
+  const cookie = (await headers()).get("cookie") ?? "";
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://musebook.dev";
   const secret = process.env.MUSEBOOK_EDGE_SECRET;
   if (secret === undefined) {
     throw new Error("MUSEBOOK_EDGE_SECRET is required for twin fetches (§14.5.4)");
   }
   const res = await fetch(`${base}/p/${encodeURIComponent(slug)}.json`, {
-    headers: { "x-musebook-edge": secret },
+    headers: { "x-musebook-edge": secret, cookie },
     // Twin responses are `private, no-store` when negotiated — but the fetch
     // cache keys on Next's data cache, and the Worker's `.json` route serves
     // fresh content for each content hash, so a zero revalidate keeps the page

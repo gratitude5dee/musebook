@@ -1,0 +1,228 @@
+/* apps/web/app/globals.css — §14.2.4, verbatim. The Tailwind v4 shape
+ * (@theme inline, OKLCH); every OKLCH value is the conversion of the hex in
+ * §14.2.2/§14.2.3's tables, kept in a comment so a human can check it. */
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* packages/ui ships raw source — scan it so its utilities resolve. */
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --radius: 0.625rem;
+
+  --background: oklch(0.985 0.0041 91.45); /* #FBFAF7 */
+  --foreground: oklch(0.1747 0.0052 67.47); /* #12100E */
+  --card: oklch(1 0 89.88); /* #FFFFFF */
+  --card-foreground: oklch(0.1747 0.0052 67.47);
+  --popover: oklch(1 0 89.88);
+  --popover-foreground: oklch(0.1747 0.0052 67.47);
+  --primary: oklch(0.4423 0.1605 282.87); /* #4B3FA7 */
+  --primary-foreground: oklch(1 0 89.88);
+  --secondary: oklch(0.9585 0.0098 87.47); /* #F4F1EA */
+  --secondary-foreground: oklch(0.1747 0.0052 67.47);
+  --muted: oklch(0.9585 0.0098 87.47);
+  --muted-foreground: oklch(0.4633 0.0162 78.15); /* #5E584F */
+  --accent: oklch(0.9429 0.0124 91.52); /* #EFECE3 */
+  --accent-foreground: oklch(0.1747 0.0052 67.47);
+  --destructive: oklch(0.5013 0.1783 28.7); /* #B3261E */
+  --border: oklch(0.9048 0.0145 84.58); /* #E4DFD5 */
+  --border-strong: oklch(0.5688 0.0186 79.28); /* #7D766B */
+  --input: oklch(0.9048 0.0145 84.58);
+  --ring: oklch(0.4423 0.1605 282.87);
+
+  /* Musebook semantic extensions */
+  --gate: oklch(0.5078 0.108 73.3); /* #8A5A00 */
+  --gate-foreground: oklch(1 0 89.88);
+  --gate-tint: oklch(0.9631 0.0268 85.66); /* #FBF2DF */
+  --agent: oklch(0.4761 0.0809 185.68); /* #0B6B63 */
+  --agent-foreground: oklch(1 0 89.88);
+  --agent-tint: oklch(0.956 0.0193 184.91); /* #E3F5F2 */
+  --success: oklch(0.4843 0.1023 159.77); /* #15704A */
+  --scrim: oklch(0.2106 0.005 67.55); /* #1A1816 */
+
+  --chart-1: var(--primary);
+  --chart-2: var(--agent);
+  --chart-3: var(--gate);
+  --chart-4: var(--muted-foreground);
+  --chart-5: var(--success);
+
+  /* Elevation SOURCE vars. Named --elev-* on purpose; see §14.2.4's note. */
+  --elev-1: 0 1px 2px 0 rgb(26 24 22 / 0.05);
+  --elev-2: 0 4px 12px -2px rgb(26 24 22 / 0.08), 0 2px 4px -2px rgb(26 24 22 / 0.05);
+  --elev-3: 0 12px 32px -8px rgb(26 24 22 / 0.14), 0 4px 8px -4px rgb(26 24 22 / 0.06);
+  --elev-4: 0 24px 64px -16px rgb(26 24 22 / 0.24);
+
+  /* Motion durations. Not a Tailwind namespace: consumed as duration-[var(--dur-base)]. */
+  --dur-instant: 80ms;
+  --dur-fast: 140ms;
+  --dur-base: 220ms;
+  --dur-slow: 360ms;
+  --dur-ambient: 1200ms;
+}
+
+.dark {
+  --background: oklch(0.1504 0.0027 67.55); /* #0C0B0A */
+  --foreground: oklch(0.9618 0.0086 84.57); /* #F5F2EC */
+  --card: oklch(0.1871 0.0043 84.59); /* #141311 */
+  --card-foreground: oklch(0.9618 0.0086 84.57);
+  --popover: oklch(0.2189 0.0065 78.18); /* #1C1A17 */
+  --popover-foreground: oklch(0.9618 0.0086 84.57);
+  --primary: oklch(0.7403 0.1422 287.91); /* #A79BFF */
+  --primary-foreground: oklch(0.2 0.0561 284.82); /* #14112E */
+  --secondary: oklch(0.2189 0.0065 78.18);
+  --secondary-foreground: oklch(0.9618 0.0086 84.57);
+  --muted: oklch(0.2189 0.0065 78.18);
+  --muted-foreground: oklch(0.6958 0.0165 77.03); /* #A39C92 */
+  --accent: oklch(0.2444 0.0136 87.57); /* #232019 */
+  --accent-foreground: oklch(0.9618 0.0086 84.57);
+  --destructive: oklch(0.7116 0.1812 22.84); /* #FF6B6B */
+  --border: oklch(0.2712 0.0108 73.47); /* #2A2621 */
+  --border-strong: oklch(0.5095 0.0158 78.18); /* #6B655C */
+  --input: oklch(0.2712 0.0108 73.47);
+  --ring: oklch(0.7403 0.1422 287.91);
+
+  --gate: oklch(0.8045 0.1558 82.54); /* #F0B429 */
+  --gate-foreground: oklch(0.1504 0.0027 67.55);
+  --gate-tint: oklch(0.251 0.0299 76.86); /* #2A2011 */
+  --agent: oklch(0.8301 0.1167 184.17); /* #5EE0D0 */
+  --agent-foreground: oklch(0.1504 0.0027 67.55);
+  --agent-tint: oklch(0.2564 0.0307 184.92); /* #102825 */
+  --success: oklch(0.7908 0.14 159.73); /* #5BD69B */
+  --scrim: oklch(0 0 0);
+
+  /* Same geometry, ~2x alpha, plus a 1px inset highlight so cards lift off ink. */
+  --elev-1: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --elev-2: 0 4px 12px -2px rgb(0 0 0 / 0.5), inset 0 1px 0 0 rgb(255 255 255 / 0.04);
+  --elev-3: 0 12px 32px -8px rgb(0 0 0 / 0.6), inset 0 1px 0 0 rgb(255 255 255 / 0.05);
+  --elev-4: 0 24px 64px -16px rgb(0 0 0 / 0.72), inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-gate: var(--gate);
+  --color-gate-foreground: var(--gate-foreground);
+  --color-gate-tint: var(--gate-tint);
+  --color-agent: var(--agent);
+  --color-agent-foreground: var(--agent-foreground);
+  --color-agent-tint: var(--agent-tint);
+  --color-success: var(--success);
+  --color-scrim: var(--scrim);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 4px); /*  6px */
+  --radius-md: calc(var(--radius) - 2px); /*  8px */
+  --radius-lg: var(--radius); /* 10px */
+  --radius-xl: calc(var(--radius) + 4px); /* 14px */
+  --radius-2xl: calc(var(--radius) + 10px); /* 20px */
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-instrument-serif);
+
+  /* shadow-e1 .. shadow-e4 utilities, fed by the --elev-* source vars. */
+  --shadow-e1: var(--elev-1);
+  --shadow-e2: var(--elev-2);
+  --shadow-e3: var(--elev-3);
+  --shadow-e4: var(--elev-4);
+}
+
+@theme {
+  /* Overrides Tailwind's default ease-out / ease-in-out and adds ease-spring. */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  @media (prefers-contrast: more) {
+    :root,
+    .dark {
+      --border: var(--border-strong);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Composer preview typography — the rendered markdownToHtml() output. Scoped
+ * under .mb-preview so it never leaks into app chrome. */
+.mb-preview h1 {
+  @apply mt-6 mb-3 font-serif text-4xl leading-tight;
+}
+.mb-preview h2 {
+  @apply mt-6 mb-3 font-serif text-3xl leading-tight;
+}
+.mb-preview h3 {
+  @apply mt-5 mb-2 font-serif text-2xl leading-snug;
+}
+.mb-preview p {
+  @apply mb-4;
+}
+.mb-preview ul {
+  @apply mb-4 list-disc pl-6;
+}
+.mb-preview ol {
+  @apply mb-4 list-decimal pl-6;
+}
+.mb-preview blockquote {
+  @apply mb-4 border-l-2 border-border-strong pl-4 font-serif italic;
+}
+.mb-preview pre {
+  @apply mb-4 overflow-x-auto rounded-lg bg-muted p-4 font-mono text-sm;
+}
+.mb-preview code {
+  @apply rounded bg-muted px-1 font-mono text-[0.875em];
+}
+.mb-preview a {
+  @apply text-primary underline underline-offset-2;
+}
+.mb-preview img {
+  @apply my-4 rounded-lg;
+}
+.mb-preview hr {
+  @apply my-6 border-border;
+}

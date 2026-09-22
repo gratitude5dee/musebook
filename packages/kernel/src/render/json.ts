@@ -1,8 +1,8 @@
 // packages/kernel/src/render/json.ts — the .json twin envelope (§6.6).
 import type { AccessDecision, Resource } from "@musebook/schema";
-import { toAccessBadge } from "../view.js";
-import { jsonLdFor } from "./jsonld.js";
-import { previewOf } from "./preview.js";
+import { toAccessBadge } from "../view";
+import { jsonLdFor } from "./jsonld";
+import { previewOf } from "./preview";
 
 export function renderJson(
   resource: Resource,

@@ -1050,6 +1050,83 @@ export const GATES = {
       run: checks.m6FakeTxSkipped,
     },
   ],
+
+  // §16.5 M7 — compose, publish, mode picker, media upload. Item 10 runs the
+  // universal G-AXE sweep for the first time (its activeFrom flips to M7).
+  M7: [
+    {
+      id: "M7.1",
+      kind: "fn",
+      desc: "sign-in → compose (one video post w/ real media upload) → publish ×3 modes → render /p/{slug} via Worker",
+      run: checks.m7PublishThreeModes,
+    },
+    {
+      id: "M7.2",
+      kind: "fn",
+      desc: "presigned PUT lands in musebook-uploads only; foreign bucket 400; aws4fetch grep = uploads.ts alone",
+      run: checks.m7PresignScope,
+    },
+    {
+      id: "M7.3",
+      kind: "fn",
+      desc: "X-Amz-Expires=900; expired replay → 403 ExpiredRequest with no CORS headers",
+      run: checks.m7PresignTtl,
+    },
+    {
+      id: "M7.4",
+      kind: "fn",
+      desc: "Toll sentence grep under apps/web/app/(app)/compose — 'a declared contract, not a detection guarantee'",
+      run: checks.m7TollSentence,
+    },
+    {
+      id: "M7.5",
+      kind: "fn",
+      desc: "publish is one statement: 2 queued classify+embed rows; M6.15 BEGIN-grep re-run",
+      run: checks.m7PublishOneStatement,
+    },
+    {
+      id: "M7.6",
+      kind: "fn",
+      desc: "globally unique slugs on the wire (same title → distinct slugs); M2.15 re-run",
+      run: checks.m7SlugUniqueness,
+    },
+    {
+      id: "M7.7",
+      kind: "fn",
+      desc: "edit-after-grant warning rendered on the composer (Playwright substring)",
+      run: checks.m7EditGrantWarning,
+    },
+    {
+      id: "M7.8",
+      kind: "fn",
+      desc: "upload→event→consumer: staging object gone, one assets row matching the CHECK; queue producer bound",
+      run: checks.m7UploadPromotion,
+    },
+    {
+      id: "M7.9",
+      kind: "fn",
+      desc: "lifecycle: abort-incomplete-multipart 2d AND staging/ expire 7d on musebook-uploads",
+      run: checks.m7StagingLifecycle,
+    },
+    {
+      id: "M7.10",
+      kind: "fn",
+      desc: "G-AXE green: zero serious/critical violations, 7 routes × light+dark, /reels included",
+      run: checks.m7Axe,
+    },
+    {
+      id: "M7.11",
+      kind: "fn",
+      desc: "§14 M7 rows: JS-off gated body vs Worker; no Testimonials/MotionBackground; no repeat:Infinity/animate-pulse/hex; reduced-motion reels",
+      run: checks.m7Section14Acceptance,
+    },
+    {
+      id: "M7.12",
+      kind: "fn",
+      desc: "browser never names musebook-paid/-artifacts/-logs (apps/web + packages/ui grep)",
+      run: checks.m7BucketNaming,
+    },
+  ],
 };
 
 export const MILESTONE_TITLES = {

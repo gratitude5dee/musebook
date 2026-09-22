@@ -7,7 +7,17 @@ import pg from "pg";
 
 export const SEED_POST_ID = "44444444-4444-4444-8444-000000000004"; // seed-article-free
 export const SEED_POST_VERSION_ID = "55555555-5555-4555-8555-000000000004";
-export const SEED_CONTENT_HASH = "e31155826556dd6b2c73920c6a57a597e85e837fcd1166c9733a270ac5592aca";
+/** The seed article's live content hash — read from posts at call time so a
+ *  seed-text change (which rotates every sha256) never strands the fixture. */
+export async function seedContentHash(): Promise<string> {
+  return await withDb(async (c) => {
+    const { rows } = await c.query<{ content_hash: string }>(
+      `select content_hash from public.posts where id = $1`,
+      [SEED_POST_ID],
+    );
+    return rows[0].content_hash;
+  });
+}
 export const SEED_AUTHOR_ID = "11111111-1111-4111-8111-000000000001";
 
 /** Fixture writes run as `postgres` (bypassrls — test setup predates the
@@ -29,6 +39,7 @@ export async function withDb<T>(fn: (c: pg.Client) => Promise<T>): Promise<T> {
  *  (dedupe_key 'test-%'/'sweep-%', idempotency_key 'test-%') and by the seed
  *  content hash on the effect tables. Seed rows themselves are never deleted. */
 export async function resetSeed(): Promise<void> {
+  const hash = await seedContentHash();
   await withDb(async (c) => {
     await c.query(
       `delete from public.ops_events where subject_id in
@@ -43,12 +54,8 @@ export async function resetSeed(): Promise<void> {
             or dedupe_key like 'classify:%' or dedupe_key like 'embed:%'
             or dedupe_key like 'distribute:%'`,
     );
-    await c.query(`delete from public.post_classifications where content_hash = $1`, [
-      SEED_CONTENT_HASH,
-    ]);
-    await c.query(`delete from public.post_embeddings where content_hash = $1`, [
-      SEED_CONTENT_HASH,
-    ]);
+    await c.query(`delete from public.post_classifications where content_hash = $1`, [hash]);
+    await c.query(`delete from public.post_embeddings where content_hash = $1`, [hash]);
     await c.query(`delete from public.distribution_jobs where idempotency_key like 'test-%'`);
     await c.query(`delete from public.channels where postiz_channel_id like 'test-%'`);
     await c.query(`delete from public.platforms where slug = 'testx'`);
@@ -75,9 +82,10 @@ export async function seedOutboxJob(queue: string): Promise<SeededJob> {
     .replace(/-/g, "_")
     .replace(/_dlq$/, "");
 
+  const contentHash = await seedContentHash();
   const records: Record<string, Record<string, unknown>> = {
     classify: {
-      content_hash: SEED_CONTENT_HASH,
+      content_hash: contentHash,
       provider: "test",
       model: "test-model",
       primary_topic: "testing",
@@ -87,7 +95,7 @@ export async function seedOutboxJob(queue: string): Promise<SeededJob> {
       latency_ms: 1,
     },
     embed: {
-      content_hash: SEED_CONTENT_HASH,
+      content_hash: contentHash,
       post_id: SEED_POST_ID,
       model: "test-embed",
       dim: 1536,
@@ -124,8 +132,8 @@ export async function seedOutboxJob(queue: string): Promise<SeededJob> {
     c.query<{ id: number }>(
       `insert into public.job_outbox (kind, dedupe_key, payload)
        values ($1, $2, $3::jsonb) returning id`,
-      [kind, key, { post_id: SEED_POST_ID, content_hash: SEED_CONTENT_HASH, record }],
+      [kind, key, { post_id: SEED_POST_ID, content_hash: contentHash, record }],
     ),
   );
-  return { id: Number(rows[0].id), contentHash: SEED_CONTENT_HASH, key };
+  return { id: Number(rows[0].id), contentHash: contentHash, key };
 }

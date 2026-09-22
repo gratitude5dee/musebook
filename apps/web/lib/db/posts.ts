@@ -10,8 +10,6 @@ import { fetchJsonTwin } from "../edge/twin";
 interface PostRow {
   post_id: string;
   author_user_id: string;
-  author_display_name: string;
-  author_handle: string;
   kind: PostView["kind"];
   status: string;
   slug: string;
@@ -24,7 +22,6 @@ interface PostRow {
   price_atomic: string;
   price_asset: string | null;
   price_network: string | null;
-  revenue_share_version: string;
   license_spdx: PostView["licenseSpdx"];
   license_url: string | null;
   train_ai: boolean;
@@ -48,7 +45,7 @@ export async function loadPostView(slug: string): Promise<PostView | null> {
     serviceDb
       .from("posts")
       .select(
-        "post_id, author_user_id, author_display_name, author_handle, kind, status, slug, title, summary, canonical_url, language_code, tags, content_hash, price_atomic, price_asset, price_network, revenue_share_version, license_spdx, license_url, train_ai, ai_use, search_indexable, attribution_required, citation_template, og_image_url, published_at, updated_at",
+        "post_id:id, author_user_id, kind, status, slug, title, summary, canonical_url, language_code, tags, content_hash, price_atomic, price_asset, price_network, license_spdx, license_url, train_ai, ai_use, search_indexable, attribution_required, citation_template, og_image_url, published_at, updated_at",
       )
       .eq("slug", slug)
       .eq("status", "published")
@@ -58,6 +55,13 @@ export async function loadPostView(slug: string): Promise<PostView | null> {
   ]);
   if (row === null || row === undefined || twin === null) return null;
 
+  const { data: profile } = await serviceDb
+    .from("profiles")
+    .select("handle, display_name")
+    .eq("user_id", row.author_user_id)
+    .maybeSingle()
+    .returns<{ handle: string; display_name: string }>();
+
   return {
     postId: row.post_id,
     slug: row.slug,
@@ -65,8 +69,8 @@ export async function loadPostView(slug: string): Promise<PostView | null> {
     title: row.title,
     summary: row.summary,
     authorUserId: row.author_user_id,
-    authorHandle: row.author_handle,
-    authorDisplayName: row.author_display_name,
+    authorHandle: profile?.handle ?? "unknown",
+    authorDisplayName: profile?.display_name ?? "Unknown",
     languageCode: row.language_code,
     tags: row.tags,
     contentHash: row.content_hash,

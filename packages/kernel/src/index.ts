@@ -1,9 +1,9 @@
 // packages/kernel/src/index.ts — plan.md §6.3, verbatim.
 import type { AccessDecision, Actor, Rendered, Representation, Resource } from "@musebook/schema";
-import type { KernelPorts } from "./ports.js";
-import { getPorts, setPorts } from "./registry.js";
-import { resolveAccessWith } from "./access.js";
-import { renderResourceWith } from "./render/index.js";
+import type { KernelPorts } from "./ports";
+import { getPorts, setPorts } from "./registry";
+import { resolveAccessWith } from "./access";
+import { renderResourceWith } from "./render/index";
 
 export interface Kernel {
   resolveAccess(resource: Resource, actor: Actor): Promise<AccessDecision>;
@@ -61,11 +61,11 @@ export function mintsDurableGrant(resource: Resource): boolean {
   return resource.publishMode === "human_free_agent_paid";
 }
 
-export type { KernelPorts, SettleOutcome } from "./ports.js";
-export type { ResourcePort, GrantPort, PaymentPort, PolicyPort, Grant } from "./ports.js";
-export { loadResource } from "./load.js";
-export type { ResourceRow } from "./load.js";
-export { etagFor, linkHeaderFor, usageHeadersFor } from "./headers.js";
-export { formatPriceUsd } from "./price.js";
-export { variantIntentFor, accessToPublishMode, pricingLineFor } from "./projections.js";
-export { toAccessBadge, type AccessBadgeKind, type AccessBadgeView } from "./view.js";
+export type { KernelPorts, SettleOutcome } from "./ports";
+export type { ResourcePort, GrantPort, PaymentPort, PolicyPort, Grant } from "./ports";
+export { loadResource } from "./load";
+export type { ResourceRow } from "./load";
+export { etagFor, linkHeaderFor, usageHeadersFor } from "./headers";
+export { formatPriceUsd } from "./price";
+export { variantIntentFor, accessToPublishMode, pricingLineFor } from "./projections";
+export { toAccessBadge, type AccessBadgeKind, type AccessBadgeView } from "./view";

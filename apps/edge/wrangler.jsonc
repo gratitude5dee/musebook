@@ -201,6 +201,8 @@
   "vars": {
     "MUSEBOOK_LOG_LEVEL": "info",
     "ORIGIN_HOST": "musebook-web.vercel.app",
+    // Dev pairs override to http via --var (wrangler dev → next start).
+    "ORIGIN_SCHEME": "https",
     "CDN_HOST": "cdn.musebook.dev",
     "MEDIA_HOST": "media.musebook.dev",
     "ARTIFACT_HOST": "artifacts.musebook.dev",
@@ -227,6 +229,7 @@
     "MB_RELEASE_SHA": "",
     "CONSENT_BANNER_REGIONS": "",
     "R2_PRESIGN_TTL_S": "900",
+    "CF_ACCOUNT_ID": "e8f42c0430906e1515a2af01d5c1d2d1",
     "MOLTBOOK_MODE": "production",
     "MOLTBOOK_ALLOW_MOCK": "false",
     "X402_FACILITATOR_URL": "https://api.cdp.coinbase.com/platform/v2/x402",

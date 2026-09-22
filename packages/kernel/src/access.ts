@@ -6,8 +6,8 @@ import type {
   PaymentRequired,
   Resource,
 } from "@musebook/schema";
-import type { KernelPorts } from "./ports.js";
-import { PRIVATE_NO_STORE, PUBLIC_CACHEABLE, PUBLIC_CACHEABLE_AGENT_VARY } from "./cache.js";
+import type { KernelPorts } from "./ports";
+import { PRIVATE_NO_STORE, PUBLIC_CACHEABLE, PUBLIC_CACHEABLE_AGENT_VARY } from "./cache";
 
 /**
  * THE ONLY FUNCTION IN MUSEBOOK THAT READS publishMode.

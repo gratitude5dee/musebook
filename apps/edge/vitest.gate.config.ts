@@ -48,6 +48,10 @@ export default defineProject({
         },
         bindings: {
           MUSEBOOK_EDGE_SECRET: "test-edge-secret-0000",
+          // Real R2 S3 creds for the M7 presign round-trip (gate sources .env).
+          CF_ACCOUNT_ID: process.env.CF_ACCOUNT_ID ?? "missing",
+          R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID ?? "missing",
+          R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY ?? "missing",
           ORIGIN_HOST: "origin.test",
           X402_MODE: "live", // the gate matrix asserts real 402s — shadow serves 200
           // Sepolia tuple — assertAssetEnv (§6.7) cross-checks all four against

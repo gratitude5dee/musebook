@@ -1,6 +1,6 @@
 // packages/kernel/src/headers.ts — plan.md §6.6, verbatim.
 import type { AccessDecision, Representation, Resource } from "@musebook/schema";
-import { spdxUrl } from "./render/jsonld.js";
+import { spdxUrl } from "./render/jsonld";
 
 /**
  * The ETag is PER REPRESENTATION: W/"sha256-<first 16 hex of content_hash>-<as>",

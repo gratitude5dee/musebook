@@ -3,14 +3,14 @@
 // without an access answer. A denied decision still renders — the teaser plus the
 // challenge — which is why there is one function and not a `render` and `renderGated`.
 import type { AccessDecision, Rendered, Representation, Resource } from "@musebook/schema";
-import type { KernelPorts } from "../ports.js";
-import { etagFor, headersFor } from "../headers.js";
-import { renderHtml } from "./html.js";
-import { renderMarkdown } from "./markdown.js";
-import { renderJson } from "./json.js";
-import { jsonLdFor } from "./jsonld.js";
-import { renderMcp } from "./mcp.js";
-import { renderFeed } from "./feed.js";
+import type { KernelPorts } from "../ports";
+import { etagFor, headersFor } from "../headers";
+import { renderHtml } from "./html";
+import { renderMarkdown } from "./markdown";
+import { renderJson } from "./json";
+import { jsonLdFor } from "./jsonld";
+import { renderMcp } from "./mcp";
+import { renderFeed } from "./feed";
 
 const MEDIA_TYPES: Record<Representation, string> = {
   html: "text/html; charset=utf-8",
