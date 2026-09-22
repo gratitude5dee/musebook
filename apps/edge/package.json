@@ -18,12 +18,14 @@
     "@musebook/kernel": "workspace:*",
     "@musebook/x402": "workspace:*",
     "web-bot-auth": "0.2.0",
-    "pg": "catalog:"
+    "pg": "catalog:",
+    "@musebook/connectors": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "catalog:",
     "@cloudflare/workers-types": "catalog:",
     "@types/node": "26.6.2",
+    "@types/pg": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",

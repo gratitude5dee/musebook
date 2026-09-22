@@ -1238,6 +1238,20 @@ function psqlCmd(sql, url = process.env.SUPABASE_DB_URL ?? LOCAL_DB_URL) {
   if (tool?.kind === "docker") {
     if (!/127\.0\.0\.1|localhost/.test(url))
       return { r: null, blocked: "remote SUPABASE_DB_URL but no host psql" };
+    // A non-postgres login (e.g. musebook_worker) goes through the container's
+    // own TCP endpoint — docker exec -U <role> can't supply a password and
+    // postgres itself holds the musebook plane grants as ADMIN-not-SET, so
+    // SET ROLE inside app.enter would fail for it.
+    const u = url.match(/^postgres(?:ql)?:\/\/([^:@/]+)/)?.[1];
+    if (u && u !== "postgres") {
+      const pw = url.match(/^postgres(?:ql)?:\/\/[^:@/]+:([^@/]+)@/)?.[1] ?? "";
+      return {
+        r: null,
+        cmd:
+          `docker exec -e PGPASSWORD=${JSON.stringify(pw)} ${tool.container} ` +
+          `psql ${JSON.stringify(`postgresql://${u}@127.0.0.1:5432/postgres`)} -Atc ${JSON.stringify(sql)}`,
+      };
+    }
     return {
       r: null,
       cmd: `docker exec ${tool.container} psql -U postgres -Atc ${JSON.stringify(sql)}`,
@@ -1259,10 +1273,10 @@ function sqlCheck(sql, expect) {
 }
 
 /** Run arbitrary SQL, returning { code, out }. */
-function sqlRun(sql) {
+function sqlRun(sql, url) {
   // Flatten newlines: the command may travel through nested quoting layers
   // (docker exec bash -c "..."), where real newlines become literal \n.
-  const { cmd, blocked } = psqlCmd(sql.replace(/\s+/g, " "));
+  const { cmd, blocked } = psqlCmd(sql.replace(/\s+/g, " "), url);
   if (blocked) return { code: -1, out: blocked };
   return run(cmd);
 }
@@ -1456,6 +1470,7 @@ const MIGRATION_REGISTRY = [
   ["20260922091200_ops", 2],
   ["20260922091300_worker_role_and_rls_audit", 2],
   ["20260922091400_seed_reference", 2],
+  ["20260922091500_app_enter", 3],
   ["20260922091600_revenue_share", 8],
   ["20260922091700_agent_spend_reservations", 9],
   ["20260922091800_connector_credentials", 9],
@@ -1502,5 +1517,152 @@ export function m2MigrationSet() {
       errors.push(`${f}.sql on disk before its milestone — check the registry`);
   for (const f of expected)
     if (!onDisk.has(f)) errors.push(`${f}.sql listed in §16.8 but missing on disk`);
+  return { ok: errors.length === 0, errors };
+}
+
+// ---------------------------------------------------------------------------
+// M3 milestone checks — §16.5 verbatim. The vitest splits are by test-name
+// prefix (-t "M3.x"); the two suites are apps/edge/test/auth.test.ts (workerd)
+// and apps/web/test/auth.test.ts (SIWE union/domain binding).
+// ---------------------------------------------------------------------------
+
+const EDGE_AUTH_TEST = "pnpm vitest run --project edge test/auth.test.ts";
+const WEB_AUTH_TEST = "pnpm vitest run --project web test/auth.test.ts";
+const vitestSlice = (cmd, tag) => {
+  const r = run(`${cmd} -t "${tag}"`);
+  return { ok: r.code === 0, errors: r.code ? [r.out.slice(-2500)] : [] };
+};
+
+// M3.1 — all four actor classes resolve in the Worker from a constructed
+// Request under @cloudflare/vitest-plugin.
+export function m3ActorClasses() {
+  return vitestSlice(EDGE_AUTH_TEST, "M3.1");
+}
+
+// M3.2 — the WBA matrix: absent→human, valid→agent, invalid/expired/unknown→
+// 401 never free, directory unreachable + no stale<7d→503 + Retry-After:30.
+export function m3WbaOutcomes() {
+  return vitestSlice(EDGE_AUTH_TEST, "M3.2");
+}
+
+// M3.3 — the three verify() overrides asserted at the call site: maxAge 300
+// (not the library's 86400), clockSkew 30, algorithms exactly ["ed25519"]
+// (an RSA-PSS signature is rejected).
+export function m3WbaOverrides() {
+  return vitestSlice(EDGE_AUTH_TEST, "M3.3");
+}
+
+// M3.4 — SSRF: a Signature-Agent at a link-local/martian URI is never fetched;
+// body abandoned at 64KB; the fetch carries a 2 s timeout.
+export function m3Ssrf() {
+  return vitestSlice(EDGE_AUTH_TEST, "M3.4");
+}
+
+// M3.5 — RFC 9421 is verified by vendored web-bot-auth@0.2.0, not hand-rolled:
+// no Signature-Input string building anywhere in apps/edge/src, no
+// compatibility_flags in the manifest (ed25519 runs under the pinned date).
+export function m3VendoredVerifier() {
+  const errors = [];
+  const r = vitestSlice(EDGE_AUTH_TEST, "M3.5");
+  errors.push(...r.errors);
+  const handRolled = rg("Signature-Input", ["apps/edge/src"], ["--glob", "*.ts"]);
+  for (const h of handRolled)
+    if (!h.includes("web-bot-auth")) errors.push(`hand-rolled RFC 9421 surface: ${h}`);
+  const flags = rg("compatibility_flags", ["apps/edge/wrangler.jsonc"]);
+  if (flags.length)
+    errors.push(`compatibility_flags present — dead config per CF-SPINE §12: ${flags.join("; ")}`);
+  return { ok: errors.length === 0, errors };
+}
+
+// M3.6 — request.cf.verifiedBot / verifiedBotCategory / score are recorded as
+// evidence only and never unlock paid: no `botManagement` read anywhere.
+export function m3BotSignalsEvidenceOnly() {
+  const errors = [];
+  const r = vitestSlice(EDGE_AUTH_TEST, "M3.6");
+  errors.push(...r.errors);
+  const hits = rg(
+    "botManagement",
+    ["apps", "packages"],
+    ["-i", "--glob", "!**/worker-configuration.d.ts"],
+  );
+  if (hits.length) errors.push(`request.cf.botManagement must never be read: ${hits.join("; ")}`);
+  return { ok: errors.length === 0, errors };
+}
+
+// M3.7 — verifyPayload's union drives the login branch: a tampered signature
+// lands on .valid:false and generateJWT is unreachable.
+export function m3SiweUnion() {
+  return vitestSlice(WEB_AUTH_TEST, "M3.7");
+}
+
+// M3.8 — domain binding: a payload minted for example.com fails verifyPayload
+// against NEXT_PUBLIC_THIRDWEB_AUTH_DOMAIN=musebook.dev.
+export function m3DomainBinding() {
+  return vitestSlice(WEB_AUTH_TEST, "M3.8");
+}
+
+// M3.9 — delegations stores token_hash only: zero token/api_key/secret columns.
+export function m3NoTokenColumns() {
+  return sqlCheck(
+    "select count(*) from information_schema.columns where table_schema='public' and table_name='delegations' and column_name in ('token','api_key','secret')",
+    "0",
+  );
+}
+
+// M3.10 — a feed:read token asked for post:write → 403 naming the scope.
+export function m3ScopeGate() {
+  return vitestSlice(EDGE_AUTH_TEST, "M3.10");
+}
+
+// M3.11 — the legacy bearer scheme is gone: no X-Mog-API-Key anywhere.
+export function m3NoMogKey() {
+  const hits = rg("X-Mog-API-Key|x-mog-api-key", ["apps", "packages"], ["-i"]);
+  return { ok: hits.length === 0, errors: hits };
+}
+
+// M3.12 — mint + revoke each append exactly one audit_log row (integration:
+// executes the real functions against the local database).
+export function m3AuditWrites() {
+  const dlg = "bbbbbbbb-bbbb-4bbb-8bbb-000000000002";
+  // app.audit_log_insert performs app.enter('musebook_jobs') — only a member
+  // with the SET grant may switch planes (postgres holds ADMIN-not-SET).
+  // musebook_worker is the production caller, so the check authenticates as it.
+  const workerUrl = `postgresql://musebook_worker:${process.env.MUSEBOOK_WORKER_DB_PASSWORD ?? "x"}@127.0.0.1:54322/postgres`;
+  const before = sqlRun(
+    `select count(*) from public.audit_log where delegation_id='${dlg}' and action in ('delegation.mint','delegation.revoke')`,
+  );
+  if (before.code !== 0) return { ok: false, errors: [], blocked: before.out.trim() };
+  // Separate psql calls: app.enter's `set local role` lasts to transaction end,
+  // so sibling statements in one -c run would execute under the switched plane.
+  const mint = sqlRun(
+    `select app.audit_log_insert(jsonb_build_object('actor','human_creator','actor_user_id','00000000-0000-4000-8000-000000000001','delegation_id','${dlg}','action','delegation.mint','target_kind','delegation','target_id','${dlg}'))`,
+    workerUrl,
+  );
+  if (mint.code !== 0) return { ok: false, errors: [mint.out.slice(-1200)] };
+  const rev = sqlRun(
+    `select public.revoke_delegation('${dlg}','gate_m3_audit','00000000-0000-4000-8000-000000000001')`,
+    workerUrl,
+  );
+  if (rev.code !== 0) return { ok: false, errors: [rev.out.slice(-1200)] };
+  const after = sqlRun(
+    `select count(*) - ${before.out.trim()} from public.audit_log where delegation_id='${dlg}' and action in ('delegation.mint','delegation.revoke')`,
+  );
+  const delta = (after.out.trim().split("\n").pop() ?? "").trim();
+  return {
+    ok: delta === "2",
+    errors: delta === "2" ? [] : [`expected mint+revoke to append 2 audit rows, delta=${delta}`],
+  };
+}
+
+// M3.13 — exactly one Actor producer and one actorSchema: no resolvePrincipal,
+// one `export const actorSchema` in packages/schema/src.
+export function m3ActorShape() {
+  const errors = [];
+  const hits = rg("resolvePrincipal", ["apps", "packages"]);
+  if (hits.length) errors.push(`resolvePrincipal must not exist: ${hits.join("; ")}`);
+  const count = run(
+    "grep -rh 'export const actorSchema' packages/schema/src/*.ts | wc -l",
+  ).out.trim();
+  if (count !== "1") errors.push(`expected exactly 1 actorSchema export, found ${count}`);
   return { ok: errors.length === 0, errors };
 }

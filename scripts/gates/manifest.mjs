@@ -665,7 +665,92 @@ export const GATES = {
     },
   ],
 
-  // M3–M19: transcribed from §16.5 at the start of each milestone.
+  // §16.5 M3 — Identity and actor resolution in the Worker. Items 14/15 are
+  // the universal checks G-BUNDLE and G-R2-SEAL (activeFrom M3 above).
+  M3: [
+    {
+      id: "M3.1",
+      kind: "fn",
+      desc: "all four actor classes resolve in the Worker from a constructed Request",
+      run: checks.m3ActorClasses,
+    },
+    {
+      id: "M3.2",
+      kind: "fn",
+      desc: "WBA matrix: absent→human; valid→agent; invalid/expired/unknown→401; unreachable dir + no stale<7d→503 Retry-After:30",
+      run: checks.m3WbaOutcomes,
+    },
+    {
+      id: "M3.3",
+      kind: "fn",
+      desc: "call-site overrides asserted: maxAge 300, clockSkew 30, algorithms exactly [ed25519] (RSA-PSS rejected)",
+      run: checks.m3WbaOverrides,
+    },
+    {
+      id: "M3.4",
+      kind: "fn",
+      desc: "SSRF: non-allowlisted Signature-Agent never fetched; body abandoned at 64KB; 2s timeout",
+      run: checks.m3Ssrf,
+    },
+    {
+      id: "M3.5",
+      kind: "fn",
+      desc: "no hand-rolled RFC 9421 (no Signature-Input building in src); ed25519 on pinned compat date, no flags",
+      run: checks.m3VendoredVerifier,
+    },
+    {
+      id: "M3.6",
+      kind: "fn",
+      desc: "verifiedBot/verifiedBotCategory/score recorded as evidence only; no botManagement reads",
+      run: checks.m3BotSignalsEvidenceOnly,
+    },
+    {
+      id: "M3.7",
+      kind: "fn",
+      desc: "verifyPayload union drives login: tampered signature → .valid:false, generateJWT unreachable",
+      run: checks.m3SiweUnion,
+    },
+    {
+      id: "M3.8",
+      kind: "fn",
+      desc: "domain binding negative: example.com payload fails verifyPayload vs musebook.dev",
+      run: checks.m3DomainBinding,
+    },
+    {
+      id: "M3.9",
+      kind: "fn",
+      desc: "delegations has zero token/api_key/secret columns",
+      run: checks.m3NoTokenColumns,
+      prereq: "H2",
+    },
+    {
+      id: "M3.10",
+      kind: "fn",
+      desc: "feed:read token → post:write → 403 naming the missing scope",
+      run: checks.m3ScopeGate,
+    },
+    {
+      id: "M3.11",
+      kind: "fn",
+      desc: "no X-Mog-API-Key / x-mog-api-key anywhere in apps or packages",
+      run: checks.m3NoMogKey,
+    },
+    {
+      id: "M3.12",
+      kind: "fn",
+      desc: "mint + revoke each append exactly one audit_log row (live DB integration)",
+      run: checks.m3AuditWrites,
+      prereq: "H2",
+    },
+    {
+      id: "M3.13",
+      kind: "fn",
+      desc: "no resolvePrincipal; exactly one `export const actorSchema` in packages/schema/src",
+      run: checks.m3ActorShape,
+    },
+  ],
+
+  // M4–M19: transcribed from §16.5 at the start of each milestone.
 };
 
 export const MILESTONE_TITLES = {
