@@ -552,7 +552,11 @@ export function gAxe() {
   return { ok: r.ok, errors: r.ok ? [] : [`axe sweep: ${(r.errors ?? []).join("").slice(-1500)}`] };
 }
 
-// G-FAKE-TX — no fabricated hash; `settled` written only in settle.ts.
+// G-FAKE-TX — no fabricated hash; a `settled` status is WRITTEN only in
+// settle.ts. The regex is write-shaped (status: 'settled' / status = 'settled')
+// because §16.5 M8.10 guards assignments, not the status vocabulary — type
+// unions (`"pending" | "settled"`), switch discriminant labels and reads all
+// legitimately name it (kernel/ports.ts, access.ts, generated DB types).
 export function fakeTx() {
   const errors = [];
   const hits = rg(
@@ -563,9 +567,9 @@ export function fakeTx() {
   if (hits.length)
     errors.push(`fabricated-looking transaction hash outside fixtures:\n${hits.join("\n")}`);
   const s = rg(
-    String.raw`['"]settled['"]`,
+    String.raw`status\s*[:=]\s*['"]settled['"]`,
     ["apps", "packages"],
-    ["-g", "!packages/x402/src/settle.ts", "-g", "!**/test/**"],
+    ["-g", "!packages/x402/src/settle.ts", "-g", "!**/test/**", "-g", "!**/database.types.ts"],
   );
   if (s.length)
     errors.push(`'settled' status written outside packages/x402/src/settle.ts:\n${s.join("\n")}`);
@@ -2469,4 +2473,141 @@ export function m7BucketNaming() {
     ok: hits.length === 0,
     errors: hits.length ? [`client-side bucket names:\n${hits.join("\n")}`] : [],
   };
+}
+
+// ---------------------------------------------------------------------------
+// M8 milestone checks — §16.5 verbatim. The wire tier is test/gate/m8-wire
+// (real x402.org facilitator round trip, workerd) and the DB tier is
+// test/gate/m8-x402 (app.* functions as musebook_worker).
+// ---------------------------------------------------------------------------
+
+const M8_WIRE = `${EG} test/gate/m8-wire.test.ts`;
+const M8_DB = `${EG} test/gate/m8-x402.test.ts`;
+
+// M8.1 — testnet round trip through the Worker: 402 names X402_PAY_TO +
+// X402_NETWORK in accepts[], a Base Sepolia payment replays to a 200 body.
+export function m8RoundTrip() {
+  return vitestSlice(M8_WIRE, "x402_always");
+}
+
+// M8.2 — the wire test fires the signed authorization 101 ways concurrently
+// (one paying fetch + 100 replays); the SQL tier proves the unique nonce
+// claim. Exactly one settlement row, never a second settle.
+export function m8OneSettlement() {
+  const a = vitestSlice(M8_DB, "claims the nonce exactly once");
+  const b = vitestSlice(M8_WIRE, "x402_always");
+  const errors = [...(a.errors ?? []), ...(b.errors ?? [])];
+  return { ok: a.ok && b.ok, errors };
+}
+
+// M8.3 — G-FRESH is green AND it bites: a fixture that reads a grant on
+// HYPERDRIVE_CACHED must turn the check red, and removing it restores green.
+export function m8FreshBites() {
+  const fixture = join(ROOT, "apps/edge/src/kernel/__gate_fresh_bite.ts");
+  const errors = [];
+  const green = gFresh();
+  if (!green.ok) errors.push(...green.errors);
+  writeFileSync(
+    fixture,
+    `// gate fixture: a grant read pinned to the cached pool must fail G-FRESH.\nexport const grantRead = "grant"; /* HYPERDRIVE_CACHED */\n`,
+  );
+  try {
+    const red = gFresh();
+    if (red.ok) errors.push("G-FRESH stayed green with a CACHED grant read in apps/edge/src");
+  } finally {
+    rmSync(fixture, { force: true });
+  }
+  const after = gFresh();
+  if (!after.ok) errors.push(...(after.errors ?? []));
+  return { ok: errors.length === 0, errors };
+}
+
+// M8.4 — KV caches positives only: no GRANTS.put carries deny/false/null,
+// and a KV miss falls through to Postgres (grants.ts read-through).
+export function m8KvPositivesOnly() {
+  const errors = [];
+  for (const h of rg(String.raw`GRANTS\.put`, ["apps/edge/src"]))
+    if (/deny|false|null/i.test(h)) errors.push(`negative grant cached: ${h}`);
+  const src = readFileSync(join(ROOT, "apps/edge/src/kernel/grants.ts"), "utf8");
+  if (!/env\.GRANTS/.test(src) || !/readGrantFresh|HYPERDRIVE_FRESH/.test(src))
+    errors.push("grants.ts: no KV read-through to a FRESH Postgres read found");
+  return { ok: errors.length === 0, errors };
+}
+
+// M8.5 — mintsDurableGrant honesty on the wire: a settled hfap purchase
+// leaves an access_grants row bound to content_hash; x402_always leaves none.
+export function m8DurableGrantHonest() {
+  return vitestSlice(M8_WIRE, "human_free_agent_paid");
+}
+
+// M8.6 — the paid-media gate holds: no grant → 402 + zero bytes; grant → 200.
+// G-R2-SEAL stays green over all three buckets.
+export async function m8PaidMediaGate() {
+  const slice = vitestSlice(`${EG} test/gate/r2-split.test.ts`, "paid media");
+  const seal = await r2Seal();
+  const errors = [...(slice.errors ?? []), ...(seal.errors ?? [])];
+  return { ok: slice.ok && seal.ok, errors };
+}
+
+// M8.7 — EIP-712 domain correctness on the target network: the script
+// eth_calls name()/version() against X402_ASSET_ADDRESS and the wrong-domain
+// signature is rejected by the facilitator before any nonce claim.
+export function m8AssetDomain() {
+  const errors = [];
+  const r = run("pnpm exec tsx scripts/assert-asset-domain.ts");
+  if (r.code !== 0) errors.push(`assert-asset-domain exit ${r.code}: ${r.out.slice(-1200)}`);
+  const slice = vitestSlice(M8_WIRE, "wrong-domain");
+  if (!slice.ok) errors.push(...(slice.errors ?? []));
+  return { ok: errors.length === 0, errors };
+}
+
+// M8.8 — no settlement key and no EIP-712 recovery at the edge; G-BUNDLE
+// still reports no viem/node:fs/node:path in the edge bundle.
+export function m8NoEdgeRecovery() {
+  const errors = [];
+  const scopes = ["apps/edge/src", "apps/mcp/src"].filter((d) => existsSync(join(ROOT, d)));
+  for (const h of rg(String.raw`hashTypedData|recoverTypedDataAddress|createPublicClient`, scopes))
+    errors.push(`EIP-712 recovery surface at the edge: ${h}`);
+  const b = edgeBundle();
+  if (!b.ok) errors.push(...(b.errors ?? []));
+  return { ok: errors.length === 0, errors };
+}
+
+// M8.11 — the ledger carries the policy version, never a bare integer: no
+// null revenue_share_version on settlements or posts, no platform_fee_bps
+// literal at the edge.
+export function m8PolicyVersioned() {
+  const errors = [];
+  const a = sqlCheck(
+    "select count(*) from public.x402_settlements where revenue_share_version is null",
+    "0",
+  );
+  if (!a.ok) errors.push(...a.errors);
+  const b = sqlCheck("select count(*) from public.posts where revenue_share_version is null", "0");
+  if (!b.ok) errors.push(...b.errors);
+  for (const h of rg("platform_fee_bps", ["apps/edge/src"]))
+    errors.push(`bare fee integer at the edge: ${h}`);
+  return { ok: errors.length === 0, errors };
+}
+
+// M8.12 — the mainnet fallback is configuration, not memory: OPERATIONS.md
+// records the production X402_MODE with a date and the /supported evidence,
+// and apps/edge/wrangler.jsonc's prod X402_MODE agrees with the record.
+export function m8MainnetModeRecorded() {
+  const errors = [];
+  const opsPath = join(ROOT, "OPERATIONS.md");
+  const ops = existsSync(opsPath) ? readFileSync(opsPath, "utf8") : "";
+  const recorded = /X402_MODE[^\n]*?(live|shadow)/i.exec(ops)?.[1]?.toLowerCase() ?? null;
+  if (recorded === null)
+    errors.push("OPERATIONS.md does not record the production X402_MODE (live|shadow)");
+  if (!/eip155:8453/.test(ops))
+    errors.push("OPERATIONS.md lacks the facilitator /supported evidence (eip155:8453)");
+  if (!/20\d{2}-\d{2}-\d{2}/.test(ops))
+    errors.push("OPERATIONS.md lacks a date beside the mode record");
+  const w = readJsonc(join(ROOT, "apps/edge/wrangler.jsonc"));
+  const prodMode = w?.vars?.X402_MODE ?? null;
+  if (prodMode === null) errors.push("wrangler.jsonc prod vars carry no X402_MODE");
+  else if (recorded !== null && prodMode !== recorded)
+    errors.push(`wrangler prod X402_MODE=${prodMode} but OPERATIONS.md records ${recorded}`);
+  return { ok: errors.length === 0, errors };
 }

@@ -20,7 +20,8 @@
     "@musebook/media": "workspace:*",
     "@musebook/muse-mixer": "workspace:*",
     "@musebook/schema": "workspace:*",
-    "pg": "catalog:"
+    "pg": "catalog:",
+    "@musebook/x402": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "catalog:",

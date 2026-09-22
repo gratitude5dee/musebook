@@ -17,7 +17,7 @@ const atomic = z.string().regex(/^[0-9]{1,78}$/, "atomic units as a decimal stri
 export const paymentRequirementsSchema = z.object({
   scheme: z.string(), // 'exact'
   network: caip2, // 'eip155:8453'
-  amount: atomic, // v2 renamed this from v1's maxAmountRequired
+  amount: atomic, // v2's rename of the v1 amount field
   asset: z.string(), // ERC-20 contract address, always
   payTo: z.string(),
   maxTimeoutSeconds: z.number().int().positive(),

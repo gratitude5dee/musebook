@@ -116,13 +116,13 @@ export async function seededGrantToken(postId: string): Promise<string> {
   await db(
     `insert into public.x402_settlements
        (id, post_id, content_hash, network, asset, payer, nonce,
-        amount_atomic, pay_to, transaction, status, facilitator_url, settled_at)
+        amount_atomic, pay_to, transaction, status, facilitator_url, settled_at, revenue_share_version)
      select $1::uuid, p.id, p.content_hash, 'eip155:84532',
             '0x036cbd53842c5426634e7929541ec2318f3dcf7e', $2,
             '0x' || lpad(encode(gen_random_bytes(28), 'hex'), 56, '0') || 'feed0002',
             p.price_atomic, '0x0000000000000000000000000000000000000001',
             '0x' || lpad(encode(gen_random_bytes(28), 'hex'), 56, '0') || 'feed0003',
-            'settled'::settlement_status, 'https://x402.org/facilitator', now()
+            'settled'::settlement_status, 'https://x402.org/facilitator', now(), p.revenue_share_version
        from public.posts p where p.id = $3::uuid`,
     [id, payer, postId],
   );

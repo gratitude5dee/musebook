@@ -54,6 +54,7 @@ export default defineConfig({
         "packages/kernel/src/**/*.ts",
         "packages/connectors/src/**/*.ts",
         "packages/telemetry/src/**/*.ts",
+        "packages/x402/src/**/*.ts",
         "apps/edge/src/**/*.ts",
         "apps/worker/src/**/*.ts",
         "apps/web/proxy.ts",
@@ -84,6 +85,13 @@ export default defineConfig({
         "packages/kernel/src/**": {
           statements: 95,
           branches: 92,
+          functions: 95,
+          lines: 95,
+          perFile: true,
+        },
+        "packages/x402/src/**": {
+          statements: 95,
+          branches: 90,
           functions: 95,
           lines: 95,
           perFile: true,

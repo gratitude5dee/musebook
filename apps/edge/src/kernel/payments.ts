@@ -2,11 +2,21 @@
 // challenge() pins the resolved quote through app.pin_quote (§6.7.6: one
 // statement, the plane entered inside the function, max_timeout_seconds 60 ==
 // QUOTE_TTL_SECONDS, rate_source 'direct_usdc', pay_to always the treasury).
-// settle() ships with §6.8's settleOnce at M8 — 'unavailable' is the fail-closed
-// answer: facilitator_unavailable -> 503, never a free 200 (spine invariant 9).
+// settle() is §6.8's settleOnce: facilitator verify -> replay-claim insert ->
+// settle -> flip, then the §6.10 three-leg ledger insert on 'settled'.
 import type { Actor, PaymentRequired, Resource } from "@musebook/schema";
 import type { PaymentPort, SettleOutcome } from "@musebook/kernel";
-import { buildPaymentRequired, QUOTE_TTL_SECONDS, X402_ASSETS, type Quote } from "@musebook/x402";
+import {
+  buildPaymentRequired,
+  FacilitatorClient,
+  makeCdpAuthHeaders,
+  postLegsForSettlement,
+  QUOTE_TTL_SECONDS,
+  settleOnce,
+  X402_ASSETS,
+  type Quote,
+} from "@musebook/x402";
+import { makeSettlementStore } from "../db/settlements.js";
 import type { DbClient } from "../db/client.js";
 
 /** §6.7 asset-domain drift guard, Worker half: the env agrees with itself and
@@ -27,6 +37,46 @@ export function assertAssetEnv(env: Env): void {
     throw new Error("x402 asset env disagrees with X402_ASSETS — refusing to serve (§6.7)");
   }
   asserted = true;
+}
+
+// ── Facilitator, per isolate (§6.7.5). The client's failure-breaker state is
+// isolate state on purpose; construction env comes from the first request that
+// needs it, which is fine because env vars are per-deploy constants.
+let facilitator: FacilitatorClient | null = null;
+function facilitatorFor(env: Env): FacilitatorClient {
+  facilitator ??= new FacilitatorClient({
+    url: env.X402_FACILITATOR_URL ?? "",
+    network: env.X402_NETWORK,
+    timeoutMs: 8_000,
+    ...(env.CDP_API_KEY_ID !== undefined && env.CDP_API_KEY_SECRET !== undefined
+      ? { authHeaders: makeCdpAuthHeaders(env.CDP_API_KEY_ID, env.CDP_API_KEY_SECRET) }
+      : {}),
+  });
+  return facilitator;
+}
+
+// GET <facilitator>/supported once per isolate; a configured facilitator that
+// cannot settle our (v2, exact, network) triple turns every gated route into
+// 'unavailable' -> 503 rather than minting 402s nothing can pay (§6.7.5).
+let ready: Promise<void> | null = null;
+function assertSupported(env: Env): Promise<void> {
+  if (ready === null) {
+    const p = facilitatorFor(env)
+      .supported()
+      .then((supported) => {
+        const ok = supported.kinds.some(
+          (k) => k.x402Version === 2 && k.scheme === "exact" && k.network === env.X402_NETWORK,
+        );
+        if (!ok) {
+          throw new Error(`facilitator does not support ${env.X402_NETWORK} v2 exact`);
+        }
+      });
+    p.catch(() => {
+      if (ready === p) ready = null;
+    });
+    ready = p;
+  }
+  return ready;
 }
 
 export function makePaymentPort(env: Env, fresh: DbClient): PaymentPort {
@@ -82,12 +132,31 @@ export function makePaymentPort(env: Env, fresh: DbClient): PaymentPort {
       return required;
     },
 
-    // §6.8's settleOnce (facilitator verify -> replay-claim -> settle -> flip)
-    // lands with the settlement milestone. 'unavailable' maps to
-    // facilitator_unavailable -> 503: the paywall fails closed, never open.
-    // eslint-disable-next-line @typescript-eslint/require-await
-    async settle(): Promise<SettleOutcome> {
-      return { kind: "unavailable" };
+    async settle(input: {
+      resource: Resource;
+      actor: Actor;
+      resourceUrl: string;
+    }): Promise<SettleOutcome> {
+      assertAssetEnv(env);
+      try {
+        await assertSupported(env);
+      } catch {
+        return { kind: "unavailable" };
+      }
+      const outcome = await settleOnce({
+        store: makeSettlementStore(fresh),
+        facilitator: facilitatorFor(env),
+        resource: input.resource,
+        actor: input.actor,
+        now: new Date(),
+        idempotentWindowSeconds: Number(env.X402_IDEMPOTENT_WINDOW_SECONDS ?? "120"),
+      });
+      // Legs run only on the 'settled' arm: the 'idempotent' arm replays a row
+      // whose legs the original settle posted (or the reconciler will).
+      if (outcome.kind === "settled") {
+        await postLegsForSettlement(fresh, outcome.settlementId);
+      }
+      return outcome;
     },
   };
 }

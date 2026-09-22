@@ -9,8 +9,9 @@ declare global {
     MUSEBOOK_EDGE_SECRET: string;
     /** x402 pay-to address — a Worker secret (§3.7). */
     X402_PAY_TO: string;
-    /** Facilitator URL may be overridden by secret when a key is attached. */
-    X402_FACILITATOR_API_KEY?: string;
+    /** CDP facilitator request-signing key pair — secrets (§6.7.5). */
+    CDP_API_KEY_ID?: string;
+    CDP_API_KEY_SECRET?: string;
     /** R2 multipart signing credentials — scoped to musebook-uploads alone
      *  (§3.7). A credential reaching musebook-paid is a paywall bypass. */
     R2_ACCESS_KEY_ID: string;

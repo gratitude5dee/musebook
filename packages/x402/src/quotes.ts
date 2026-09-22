@@ -1,6 +1,6 @@
 // packages/x402/src/quotes.ts — plan.md §6.7.6, verbatim.
 import type { PaymentRequired, PaymentRequirements } from "@musebook/schema";
-import { X402_ASSETS } from "./assets.js";
+import { X402_ASSETS } from "./assets";
 
 export interface Quote {
   readonly id: string;

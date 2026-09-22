@@ -33,6 +33,7 @@
     "postgres": "3.4.7",
     "typescript": "catalog:",
     "vitest": "catalog:",
-    "wrangler": "catalog:"
+    "wrangler": "catalog:",
+    "viem": "2.56.8"
   }
 }

@@ -5,5 +5,6 @@ export default defineProject({
     name: "x402",
     environment: "node",
     include: ["test/**/*.test.ts"],
+    exclude: ["test/live/**"],
   },
 });

@@ -84,3 +84,22 @@ Seven work + seven DLQ, all §4.13.2 names: `musebook-agent-cancel`,
   the Worker from the request path and takes the paywall with it.
 - `origin.musebook.dev` is the break-glass DNS-only path to the Vercel origin.
   It carries no Worker route — which also means it carries no paywall.
+
+## x402 settlement mode — production record (§16.5 M8.12)
+
+As of **2026-09-22** production runs `X402_MODE=live` on `eip155:8453` (Base
+mainnet), asset `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` (USDC,
+EIP-712 domain `name="USD Coin"`, `version="2"`).
+
+The evidence that justifies `live` rather than the `shadow` fallback: the
+facilitator `GET {X402_FACILITATOR_URL}/supported` — the Coinbase CDP
+facilitator `https://api.cdp.coinbase.com/platform/v2/x402`, authenticated
+with the CDP JWT — returns a `kinds[]` entry with `"network":"eip155:8453"`
+and `"x402Version":2` (verified 2026-09-22). The preview env
+(`musebook-edge-preview`) stays `X402_MODE=shadow` on `eip155:84532`
+permanently — it must never settle real money.
+
+If a future facilitator cut fails this evidence, flip prod's
+`apps/edge/wrangler.jsonc` `vars.X402_MODE` to `"shadow"` and update this
+record with the new date — the gate re-reads the pair and refuses a mode
+that is asserted but not evidenced.

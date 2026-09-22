@@ -4,6 +4,8 @@
 // wrangler.jsonc — a cron with no matching case is a §15.28 acceptance failure.
 import { sweepOutbox } from "./cron/outbox.js";
 import { rebuildAnonSlates } from "./cron/slates.js";
+import { reconcileSettlements } from "./cron/settlements.js";
+import { assertAssetDomainCron } from "./cron/asset-domain.js";
 import { dispatch } from "./consumers/index.js";
 import { SlateBuilder } from "./slate-builder.js";
 
@@ -24,13 +26,15 @@ export default {
   async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
     switch (controller.cron) {
       case "* * * * *":
-        return sweepOutbox(env, ctx);
+        await sweepOutbox(env, ctx);
+        return reconcileSettlements(env);
       case "*/5 * * * *":
         return noop(); // §15's runAlertPass lands at M15
       case "0 * * * *":
         return rebuildAnonSlates(env, ctx); // §9.19 + §13 rollups hang off this one
       case "0 4 * * 1":
-        return noop(); // §12's refreshPlatformConstraints lands later
+        // §6.7's asset-domain drift check; §12's refreshPlatformConstraints joins it later.
+        return assertAssetDomainCron(env);
       case "*/15 * * * *":
         return noop(); // §10's agent maintenance lands at M10
       case "17 3 * * *":

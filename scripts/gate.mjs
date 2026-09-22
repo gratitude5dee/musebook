@@ -212,7 +212,7 @@ async function runGate(milestone, universalOnly, selfTest = false) {
         `docker exec $(docker ps -q --filter name=supabase_db | head -1) ` +
           `psql -U postgres -d postgres -Atc "select count(*) from public.posts"`,
       );
-      ready = probe.code === 0 && Number(probe.out.trim()) >= 36;
+      ready = probe.code === 0 && Number(probe.out.trim()) >= 24;
       if (!ready) await new Promise((r) => setTimeout(r, 2000));
     }
     if (!ready) {

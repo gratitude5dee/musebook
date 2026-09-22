@@ -161,6 +161,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    /* The sticky header is bg-background/80 over a scrolling page; an opaque
+       root keeps the blend over the theme color instead of the white canvas. */
+    @apply bg-background;
+  }
   body {
     @apply bg-background text-foreground;
     font-synthesis-weight: none;

@@ -62,6 +62,14 @@ export default defineProject({
           X402_ASSET_EIP712_NAME: "USDC",
           X402_ASSET_DECIMALS: "6",
           X402_PAY_TO: "0x0000000000000000000000000000000000000001",
+          // Testnet facilitator for the M8 wire tier: the Sepolia tuple above
+          // rules CDP out only by network, but the gate has no CDP secrets —
+          // x402.org's facilitator is unauthenticated and testnet-only, which
+          // is exactly what this tier settles through.
+          X402_FACILITATOR_URL: process.env.X402_FACILITATOR_URL ?? "https://x402.org/facilitator",
+          // The funded Sepolia payer for the M8.1/2/5 live checks (H9); the
+          // test skips loudly when unset.
+          X402_TEST_PAYER_KEY: process.env.X402_TEST_PAYER_KEY ?? "missing",
         },
       },
     }),
