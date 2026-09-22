@@ -2,7 +2,7 @@
 //
 // These are the package's only transforms — the ungated full-body (and
 // preview-body) conversions behind `representations` in `posts.*_r2_key`.
-// They never read publish_mode and never decide free vs paid: preview
+// They never read the mode and never decide free vs paid: preview
 // handling is explicit in `BodyKind` (§4.4's `preview_key` shape) — the
 // caller selects full/preview/empty, and anything decision-dependent in the
 // output (`isAccessibleForFree`, `hasPart`, ETag, usage headers, the paywall

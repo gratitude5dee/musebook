@@ -1,0 +1,34 @@
+402
+text/html; charset=utf-8
+cache: private, private, no-store, must-revalidate
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Always-Paid Article — Musebook</title>
+<meta name="description" content="Every read is paid.">
+<link rel="canonical" href="https://musebook.dev/p/the-gated-article">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Always-Paid Article">
+<meta property="og:url" content="https://musebook.dev/p/the-gated-article">
+<meta property="og:description" content="Every read is paid.">
+<meta property="article:published_time" content="2026-09-22T12:00:00Z">
+<meta property="article:author" content="https://musebook.dev/@author-one">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://musebook.dev/p/the-gated-article#post","mainEntityOfPage":{"@type":"WebPage","@id":"https://musebook.dev/p/the-gated-article"},"headline":"The Always-Paid Article","description":"Every read is paid.","inLanguage":"en","datePublished":"2026-09-22T12:00:00Z","dateModified":"2026-09-22T12:00:00Z","keywords":"musebook, x402","author":{"@type":"Person","name":"Author One","url":"https://musebook.dev/@author-one"},"publisher":{"@type":"Organization","name":"Musebook","url":"https://musebook.dev"},"isAccessibleForFree":false,"license":"https://creativecommons.org/licenses/by/4.0/","usageInfo":"https://musebook.dev/api/posts/00000000-0000-4000-8000-000000000003/license","hasPart":{"@type":"WebPageElement","isAccessibleForFree":false,"cssSelector":".musebook-paywall"}}</script>
+<style>:root{--background:#FBFAF7;--foreground:#12100E;--muted-foreground:#5E584F;--card:#FFFFFF;--border-strong:#7D766B;--gate:#8A5A00;--gate-tint:#FBF2DF;--radius:0.625rem;--font-serif:ui-serif,Georgia,serif;--font-sans:ui-sans-serif,system-ui,sans-serif;}body{margin:0 auto;max-width:44rem;padding:2rem 1.25rem;background:var(--background);color:var(--foreground);font-family:var(--font-serif);font-size:1.0625rem;line-height:1.7;}h1{font-size:2rem;line-height:1.2;}a{color:var(--gate);}.musebook-paywall{margin-top:2.5rem;padding:1.5rem;border:1px solid var(--border-strong);border-radius:var(--radius);background:var(--gate-tint);font-family:var(--font-sans);}.musebook-paywall .unlock{display:inline-block;margin-top:0.75rem;padding:0.625rem 1.25rem;border:1px solid var(--border-strong);border-radius:var(--radius);background:var(--card);color:var(--foreground);text-decoration:none;font-weight:600;}.musebook-paywall .how{color:var(--muted-foreground);font-size:0.875rem;}</style>
+</head>
+<body>
+<article><h1>The Always-Paid Article</h1>
+<p>Every read is paid — human or agent. The teaser is all you get for free.</p>
+<p>A second block of padding so the paid tail sits well past the preview boundary. This paragraph exists only to push the marker beyond four hundred characters, the deterministic teaser's cutoff used by every stub port in this suite.</p></article>
+<div class="musebook-paywall">
+<p><strong>This one is paid.</strong></p>
+<p>Unlock the rest for $0.25. @author-one gets the creator share.</p>
+<p><a class="unlock" href="https://musebook.dev/pay/00000000-0000-4000-8000-000000000003">Unlock · $0.25</a></p>
+<p><a class="how" href="https://musebook.dev/publishing-modes#x402">How x402 works</a></p>
+</div>
+<script type="module" defer src="/unlock.js"></script>
+</body>
+</html>

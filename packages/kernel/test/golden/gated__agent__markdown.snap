@@ -1,0 +1,25 @@
+402
+text/markdown; charset=utf-8
+cache: private, private, no-store, must-revalidate
+---
+---
+title: "The Always-Paid Article"
+slug: "the-gated-article"
+kind: "article"
+author: "@author-one"
+display_name: "Author One"
+license: "CC-BY-4.0"
+content_hash: "9ece894f03754d19cf087b9717f85e1cd7da0da84229b82f7d67ed077cf4c5ac"
+published: "2026-09-22T12:00:00Z"
+updated: "2026-09-22T12:00:00Z"
+tags: ["musebook", "x402"]
+---
+# The Always-Paid Article
+
+Every read is paid — human or agent. The teaser is all you get for free.
+
+A second block of padding so the paid tail sits well past the preview boundary. This paragraph exists only to push the marker beyond four hundred characters, the deterministic teaser's cutoff used by every stub port in this suite.
+
+<!-- musebook:paywall -->
+> This post is available via x402 for 0.250000 USDC on eip155:8453 per fetch.
+> Retry with a PAYMENT-SIGNATURE header. See https://musebook.dev/llms.txt

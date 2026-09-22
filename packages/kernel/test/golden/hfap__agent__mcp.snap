@@ -1,0 +1,35 @@
+402
+application/json
+cache: private, private, no-store, must-revalidate
+---
+{
+  "content": [
+    {
+      "text": "{\"x402Version\":2,\"error\":\"PAYMENT-SIGNATURE header is required\",\"resource\":{\"url\":\"https://musebook.dev/p/the-hfap-article\",\"description\":\"Free for humans; agents pay once per content_hash.\"},\"accepts\":[{\"scheme\":\"exact\",\"network\":\"eip155:8453\",\"amount\":\"2000\",\"asset\":\"0x833589fcd6edb6e08f4c7c32d4f71b54bda02913\",\"payTo\":\"0x769900f8faad0000000000000000000000000001\",\"maxTimeoutSeconds\":60,\"extra\":{\"name\":\"USD Coin\",\"version\":\"2\"}}]}",
+      "type": "text"
+    }
+  ],
+  "isError": true,
+  "structuredContent": {
+    "accepts": [
+      {
+        "amount": "2000",
+        "asset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+        "extra": {
+          "name": "USD Coin",
+          "version": "2"
+        },
+        "maxTimeoutSeconds": 60,
+        "network": "eip155:8453",
+        "payTo": "0x769900f8faad0000000000000000000000000001",
+        "scheme": "exact"
+      }
+    ],
+    "error": "PAYMENT-SIGNATURE header is required",
+    "resource": {
+      "description": "Free for humans; agents pay once per content_hash.",
+      "url": "https://musebook.dev/p/the-hfap-article"
+    },
+    "x402Version": 2
+  }
+}

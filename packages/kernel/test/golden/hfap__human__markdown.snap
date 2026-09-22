@@ -1,0 +1,23 @@
+200
+text/markdown; charset=utf-8
+cache: public, public, s-maxage=300, stale-while-revalidate=86400
+---
+---
+title: "The Human-Free Agent-Paid Article"
+slug: "the-hfap-article"
+kind: "article"
+author: "@author-one"
+display_name: "Author One"
+license: "CC-BY-4.0"
+content_hash: "6bcb233f16e8a892225c487c6596e10fa9813ad42477cd1a12dd4ebbf1f11409"
+published: "2026-09-22T12:00:00Z"
+updated: "2026-09-22T12:00:00Z"
+tags: ["musebook", "x402"]
+---
+# The Human-Free Agent-Paid Article
+
+Humans read this at 200. Agents get a 402 with a preview.
+
+A second block of padding so the paid tail sits well past the preview boundary. This paragraph exists only to push the marker beyond four hundred characters, the deterministic teaser's cutoff used by every stub port in this suite.
+
+The tail of the body, which a denied render must never emit: MUSEBOOK_PAID_BODY_MARKER_7f3a

@@ -1,0 +1,23 @@
+200
+text/markdown; charset=utf-8
+cache: public, public, s-maxage=300, stale-while-revalidate=86400
+---
+---
+title: "The Free Article"
+slug: "the-free-article"
+kind: "article"
+author: "@author-one"
+display_name: "Author One"
+license: "CC-BY-4.0"
+content_hash: "97e99cbe926959ccfc95d34cdb430689e3e01c333b4a10fb8c68de769b458b98"
+published: "2026-09-22T12:00:00Z"
+updated: "2026-09-22T12:00:00Z"
+tags: ["musebook", "x402"]
+---
+# The Free Article
+
+Free for everyone — humans and agents alike. No quote, no signature, no 402.
+
+A second block of padding so the paid tail sits well past the preview boundary. This paragraph exists only to push the marker beyond four hundred characters, the deterministic teaser's cutoff used by every stub port in this suite.
+
+The tail of the body, which a denied render must never emit: MUSEBOOK_PAID_BODY_MARKER_7f3a

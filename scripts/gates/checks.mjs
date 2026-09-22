@@ -1717,3 +1717,108 @@ export function m4NoAppImport() {
   const hits = rg("@musebook/content", ["apps"]);
   return { ok: hits.length === 0, errors: hits };
 }
+
+// ---------------------------------------------------------------------------
+// M5 milestone checks — §16.5 verbatim. Eleven checks: the 24 goldens on both
+// tiers, the SECRET_MARKER invariant, jsonld/feed assertions, fail-closed,
+// preview determinism, shared-cache posture, purity + mechanical greps, ETag
+// single-producer, and mintsDurableGrant.
+// ---------------------------------------------------------------------------
+
+const KERNEL_NODE = "pnpm vitest run --project kernel";
+const KERNEL_WORKERS = "pnpm vitest run --project kernel-workers";
+
+// M5.1 — all 24 golden fixtures pass, and byte-identically under both runners.
+export function m5GoldenFixtures() {
+  const node = run(`${KERNEL_NODE} test/golden.test.ts -t "golden fixtures"`);
+  if (node.code !== 0) return { ok: false, errors: [`node tier: ${node.out.slice(-2500)}`] };
+  const workers = run(`${KERNEL_WORKERS} test/golden.test.ts -t "golden fixtures"`);
+  if (workers.code !== 0)
+    return { ok: false, errors: [`workerd tier: ${workers.out.slice(-2500)}`] };
+  return { ok: true, errors: [] };
+}
+
+// M5.2 — SECRET_MARKER: denied bodies never contain MUSEBOOK_PAID_BODY_MARKER_7f3a.
+export function m5SecretMarker() {
+  return vitestSlice(`${KERNEL_NODE} test/golden.test.ts`, "SECRET_MARKER");
+}
+
+// M5.3 — jsonld (6 assertions on isAccessibleForFree/hasPart) + feed (3 on
+// content_text === summary).
+export function m5JsonldFeed() {
+  return vitestSlice(
+    `${KERNEL_NODE} test/golden.test.ts`,
+    "jsonld assertions|feed assertions",
+  );
+}
+
+// M5.4 — fail-closed: throwing GrantPort AND PaymentPort each → allow:false +
+// zero-length body.
+export function m5FailClosed() {
+  return vitestSlice(`${KERNEL_NODE} test/fail-closed.test.ts`, "fail-closed");
+}
+
+// M5.5 — preview determinism over 1,000 generated bodies; never splits a fence.
+export function m5PreviewDeterminism() {
+  return vitestSlice(`${KERNEL_NODE} test/preview.test.ts`, "previewOf determinism");
+}
+
+// M5.6 — cache.shared === false for every non-free allow reason; no
+// CDN-Cache-Control header in any casing.
+export function m5CachePosture() {
+  return vitestSlice(`${KERNEL_NODE} test/cache.test.ts`, "shared-cache assertions");
+}
+
+// M5.7 — purity: index callable with stub ports in plain Node AND no platform
+// imports under packages/kernel/src/.
+export function m5Purity() {
+  const slice = vitestSlice(`${KERNEL_NODE} test/purity.test.ts`, "kernel purity");
+  if (!slice.ok) return slice;
+  const hits = rg(String.raw`from '(cloudflare:|pg|@cloudflare/)`, [
+    "packages/kernel/src",
+  ]);
+  return { ok: hits.length === 0, errors: hits };
+}
+
+// M5.8 — containment: publish_mode|publishMode appears only inside the
+// kernel and the two named schema files, file by file.
+export function m5Containment() {
+  const hits = rg("publish_mode|publishMode", ["apps", "packages"], [
+    "-g", "*.ts",
+    "-g", "*.tsx",
+  ]).filter(
+    (h) =>
+      !h.startsWith("packages/kernel/") &&
+      // D34: the §3.4 allow-list exempts TEST fixture dirs (the rule's own
+      // default includes packages/kernel/test/); a fixture declares the mode
+      // value, it never branches on it — same exemption for the other floors.
+      !h.startsWith("packages/content/test/") &&
+      !h.startsWith("packages/x402/test/") &&
+      !h.startsWith("packages/schema/src/kernel.ts") &&
+      !h.startsWith("packages/schema/src/database.types.ts"),
+  );
+  return { ok: hits.length === 0, errors: hits };
+}
+
+// M5.9 — no app attached: nothing under apps/ imports @musebook/kernel yet.
+export function m5NoAppImport() {
+  const hits = rg("@musebook/kernel", ["apps"]);
+  return { ok: hits.length === 0, errors: hits };
+}
+
+// M5.10 — ETag per representation, produced only in packages/kernel/src/headers.ts.
+export function m5EtagSingleProducer() {
+  const slice = vitestSlice(`${KERNEL_NODE} test/etag.test.ts`, "etagFor");
+  if (!slice.ok) return slice;
+  const hits = rg(String.raw`W/"\$\{|W/"sha256-`, ["apps", "packages"], [
+    "-g", "*.ts",
+  ]).filter(
+    (h) => !h.startsWith("packages/kernel/src/headers.ts") && !h.includes("/test/"),
+  );
+  return { ok: hits.length === 0, errors: hits };
+}
+
+// M5.11 — mintsDurableGrant: true only for human_free_agent_paid.
+export function m5MintsDurableGrant() {
+  return vitestSlice(`${KERNEL_NODE} test/projections.test.ts`, "mintsDurableGrant");
+}
