@@ -1,0 +1,256 @@
+{
+  "milestone": "M4",
+  "commit": "c68a111f",
+  "branch": "m4-content",
+  "dirty": true,
+  "started": "2026-09-22T07:59:01.203Z",
+  "finished": "2026-09-22T07:59:01.203Z",
+  "seed_hash": "b7b32be0277a248d",
+  "versions": {
+    "node": "v24.21.0",
+    "pnpm": "12.5.1",
+    "next": "0.0.0",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11",
+    "wrangler": "4.136.1",
+    "@cloudflare/vitest-plugin": "1.2.0",
+    "supabase_cli": "2.117.0"
+  },
+  "checks": [
+    {
+      "id": "M4.1",
+      "status": "pass",
+      "duration_s": 0.83,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M4.2",
+      "status": "pass",
+      "duration_s": 0.8,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M4.3",
+      "status": "pass",
+      "duration_s": 0.89,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M4.4",
+      "status": "pass",
+      "duration_s": 0.88,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M4.5",
+      "status": "pass",
+      "duration_s": 4.69,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M4.6",
+      "status": "pass",
+      "duration_s": 0.01,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-BUILD",
+      "status": "pass",
+      "duration_s": 4.79,
+      "exit_code": 0,
+      "output": "packages/schema build$ tsc --build --pretty\npackages/schema build: Done\npackages/classify build$ tsc --build --pretty\npackages/connectors build$ tsc --build --pretty\npackages/content build$ tsc --build --pretty\npackages/distributor build$ tsc --build --pretty\npackages/content build: Done\npackages/media build$ tsc --build --pretty\npackages/classify build: Done\npackages/muse-mixer build$ tsc --build --pretty\npackages/connectors build: Done\npackages/ui build$ tsc --build --pretty\npackages/distributor build: Done\npackages/x402 build$ tsc --build --pretty\npackages/media build: Done\npackages/muse-mixer build: Done\npackages/artifacts build$ tsc --build --pretty\npackages/kernel build$ tsc --build --pretty\npackages/x402 build: Done\npackages/ui build: Done\napps/web build$ next build\npackages/kernel build: Done\napps/edge build$ tsc --build --pretty\napps/mcp build$ tsc --build --pretty\npackages/artifacts build: Done\napps/worker build$ tsc --build --pretty\napps/mcp build: Done\napps/edge build: Done\napps/worker build: Done\napps/web build: ▲ Next.js 16.3.5 (Turbopack)\napps/web build: ✓ Running next.config.ts took 16ms\napps/web build: \napps/web build:   Creating an optimized production build ...\napps/web build: ✓ Compiled successfully in 141ms\napps/web build:   Running TypeScript ...\napps/web build:   Finished TypeScript in 2.4s ...\napps/web build:   Collecting page data using 7 workers ...\napps/web build:   Generating static pages using 7 workers (0/9) ...\napps/web build:   Generating static pages using 7 workers (2/9) \napps/web build:   Generating static pages using 7 workers (4/9) \napps/web build:   Generating static pages using 7 workers (6/9) \napps/web build: ✓ Generating static pages using 7 workers (9/9) in 150ms\napps/web build:   Finalizing page optimization ...\napps/web build: \napps/web build: Route (app)\napps/web build: ┌ ○ /\napps/web build: ├ ○ /_not-found\napps/web build: ├ ƒ /api/agent/delegations\napps/web build: ├ ƒ /api/agent/delegations/[id]\napps/web build: ├ ƒ /api/auth/login\napps/web build: ├ ƒ /api/auth/logout\napps/web build: ├ ƒ /api/auth/me\napps/web build: ├ ƒ /api/auth/payload\napps/web build: └ ƒ /api/auth/supabase-token\napps/web build: \napps/web build: \napps/web build: ƒ Proxy (Middleware)\napps/web build: \napps/web build: ○  (Static)   prerendered as static content\napps/web build: ƒ  (Dynamic)  server-rendered on demand\napps/web build: \napps/web build: Done"
+    },
+    {
+      "id": "G-TYPES",
+      "status": "pass",
+      "duration_s": 1.4,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-BOUND",
+      "status": "pass",
+      "duration_s": 0.02,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-FMT",
+      "status": "pass",
+      "duration_s": 1.31,
+      "exit_code": 0,
+      "output": "Checking formatting...\nAll matched files use Prettier code style!"
+    },
+    {
+      "id": "G-TEST",
+      "status": "pass",
+      "duration_s": 9.07,
+      "exit_code": 0,
+      "output": "RUN  v4.1.11 /home/ubuntu/repos/musebook\n\n ✓ |artifacts| test/smoke.test.ts (1 test) 2ms\n ✓ |classify| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors| test/agent-scope.test.ts (14 tests) 10ms\n ✓ |content| test/hash-sensitivity.test.ts (1 test) 36ms\n ✓ |content| test/hash-roundtrip.test.ts (5 tests) 90ms\n ✓ |content| test/hash-stability.test.ts (2 tests) 88ms\n ✓ |content| test/coverage.test.ts (14 tests) 14ms\n ✓ |content| test/canonicalize.test.ts (11 tests) 5ms\n ✓ |content| test/smoke.test.ts (1 test) 2ms\n ✓ |content| test/etag.test.ts (8 tests) 3ms\n ✓ |content| test/representations.test.ts (17 tests) 11ms\n ✓ |content-workers| test/coverage.test.ts (14 tests) 6ms\n ✓ |content-workers| test/canonicalize.test.ts (11 tests) 3ms\n ✓ |content-workers| test/hash-roundtrip.test.ts (5 tests) 46ms\n ✓ |content-workers| test/hash-sensitivity.test.ts (1 test) 26ms\n ✓ |content-workers| test/hash-stability.test.ts (2 tests) 55ms\n ✓ |distributor| test/smoke.test.ts (1 test) 2ms\n ✓ |content-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |edge| test/rdns.test.ts (7 tests) 6ms\n ✓ |edge| test/wba-directory.test.ts (10 tests) 45ms\n ✓ |eslint-plugin-musebook| rules/no-platform-imports-in-mixer.test.ts (10 tests) 72ms\n ✓ |edge| test/smoke.test.ts (1 test) 2ms\n ✓ |eslint-plugin-musebook| rules/later-rules.test.ts (12 tests) 76ms\n ✓ |kernel| test/smoke.test.ts (1 test) 2ms\n ✓ |eslint-plugin-musebook| rules/no-publish-mode-outside-kernel.test.ts (12 tests) 75ms\n ✓ |content-workers| test/etag.test.ts (8 tests) 3ms\n ✓ |content-workers| test/representations.test.ts (17 tests) 11ms\n ✓ |media| test/smoke.test.ts (1 test) 2ms\n ✓ |muse-mixer| test/smoke.test.ts (1 test) 2ms\n ✓ |ui| test/smoke.test.ts (1 test) 2ms\n ✓ |schema| test/smoke.test.ts (1 test) 2ms\n ✓ |kernel-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |muse-mixer-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |mcp| test/smoke.test.ts (1 test) 2ms\n ✓ |web| test/proxy.test.ts (4 tests) 9ms\n ✓ |web| test/smoke.test.ts (1 test) 2ms\n ✓ |x402| test/smoke.test.ts (1 test) 2ms\n ✓ |web| test/auth.test.ts (3 tests) 53ms\n ✓ |worker| test/smoke.test.ts (1 test) 2ms\n ✓ |x402-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |edge| test/actor-paths.test.ts (14 tests) 35ms\n ✓ |edge| test/auth.test.ts (27 tests) 2134ms\n     ✓ the directory fetch has a 2 s timeout  2004ms\n\n Test Files  43 passed (43)\n      Tests  248 passed (248)\n   Start at  07:57:23\n   Duration  8.30s (transform 6.10s, setup 0ms, import 18.99s, tests 2.95s, environment 3ms)"
+    },
+    {
+      "id": "G-CFTEST",
+      "status": "pass",
+      "duration_s": 8.29,
+      "exit_code": 0,
+      "output": "RUN  v4.1.11 /home/ubuntu/repos/musebook\n\n ✓ |content-workers| test/canonicalize.test.ts (11 tests) 3ms\n ✓ |content-workers| test/coverage.test.ts (14 tests) 5ms\n ✓ |content-workers| test/hash-sensitivity.test.ts (1 test) 26ms\n ✓ |content-workers| test/hash-roundtrip.test.ts (5 tests) 58ms\n ✓ |content-workers| test/hash-stability.test.ts (2 tests) 64ms\n ✓ |content-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |edge| test/rdns.test.ts (7 tests) 6ms\n ✓ |edge| test/wba-directory.test.ts (10 tests) 48ms\n ✓ |edge| test/smoke.test.ts (1 test) 2ms\n ✓ |kernel-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |mcp| test/smoke.test.ts (1 test) 2ms\n ✓ |content-workers| test/etag.test.ts (8 tests) 3ms\n ✓ |content-workers| test/representations.test.ts (17 tests) 9ms\n ✓ |muse-mixer-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |worker| test/smoke.test.ts (1 test) 2ms\n ✓ |x402-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |edge| test/actor-paths.test.ts (14 tests) 47ms\n ✓ |edge| test/auth.test.ts (27 tests) 2102ms\n     ✓ the directory fetch has a 2 s timeout  2004ms\n\n Test Files  18 passed (18)\n      Tests  123 passed (123)\n   Start at  07:57:32\n   Duration  7.61s (transform 5.74s, setup 0ms, import 13.80s, tests 2.38s, environment 2ms)"
+    },
+    {
+      "id": "G-ENV",
+      "status": "pass",
+      "duration_s": 0.04,
+      "exit_code": 0,
+      "output": "G-ENV ok: 192 manifest names, both runtimes, generated files in sync"
+    },
+    {
+      "id": "G-ZOD",
+      "status": "pass",
+      "duration_s": 0.13,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-AGPL",
+      "status": "pass",
+      "duration_s": 0.04,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-LINT",
+      "status": "pass",
+      "duration_s": 2.9,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-LEGACY",
+      "status": "pass",
+      "duration_s": 0.01,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-VERCEL-DEAD",
+      "status": "pass",
+      "duration_s": 0.07,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-SKIP",
+      "status": "pass",
+      "duration_s": 0.04,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-CFDRY",
+      "status": "pass",
+      "duration_s": 0.93,
+      "exit_code": 0,
+      "output": "Scope: 4 of 17 workspace projects\napps/edge cf:dry$ wrangler deploy --dry-run --outdir .wrangler/dry\napps/worker cf:dry$ wrangler deploy --dry-run --outdir .wrangler/dry\napps/mcp cf:dry$ wrangler deploy --dry-run --outdir .wrangler/dry\napps/worker cf:dry: \napps/worker cf:dry:  ⛅️ wrangler 4.136.1\napps/worker cf:dry: ────────────────────\napps/worker cf:dry: Using \"CF_API_TOKEN\" environment variable. This is deprecated. Please use \"CLOUDFLARE_API_TOKEN\", instead.\napps/mcp cf:dry: \napps/mcp cf:dry:  ⛅️ wrangler 4.136.1\napps/mcp cf:dry: ────────────────────\napps/mcp cf:dry: Using \"CF_API_TOKEN\" environment variable. This is deprecated. Please use \"CLOUDFLARE_API_TOKEN\", instead.\napps/edge cf:dry: \napps/edge cf:dry:  ⛅️ wrangler 4.136.1\napps/edge cf:dry: ────────────────────\napps/edge cf:dry: Using \"CF_API_TOKEN\" environment variable. This is deprecated. Please use \"CLOUDFLARE_API_TOKEN\", instead.\napps/edge cf:dry: \u001b[33m▲ \u001b[43;33m[\u001b[43;30mWARNING\u001b[43;33m]\u001b[0m \u001b[1mMultiple environments are defined in the Wrangler configuration file, but no target environment was specified for the deploy command.\u001b[0m\napps/edge cf:dry: \napps/edge cf:dry:   To avoid unintentional changes to the wrong environment, it is recommended to explicitly specify the target environment using the `-e|--env` flag or CLOUDFLARE_ENV env variable.\napps/edge cf:dry:   If your intention is to use the top-level environment of your configuration simply pass an empty string to the flag to target such environment. For example `--env=\"\"`.\napps/edge cf:dry: \napps/edge cf:dry: \napps/mcp cf:dry: Total Upload: 0.59 KiB / gzip: 0.35 KiB\napps/mcp cf:dry: Your Worker has access to the following bindings:\napps/mcp cf:dry: Binding                                                                            Resource                      \napps/mcp cf:dry: env.OAUTH_KV (7daede739ca44bb98df9429bcecffb8b)                                    KV Namespace                  \napps/mcp cf:dry: env.GRANTS (f7f0e81c8e1f4eb190e366714ed6b0ad)                                      KV Namespace                  \napps/mcp cf:dry: env.Q_CLASSIFY (musebook-classify)                                                 Queue                         \napps/mcp cf:dry: env.Q_MEDIA (musebook-media)                                                       Queue                         \napps/mcp cf:dry: env.Q_MEDIA_FINALIZE (musebook-media-finalize)                                     Queue                         \napps/mcp cf:dry: env.Q_AGENT_CANCEL (musebook-agent-cancel)                                         Queue                         \napps/mcp cf:dry: env.HYPERDRIVE_CACHED (48c4c1c7cc734a8cb4031bd546160eae)                           Hyperdrive Config             \napps/mcp cf:dry: env.HYPERDRIVE_FRESH (5288b46cce7340438e840e1d0daeb23d)                            Hyperdrive Config             \napps/mcp cf:dry: env.PUBLIC_MEDIA (musebook-public)                                                 R2 Bucket                     \napps/mcp cf:dry: env.PAID_MEDIA (musebook-paid)                                                     R2 Bucket                     \napps/mcp cf:dry: env.TELEMETRY (musebook_telemetry)                                                 Analytics Engine Dataset      \napps/mcp cf:dry: env.MUSEBOOK_LOG_LEVEL (\"info\")                                                    Environment Variable          \napps/mcp cf:dry: env.MCP_ISSUER_URL (\"https://mcp.musebook.dev\")                                    Environment Variable          \napps/mcp cf:dry: env.MCP_AUTH_SERVER_URL (\"https://mcp.musebook.dev\")                               Environment Variable          \napps/mcp cf:dry: env.MCP_OAUTH_ACCESS_TOKEN_TTL_S (\"3600\")                                          Environment Variable          \napps/mcp cf:dry: env.MCP_OAUTH_AUTH_CODE_TTL_S (\"600\")                                              Environment Variable          \napps/mcp cf:dry: env.PREVIEW_CHARS (\"400\")                                                          Environment Variable          \napps/mcp cf:dry: env.MB_RELEASE_SHA (\"\")                    "
+    },
+    {
+      "id": "G-SEED",
+      "status": "pass",
+      "duration_s": 54.76,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-RLS",
+      "status": "pass",
+      "duration_s": 1.41,
+      "exit_code": 0,
+      "output": "/home/ubuntu/repos/musebook/supabase/tests/001_rls_matrix.test.sql .. ok\nAll tests successful.\nFiles=1, Tests=53,  0 wallclock secs ( 0.01 usr +  0.01 sys =  0.02 CPU)\nResult: PASS"
+    },
+    {
+      "id": "G-ROLE",
+      "status": "pass",
+      "duration_s": 0.28,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-DRIFT",
+      "status": "pass",
+      "duration_s": 3.66,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-BUNDLE",
+      "status": "pass",
+      "duration_s": 0.03,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-R2-SEAL",
+      "status": "pass",
+      "duration_s": 6.06,
+      "exit_code": 0,
+      "output": "",
+      "prereq": "H3"
+    },
+    {
+      "id": "G-COV",
+      "status": "pass",
+      "duration_s": 10.55,
+      "exit_code": 0,
+      "output": "RUN  v4.1.11 /home/ubuntu/repos/musebook\n      Coverage enabled with istanbul\n\n ✓ |artifacts| test/smoke.test.ts (1 test) 2ms\n ✓ |classify| test/smoke.test.ts (1 test) 3ms\n ✓ |connectors| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors| test/agent-scope.test.ts (14 tests) 8ms\n ✓ |content| test/hash-sensitivity.test.ts (1 test) 77ms\n ✓ |content| test/hash-roundtrip.test.ts (5 tests) 148ms\n ✓ |content| test/hash-stability.test.ts (2 tests) 102ms\n ✓ |content| test/canonicalize.test.ts (11 tests) 4ms\n ✓ |content| test/coverage.test.ts (14 tests) 8ms\n ✓ |content| test/smoke.test.ts (1 test) 2ms\n ✓ |content| test/etag.test.ts (8 tests) 3ms\n ✓ |content| test/representations.test.ts (17 tests) 12ms\n ✓ |content-workers| test/canonicalize.test.ts (11 tests) 4ms\n ✓ |content-workers| test/coverage.test.ts (14 tests) 7ms\n ✓ |content-workers| test/hash-roundtrip.test.ts (5 tests) 72ms\n ✓ |distributor| test/smoke.test.ts (1 test) 2ms\n ✓ |content-workers| test/hash-sensitivity.test.ts (1 test) 36ms\n ✓ |content-workers| test/hash-stability.test.ts (2 tests) 89ms\n ✓ |content-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |edge| test/rdns.test.ts (7 tests) 7ms\n ✓ |edge| test/wba-directory.test.ts (10 tests) 48ms\n ✓ |eslint-plugin-musebook| rules/later-rules.test.ts (12 tests) 88ms\n ✓ |edge| test/smoke.test.ts (1 test) 3ms\n ✓ |eslint-plugin-musebook| rules/no-publish-mode-outside-kernel.test.ts (12 tests) 73ms\n ✓ |eslint-plugin-musebook| rules/no-platform-imports-in-mixer.test.ts (10 tests) 72ms\n ✓ |kernel| test/smoke.test.ts (1 test) 2ms\n ✓ |media| test/smoke.test.ts (1 test) 2ms\n ✓ |muse-mixer| test/smoke.test.ts (1 test) 2ms\n ✓ |content-workers| test/etag.test.ts (8 tests) 3ms\n ✓ |content-workers| test/representations.test.ts (17 tests) 9ms\n ✓ |kernel-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |schema| test/smoke.test.ts (1 test) 2ms\n ✓ |ui| test/smoke.test.ts (1 test) 2ms\n ✓ |web| test/smoke.test.ts (1 test) 2ms\n ✓ |mcp| test/smoke.test.ts (1 test) 2ms\n ✓ |web| test/proxy.test.ts (4 tests) 10ms\n ✓ |x402| test/smoke.test.ts (1 test) 2ms\n ✓ |muse-mixer-workers| test/smoke.test.ts (1 test) 3ms\n ✓ |web| test/auth.test.ts (3 tests) 47ms\n ✓ |x402-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |worker| test/smoke.test.ts (1 test) 3ms\n ✓ |edge| test/actor-paths.test.ts (14 tests) 42ms\n ✓ |edge| test/auth.test.ts (27 tests) 2111ms\n     ✓ the directory fetch has a 2 s timeout  2004ms\n\n Test Files  43 passed (43)\n      Tests  248 passed (248)\n   Start at  07:58:51\n   Duration  9.65s (transform 13.33s, setup 0ms, import 26.21s, tests 3.12s, environment 3ms)\n\n % Coverage report from istanbul\n\n=============================== Coverage summary ===============================\nStatements   : 100% ( 553/553 )\nBranches     : 93.01% ( 333/358 )\nFunctions    : 100% ( 72/72 )\nLines        : 100% ( 506/506 )\n================================================================================"
+    },
+    {
+      "id": "G-GOLDEN",
+      "status": "skip",
+      "activeFrom": "M5"
+    },
+    {
+      "id": "G-EDGE-ROUTES",
+      "status": "skip",
+      "activeFrom": "M6"
+    },
+    {
+      "id": "G-PROXY",
+      "status": "skip",
+      "activeFrom": "M6"
+    },
+    {
+      "id": "G-FRESH",
+      "status": "skip",
+      "activeFrom": "M6"
+    },
+    {
+      "id": "G-AXE",
+      "status": "skip",
+      "activeFrom": "M7"
+    },
+    {
+      "id": "G-FAKE-TX",
+      "status": "skip",
+      "activeFrom": "M8"
+    },
+    {
+      "id": "G-X402-V1",
+      "status": "skip",
+      "activeFrom": "M8"
+    },
+    {
+      "id": "G-PLANE-JOIN",
+      "status": "skip",
+      "activeFrom": "M11"
+    },
+    {
+      "id": "G-ISO",
+      "status": "skip",
+      "activeFrom": "M13"
+    }
+  ]
+}

@@ -1,16 +1,19 @@
 // Test stand-in for `pg`. resolve-actor.ts only constructs a Client on the
-// production path (when deps.query is absent); tests always inject deps.query,
-// so this module is never executed — it only has to satisfy the import graph
-// and the type surface that `import type { Client } from "pg"` touches.
+// production path (when deps.query is absent), so most tests never touch it —
+// the withClient coverage test does, steering behavior through `next`.
+export const next = {
+  result: [] as Record<string, unknown>[],
+  error: null as Error | null,
+};
+
 export class Client {
-  constructor(_opts?: unknown) {
-    throw new Error("pg.Client is not available under the workers test pool — inject deps.query");
-  }
+  constructor(_opts?: unknown) {}
   query(_sql: string, _params?: unknown[]): Promise<{ rows: Record<string, unknown>[] }> {
-    return Promise.reject(new Error("pg.Client stub has no database"));
+    if (next.error !== null) return Promise.reject(next.error);
+    return Promise.resolve({ rows: next.result });
   }
   connect(): Promise<void> {
-    return Promise.reject(new Error("pg.Client stub has no database"));
+    return Promise.resolve();
   }
   end(): Promise<void> {
     return Promise.resolve();

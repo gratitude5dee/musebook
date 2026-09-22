@@ -1,6 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    // Consumed as TS source by bundlers only (exports -> src/index.ts): Turbopack
+    // resolves no ".js"-specifier -> ".ts" substitution, so this package keeps
+    // bundler resolution and extensionless internal imports (D28).
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    // Runs on workerd, Node and in Turbopack bundles: the WebWorker lib is
+    // the common Web-API surface (TextEncoder, crypto.subtle, fetch).
+    "lib": ["ES2023", "WebWorker"],
     "rootDir": "./src",
     "outDir": "./dist",
     "tsBuildInfoFile": "./dist/.tsbuildinfo"

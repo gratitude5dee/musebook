@@ -750,7 +750,47 @@ export const GATES = {
     },
   ],
 
-  // M4–M19: transcribed from §16.5 at the start of each milestone.
+  // §16.5 M4 — @musebook/content. G-COV activates at M4 (universal, above).
+  M4: [
+    {
+      id: "M4.1",
+      kind: "fn",
+      desc: "property test: ≥1,000 whitespace-equivalent inputs (trailing spaces, CRLF vs LF, trailing newline, nested-list indentation) → identical content_hash",
+      run: checks.m4HashStability,
+    },
+    {
+      id: "M4.2",
+      kind: "fn",
+      desc: "one-character body change produces a different hash",
+      run: checks.m4HashSensitivity,
+    },
+    {
+      id: "M4.3",
+      kind: "fn",
+      desc: "all six representations produced for a fixture: 'html'|'markdown'|'json'|'jsonld'|'mcp'|'feed'",
+      run: checks.m4SixReps,
+    },
+    {
+      id: "M4.4",
+      kind: "fn",
+      desc: 'etag.test.ts pins W/"sha256-<16 lowercase hex>-<as>"; differs per representation',
+      run: checks.m4EtagPin,
+    },
+    {
+      id: "M4.5",
+      kind: "fn",
+      desc: "the suite passes under BOTH plain vitest AND @cloudflare/vitest-plugin with identical hashes",
+      run: checks.m4DualRunner,
+    },
+    {
+      id: "M4.6",
+      kind: "fn",
+      desc: "no app attached: grep finds no '@musebook/content' under apps/",
+      run: checks.m4NoAppImport,
+    },
+  ],
+
+  // M5–M19: transcribed from §16.5 at the start of each milestone.
 };
 
 export const MILESTONE_TITLES = {
