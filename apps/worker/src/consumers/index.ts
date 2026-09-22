@@ -3,6 +3,8 @@
 // is a no-op, then finishes it. Dead-letter handling is per queue below.
 import { claimJob, finishJob, pgFresh, type DbClient } from "../db.js";
 import { runSlateJob, type SlateRequest } from "../slate-builder.js";
+import { consumeDlq } from "./dlq.js";
+import { handleR2ObjectCreated } from "./r2-events.js";
 
 interface JobMessage {
   // postgres.js returns int8 as BigInt; producers JSON.stringify it away but a
@@ -10,6 +12,9 @@ interface JobMessage {
   job_id?: number | bigint;
   kind?: string;
   dedupe_key?: string;
+  // R2 event notifications share this batch type — dispatch routes on queue,
+  // not shape.
+  object?: { key?: string };
 }
 
 function jobIdOf(msg: JobMessage): number | null {
@@ -78,25 +83,6 @@ async function consume(
   }
 }
 
-/** A DLQ message means every retry was exhausted: mark the source job dead and
- *  emit the alert row (§4.13.4 — the alarm lives on ops_events, surfaced by
- *  §15's evaluator). */
-async function consumeDlq(env: Env, msg: JobMessage, component: string): Promise<void> {
-  const jobId = jobIdOf(msg);
-  if (jobId === null) return;
-  const db = await pgFresh(env);
-  try {
-    await finishJob(db, jobId, "dead", {
-      component,
-      event: "dlq_message",
-      error: "retries_exhausted",
-      detail: { dedupe_key: msg.dedupe_key ?? null },
-    });
-  } finally {
-    await db.end();
-  }
-}
-
 /**
  * M6's consume-now effects (§17.11.5): when the outbox payload carries a
  * `record` — a fully-shaped row for the effect table — the consumer writes it
@@ -145,11 +131,7 @@ export async function dispatch(batch: MessageBatch, env: Env): Promise<void> {
       consume(env, m, "agent_cancel", async () => {
         // M10: agent task cancellation.
       }),
-    "musebook-r2-events": (m) =>
-      consume(env, m, "r2_events", async () => {
-        // M8: uploads lifecycle — the event carries bucket+key, not a job row;
-        // claim/finish is skipped when job_id is absent by consume() itself.
-      }),
+    "musebook-r2-events": (m) => handleR2ObjectCreated(env, m),
     "musebook-slates": (m) =>
       consume(env, m, "slates", async (_db, payload) => {
         await runSlateJob(env, payload as unknown as SlateRequest);

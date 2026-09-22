@@ -58,3 +58,40 @@ export async function enqueueJob(
   }
   return jobId;
 }
+
+/** §4.13.1's publish path, verbatim: one `publish_post` round trip — the posts
+ *  update, the post_versions link and the three job_outbox rows in a single
+ *  statement — then best-effort Q_* sends inside ctx.waitUntil. */
+export async function publishPost(
+  env: Env,
+  ctx: ExecutionContext,
+  postId: string,
+  platforms: string[],
+): Promise<{ postId: string; jobIds: number[] }> {
+  const db = fresh(env);
+  let jobIds: number[];
+  try {
+    const { rows } = await db.query<{ post_id: string; job_ids: string[] }>(
+      "select * from public.publish_post($1, $2)",
+      [postId, platforms],
+    );
+    jobIds = rows[0]?.job_ids.map(Number) ?? [];
+  } finally {
+    await db.end().catch(() => undefined);
+  }
+
+  // Fast path only. If this throws, or the isolate dies here, the rows are
+  // already durable and the * * * * * sweeper picks them up within ~60 s.
+  ctx.waitUntil(
+    (async () => {
+      try {
+        await bound(env.Q_CLASSIFY, "Q_CLASSIFY").sendBatch([{ body: { job_id: jobIds[0] } }]);
+        await bound(env.Q_EMBED, "Q_EMBED").send({ job_id: jobIds[1] });
+        await bound(env.Q_DISTRIBUTE, "Q_DISTRIBUTE").send({ job_id: jobIds[2] });
+      } catch (e) {
+        console.error("enqueue_deferred", String(e));
+      }
+    })(),
+  );
+  return { postId, jobIds };
+}

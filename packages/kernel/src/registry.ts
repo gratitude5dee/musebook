@@ -1,5 +1,5 @@
 // packages/kernel/src/registry.ts — the one mutable cell in the package (§6.3).
-import type { KernelPorts } from "./ports.js";
+import type { KernelPorts } from "./ports";
 
 let configured: KernelPorts | null = null;
 

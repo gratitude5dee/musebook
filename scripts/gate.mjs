@@ -201,6 +201,33 @@ async function runGate(milestone, universalOnly, selfTest = false) {
   out(`started ${new Date().toISOString()}`);
   out("");
 
+  // A prior gate's `supabase db reset` restarts postgres asynchronously — a
+  // fresh run can land while the DB is still being recreated. Wait until the
+  // seed is actually replayed, not just until the port accepts.
+  {
+    const deadline = Date.now() + 120_000;
+    let ready = false;
+    while (Date.now() < deadline && !ready) {
+      const probe = trySh(
+        `docker exec $(docker ps -q --filter name=supabase_db | head -1) ` +
+          `psql -U postgres -d postgres -Atc "select count(*) from public.posts"`,
+      );
+      ready = probe.code === 0 && Number(probe.out.trim()) >= 36;
+      if (!ready) await new Promise((r) => setTimeout(r, 2000));
+    }
+    if (!ready) {
+      err("gate: supabase local DB not replayed after 120s");
+      process.exit(2);
+    }
+    // The migration ships no worker credential (§4.14): the wrangler dev
+    // localConnectionString authenticates as musebook_worker, so a reset
+    // leaves it unable to log in until the dev password is re-altered.
+    trySh(
+      `docker exec $(docker ps -q --filter name=supabase_db | head -1) ` +
+        `psql -U postgres -d postgres -c "alter role musebook_worker password 'postgres'"`,
+    );
+  }
+
   const record = [];
   const failures = [];
   const blockedOn = new Set();

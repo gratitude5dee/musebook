@@ -1,6 +1,6 @@
 // packages/kernel/src/render/mcp.ts — the get_post tool result (§6.6).
 import type { AccessDecision, Resource } from "@musebook/schema";
-import { renderJson } from "./json.js";
+import { renderJson } from "./json";
 
 export function renderMcp(
   resource: Resource,

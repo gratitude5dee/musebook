@@ -1,7 +1,7 @@
 // packages/kernel/src/projections.ts — plan.md §6.3, verbatim.
 import type { PublishMode, Resource } from "@musebook/schema";
-import { loadResource } from "./load.js";
-import { getPorts } from "./registry.js";
+import { loadResource } from "./load";
+import { getPorts } from "./registry";
 
 /** §12.3.3: a paid post is syndicated as a teaser, never as a copy. */
 export type VariantIntent = "full" | "teaser";

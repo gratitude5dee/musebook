@@ -41,6 +41,14 @@ export const GROUPS = [
         comment:
           "Read this off the Vercel project's domain card. Vercel issues per-project targets; do not hardcode from memory.",
       },
+      {
+        name: "ORIGIN_SCHEME",
+        scope: ["E", "L"],
+        kind: "var",
+        local: "https",
+        comment:
+          "toOrigin() rebuilds on ORIGIN_SCHEME://ORIGIN_HOST. Only the local dev pair sets http (wrangler dev → next start); deployed envs keep https.",
+      },
       { name: "CDN_HOST", scope: ["VP", "VPr", "E", "J"], kind: "var", local: "cdn.musebook.dev" },
       { name: "MEDIA_HOST", scope: ["E", "J"], kind: "var", local: "media.musebook.dev" },
       { name: "ARTIFACT_HOST", scope: ["E"], kind: "var", local: "artifacts.musebook.dev" },
@@ -105,7 +113,7 @@ export const GROUPS = [
       },
       {
         name: "CF_ACCOUNT_ID",
-        scope: ["J", "L", "CI"],
+        scope: ["J", "L", "CI", "E"],
         kind: "var",
         local: "e8f42c0430906e1515a2af01d5c1d2d1",
       },

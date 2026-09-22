@@ -16,5 +16,11 @@
   },
   "include": ["**/*.ts", "**/*.tsx", "next.config.ts", ".next/types/**/*.ts"],
   "exclude": ["node_modules", "dist", ".next", "coverage", ".wrangler"],
-  "references": [{ "path": "../../packages/schema" }, { "path": "../../packages/ui" }]
+  "references": [
+    { "path": "../../packages/schema" },
+    { "path": "../../packages/content" },
+    { "path": "../../packages/kernel" },
+    { "path": "../../packages/media" },
+    { "path": "../../packages/ui" }
+  ]
 }

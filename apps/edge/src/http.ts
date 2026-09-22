@@ -15,6 +15,7 @@ export function notFound(): Response {
 export function renderedToResponse(rendered: Rendered): Response {
   const headers = new Headers();
   for (const [k, v] of Object.entries(rendered.headers)) headers.set(k, v);
+  headers.set("content-type", rendered.mediaType);
   return new Response(rendered.body, { status: rendered.status, headers });
 }
 

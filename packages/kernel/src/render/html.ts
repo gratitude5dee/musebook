@@ -5,8 +5,8 @@
 // /unlock.js, which upgrades the pay link when Vercel is up and is harmless when not.
 import type { AccessDecision, Resource } from "@musebook/schema";
 import { markdownToHtml } from "@musebook/content";
-import { jsonLdFor } from "./jsonld.js";
-import { previewOf } from "./preview.js";
+import { jsonLdFor } from "./jsonld";
+import { previewOf } from "./preview";
 
 function esc(s: string): string {
   return s

@@ -11,6 +11,10 @@ declare global {
     X402_PAY_TO: string;
     /** Facilitator URL may be overridden by secret when a key is attached. */
     X402_FACILITATOR_API_KEY?: string;
+    /** R2 multipart signing credentials — scoped to musebook-uploads alone
+     *  (§3.7). A credential reaching musebook-paid is a paywall bypass. */
+    R2_ACCESS_KEY_ID: string;
+    R2_SECRET_ACCESS_KEY: string;
   }
 
   /** musebook-worker's SlateBuilder entrypoint over the MIXER service binding

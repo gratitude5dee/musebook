@@ -548,8 +548,8 @@ export function gFresh() {
 
 // G-AXE — browser sweep (M7+); placeholder until Playwright lands.
 export function gAxe() {
-  const r = run("pnpm --filter musebook-web exec playwright test --config test/axe 2>/dev/null");
-  return { ok: r.code === 0, errors: r.code ? [`axe sweep: ${r.out.slice(-1500)}`] : [] };
+  const r = playwrightSlice("");
+  return { ok: r.ok, errors: r.ok ? [] : [`axe sweep: ${(r.errors ?? []).join("").slice(-1500)}`] };
 }
 
 // G-FAKE-TX — no fabricated hash; `settled` written only in settle.ts.
@@ -1475,6 +1475,7 @@ const MIGRATION_REGISTRY = [
   ["20260922091300_worker_role_and_rls_audit", 2],
   ["20260922091400_seed_reference", 2],
   ["20260922091500_app_enter", 3],
+  ["20260922091501_composer", 7],
   ["20260922091600_revenue_share", 8],
   ["20260922091700_agent_spend_reservations", 9],
   ["20260922091800_connector_credentials", 9],
@@ -1793,9 +1794,11 @@ export function m5Containment() {
       !h.startsWith("packages/kernel/") &&
       // D34: the §3.4 allow-list exempts TEST fixture dirs (the rule's own
       // default includes packages/kernel/test/); a fixture declares the mode
-      // value, it never branches on it — same exemption for the other floors.
+      // value, it never branches on it — same exemption for the other floors
+      // and for test trees under apps/ (a gate spec may quote the SQL).
       !h.startsWith("packages/content/test/") &&
       !h.startsWith("packages/x402/test/") &&
+      !/\/test\//.test("/" + h.replace(/^apps\//, "")) &&
       !h.startsWith("packages/schema/src/kernel.ts") &&
       !h.startsWith("packages/schema/src/database.types.ts"),
   );
@@ -2224,5 +2227,246 @@ export function m6FakeTxSkipped() {
   return {
     ok: hasM8,
     errors: hasM8 ? [] : ["G-FAKE-TX activeFrom is not M8 in manifest.mjs"],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// M7 milestone checks — §16.5 verbatim. The playwright specs boot the real
+// pair (wrangler dev on :8787 proxying next dev on :3310); the wire suite is
+// apps/edge/test/gate/m7-publish.test.ts; promotion is apps/worker's
+// test/r2-promotion.test.ts.
+// ---------------------------------------------------------------------------
+
+const PLAYWRIGHT = "pnpm --filter musebook-web exec playwright test --config test/axe";
+// The e2e stack runs `next start` (dev mode's HMR websocket can't cross the
+// worker's plain-fetch proxy), so the suite needs a production build first.
+// Memoized: several M7 checks each drive a playwright slice.
+let webBuildState = null;
+// The local service key comes from the supabase CLI, never a repo literal —
+// the e2e playwright config derives it the same way.
+const supabaseSecretKey = () => {
+  const out = execFileSync("pnpm", ["exec", "supabase", "status", "-o", "env"], {
+    encoding: "utf8",
+  });
+  const m = /^SECRET_KEY="([^"]+)"/m.exec(out);
+  if (!m) throw new Error("supabase status -o env: SECRET_KEY not found");
+  return m[1];
+};
+const ensureWebBuild = () => {
+  if (webBuildState !== null) return webBuildState;
+  const r = run(
+    "pnpm --filter musebook-web exec env NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 " +
+      "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH " +
+      "NEXT_PUBLIC_SITE_URL=http://127.0.0.1:8787 " +
+      `SUPABASE_SECRET_KEY=${supabaseSecretKey()} ` +
+      "SUPABASE_JWT_SECRET=super-secret-jwt-token-with-at-least-32-characters-long " +
+      "MUSEBOOK_EDGE_SECRET=e2e-edge-secret-0000000000000000 next build",
+  );
+  webBuildState = { ok: r.code === 0, errors: r.code ? [`next build: ${r.out.slice(-2000)}`] : [] };
+  return webBuildState;
+};
+const playwrightSlice = (spec) => {
+  const build = ensureWebBuild();
+  if (!build.ok) return build;
+  const r = run(`${PLAYWRIGHT} ${spec}`);
+  return { ok: r.code === 0, errors: r.code ? [r.out.slice(-3000)] : [] };
+};
+
+// M7.1 — §1.7 item 2 end to end: wallet sign-in → compose (one video post with
+// a real media upload) → publish each of the three modes → three posts rows
+// with three distinct publish_mode values → all render at /p/{slug}.
+export function m7PublishThreeModes() {
+  const slice = vitestSlice(`${EG} test/gate/m7-publish.test.ts`, "M7.1");
+  if (!slice.ok) return slice;
+  return playwrightSlice("compose-publish.spec.ts");
+}
+
+// M7.2 — presigned PUT lands in musebook-uploads only; aws4fetch containment.
+export function m7PresignScope() {
+  const slice = vitestSlice(`${EG} test/gate/m7-publish.test.ts`, "M7.2/3");
+  if (!slice.ok) return slice;
+  const hits = rg(
+    String.raw`X-Amz-Signature|aws4|presign`,
+    ["apps/edge/src", "packages"],
+    ["--files-with-matches"],
+  );
+  const bad = hits.filter((h) => h !== "apps/edge/src/routes/uploads.ts");
+  return {
+    ok: bad.length === 0,
+    errors: bad.map((h) => `presign surface outside routes/uploads.ts: ${h}`),
+  };
+}
+
+// M7.3 — TTL 900 and an expired replay returns 403 ExpiredRequest, no CORS.
+export function m7PresignTtl() {
+  const slice = vitestSlice(`${EG} test/gate/m7-publish.test.ts`, "M7.2/3");
+  if (!slice.ok) return slice;
+  const hits = rg(String.raw`R2_PRESIGN_TTL_S`, ["apps/edge/src/routes/uploads.ts"]);
+  const okLine = hits.some((h) => /\?\?\s*["']?900["']?/.test(h));
+  return {
+    ok: hits.length > 0 && okLine,
+    errors:
+      hits.length === 0
+        ? ["R2_PRESIGN_TTL_S never resolves in uploads.ts"]
+        : okLine
+          ? []
+          : [`R2_PRESIGN_TTL_S default is not 900:\n${hits.join("\n")}`],
+  };
+}
+
+// M7.4 — the honest Toll sentence under apps/web/app/(app)/compose.
+export function m7TollSentence() {
+  const hits = rg(String.raw`a declared contract, not a detection guarantee`, [
+    "apps/web/app/(app)/compose",
+  ]);
+  return {
+    ok: hits.length > 0,
+    errors: hits.length
+      ? []
+      : ["Toll sentence absent under apps/web/app/(app)/compose — do not soften it"],
+  };
+}
+
+// M7.5 — publish is one statement; the M6.15 BEGIN-grep re-runs verbatim.
+export function m7PublishOneStatement() {
+  const slice = vitestSlice(`${EG} test/gate/m7-publish.test.ts`, "M7.5");
+  if (!slice.ok) return slice;
+  return m6OneStatementOutbox();
+}
+
+// M7.6 — globally unique slugs on the wire; M2 gate 15 re-runs.
+export function m7SlugUniqueness() {
+  const slice = vitestSlice(`${EG} test/gate/m7-publish.test.ts`, "M7.6");
+  if (!slice.ok) return slice;
+  return m2Slugs();
+}
+
+// M7.7 — edit-after-grant warning by substring on the composer.
+export function m7EditGrantWarning() {
+  return playwrightSlice("edit-warning.spec.ts");
+}
+
+// M7.8 — upload completion reaches musebook-r2-events and the consumer promotes:
+// vitest exercises handleR2ObjectCreated end-to-end (hash, dest bucket, assets
+// row matching the CHECK, staging object deleted); the CF API proves the
+// bucket's event notification is still bound to the queue.
+export async function m7UploadPromotion() {
+  const r = run("pnpm vitest run --project worker test/r2-promotion.test.ts");
+  if (r.code !== 0) return { ok: false, errors: [r.out.slice(-2500)] };
+  if (!process.env.CF_API_TOKEN || !process.env.CF_ACCOUNT_ID)
+    return { ok: false, errors: [], blocked: "CF_API_TOKEN/CF_ACCOUNT_ID unset (prereq H1/H2)" };
+  const qs = cf(`/accounts/${process.env.CF_ACCOUNT_ID}/queues`);
+  if (!qs.json?.success)
+    return { ok: false, errors: [`queues list failed: ${qs.out.slice(-400)}`], blocked: "CF API" };
+  const q = qs.json.result.find((x) => x.queue_name === "musebook-r2-events");
+  if (!q) return { ok: false, errors: ["queue musebook-r2-events not found"] };
+  const detail = cf(`/accounts/${process.env.CF_ACCOUNT_ID}/queues/${q.queue_id}`);
+  const producers = detail.json?.result?.producers ?? [];
+  const boundToUploads = producers.some(
+    (p) => p.type === "r2_bucket" && p.bucket_name === "musebook-uploads",
+  );
+  return {
+    ok: boundToUploads,
+    errors: boundToUploads
+      ? []
+      : [
+          `musebook-r2-events has no r2_bucket producer for musebook-uploads: ${qs.out.slice(-400)}`,
+        ],
+  };
+}
+
+// M7.9 — staging cannot become a landfill: abort-incomplete-multipart at 2d
+// AND staging/ expiry at 7d (the API view of `wrangler r2 bucket lifecycle list`).
+export function m7StagingLifecycle() {
+  if (!process.env.CF_API_TOKEN || !process.env.CF_ACCOUNT_ID)
+    return { ok: false, errors: [], blocked: "CF_API_TOKEN/CF_ACCOUNT_ID unset (prereq H1/H2)" };
+  const r = cf(`/accounts/${process.env.CF_ACCOUNT_ID}/r2/buckets/musebook-uploads/lifecycle`);
+  if (!r.json?.success)
+    return {
+      ok: false,
+      errors: [`lifecycle read failed: ${r.out.slice(-400)}`],
+      blocked: "CF API",
+    };
+  const rules = r.json.result.rules ?? [];
+  const abort = rules.some(
+    (x) => x.enabled && x.abortMultipartUploadsTransition?.condition?.maxAge === 172800,
+  );
+  const expire = rules.some(
+    (x) =>
+      x.enabled &&
+      x.conditions?.prefix === "staging/" &&
+      x.deleteObjectsTransition?.condition?.maxAge === 604800,
+  );
+  const errors = [];
+  if (!abort) errors.push("no enabled abort-incomplete-multipart rule at 2 days (172800 s)");
+  if (!expire) errors.push("no enabled staging/ expiry rule at 7 days (604800 s)");
+  return { ok: errors.length === 0, errors };
+}
+
+// M7.10 — G-AXE green from this milestone on.
+export function m7Axe() {
+  return gAxe();
+}
+
+// M7.11 — §14's M7 acceptance rows: gated body absent with JS disabled against
+// the Worker; forbidden files/animations/hexes; no reel autoplay under
+// prefers-reduced-motion.
+export function m7Section14Acceptance() {
+  const spec = playwrightSlice("gated-body.spec.ts");
+  if (!spec.ok) return spec;
+  const errors = [];
+  for (const f of [
+    "apps/web/components/marketing/TestimonialsSection.tsx",
+    "apps/web/components/marketing/MotionBackground.tsx",
+    "apps/web/components/TestimonialsSection.tsx",
+    "apps/web/components/MotionBackground.tsx",
+  ])
+    if (existsSync(join(ROOT, f))) errors.push(`${f} exists — §14 row 7 forbids it`);
+  for (const h of rg(String.raw`repeat:\s*Infinity`, ["apps/web", "packages/ui/src"]))
+    errors.push(`repeat: Infinity at ${h} (§14 row 8)`);
+  for (const h of rg(String.raw`animate-pulse`, ["apps/web", "packages/ui/src"])) {
+    const file = h.split(":")[0];
+    if (!/skeleton/i.test(file)) errors.push(`animate-pulse outside a skeleton at ${h}`);
+  }
+  for (const h of rg(
+    String.raw`#[0-9a-fA-F]{3,8}\b`,
+    ["apps/web", "packages/ui/src"],
+    [
+      "-g",
+      "*.ts",
+      "-g",
+      "*.tsx",
+      "-g",
+      "*.css",
+      "-g",
+      "!apps/web/app/globals.css",
+      "-g",
+      "!**/dist/**",
+      "-g",
+      "!**/.next/**",
+      "-g",
+      "!**/test/**",
+    ],
+  )) {
+    const file = h.split(":")[0];
+    // §14.2.10's paywall block is the one place an inline hex token is allowed.
+    if (!/app\/p\/\[slug\]|unlock|pay/i.test(file))
+      errors.push(`hardcoded hex outside globals.css at ${h}`);
+  }
+  const reelHits = rg(String.raw`autoplay|autoPlay`, ["apps/web/app/reels"]);
+  for (const h of reelHits)
+    errors.push(`reel autoplay without a prefers-reduced-motion gate at ${h} (§14 row 17)`);
+  return { ok: errors.length === 0, errors };
+}
+
+// M7.12 — the browser never names a bucket it may not reach.
+export function m7BucketNaming() {
+  const hits = rg(String.raw`musebook-paid|musebook-artifacts|musebook-logs`, [
+    "apps/web",
+    "packages/ui",
+  ]);
+  return {
+    ok: hits.length === 0,
+    errors: hits.length ? [`client-side bucket names:\n${hits.join("\n")}`] : [],
   };
 }

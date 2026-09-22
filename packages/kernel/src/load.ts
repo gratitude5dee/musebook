@@ -1,6 +1,6 @@
 // packages/kernel/src/load.ts — plan.md §6.5, verbatim.
 import { resourceSchema, type Resource } from "@musebook/schema";
-import { formatPriceUsd } from "./price.js";
+import { formatPriceUsd } from "./price";
 
 /** v1 settles USDC only (§6.9); when a second asset lands, decimals come from the row. */
 const USDC_DECIMALS = 6;

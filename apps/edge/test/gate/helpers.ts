@@ -9,7 +9,7 @@ import { signerFromJWK } from "web-bot-auth/crypto";
 
 export const MARKER = "MUSEBOOK_PAID_BODY_MARKER_7f3a";
 
-/** The seed's three articles, one per publish_mode (§17.3.2 slugs, not the
+/** The seed's three articles, one per publishing mode (§17.3.2 slugs, not the
  *  §17.11.2 doc names — seed wins). hfap uses the NOTE, not the article: the
  *  seed ships a live grant for the crawler on seed-article-hfap's content_hash
  *  (so the grant-holder path is testable), which would make the agent cell
