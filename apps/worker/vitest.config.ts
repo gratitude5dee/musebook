@@ -20,6 +20,10 @@ export default defineProject({
   test: {
     name: "worker",
     include: ["test/**/*.test.ts"],
+    // Coverage activates with this app's own milestone (§17.14 activates
+    // floors per milestone); until then the workerd pool skips collection,
+    // matching the *-workers portability projects.
+    coverage: { enabled: false },
     // No `environment` key: the plugin IS the environment.
   },
 });

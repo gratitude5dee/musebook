@@ -49,5 +49,8 @@ export default defineProject({
     name: "edge",
     include: ["test/**/*.test.ts"],
     // No `environment` key: the plugin IS the environment.
+    // Istanbul — v8 needs node:inspector, which workerd does not implement
+    // (the plugin rejects it). §17.14 measures apps/edge on this tier only.
+    coverage: { provider: "istanbul" },
   },
 });

@@ -1666,3 +1666,54 @@ export function m3ActorShape() {
   if (count !== "1") errors.push(`expected exactly 1 actorSchema export, found ${count}`);
   return { ok: errors.length === 0, errors };
 }
+
+// ---------------------------------------------------------------------------
+// M4 milestone checks — §16.5 verbatim. The six checks pin the canonical
+// producer, the hash, the six §6.6 representations, the ETag shape, dual-tier
+// hash identity, and the "no app attached" rule.
+// ---------------------------------------------------------------------------
+
+const CONTENT_NODE = "pnpm vitest run --project content";
+const CONTENT_WORKERS = "pnpm vitest run --project content-workers";
+
+// M4.1 — ≥1,000 whitespace-equivalent inputs (trailing spaces, CRLF vs LF,
+// trailing newline, nested-list indentation) → identical content_hash.
+export function m4HashStability() {
+  return vitestSlice(`${CONTENT_NODE} test/hash-stability.test.ts`, "M4.1");
+}
+
+// M4.2 — a one-character body change produces a different hash.
+export function m4HashSensitivity() {
+  return vitestSlice(`${CONTENT_NODE} test/hash-sensitivity.test.ts`, "M4.2");
+}
+
+// M4.3 — all six representations produced for a fixture:
+// 'html'|'markdown'|'json'|'jsonld'|'mcp'|'feed'.
+export function m4SixReps() {
+  return vitestSlice(`${CONTENT_NODE} test/representations.test.ts`, "M4.3");
+}
+
+// M4.4 — ETag pinned to `W/"sha256-<16 lowercase hex>-<as>"` where the hex is
+// contentHash().slice(0,16); differs per representation.
+export function m4EtagPin() {
+  return vitestSlice(`${CONTENT_NODE} test/etag.test.ts`, "M4.4");
+}
+
+// M4.5 — the suite passes under BOTH plain vitest and @cloudflare/vitest-plugin
+// with identical hashes. sha256Hex is pure TS, so identical output is what the
+// two runs assert independently (the roundtrip test pins every digest against
+// WebCrypto on whichever runtime executes it).
+export function m4DualRunner() {
+  const node = run(`${CONTENT_NODE}`);
+  if (node.code !== 0) return { ok: false, errors: [node.out.slice(-2500)] };
+  const workers = run(`${CONTENT_WORKERS}`);
+  if (workers.code !== 0) return { ok: false, errors: [workers.out.slice(-2500)] };
+  return { ok: true, errors: [] };
+}
+
+// M4.6 — no app attached: nothing under apps/ may import @musebook/content yet
+// (the composer's live preview lands at M7; kernel wraps it at M5).
+export function m4NoAppImport() {
+  const hits = rg("@musebook/content", ["apps"]);
+  return { ok: hits.length === 0, errors: hits };
+}

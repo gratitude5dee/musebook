@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@types/node": "26.6.2",
+    "fast-check": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "@cloudflare/vitest-plugin": "catalog:",
     "typescript": "catalog:",
