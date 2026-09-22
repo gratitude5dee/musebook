@@ -94,6 +94,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
 
+      # The gate's scan checks shell out to ripgrep (same as the plan's §12.2
+      # reference implementation).
+      - name: Install ripgrep
+        run: sudo apt-get update -qq && sudo apt-get install -y ripgrep
+
       # Named checks from scripts/gates/manifest.mjs (§3.4, §17.12). Same code
       # the milestone gate runs; CI runs the ones that need no credential.
       - name: AGPL containment — no Postiz source in our bundle
