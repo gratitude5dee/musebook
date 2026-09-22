@@ -8,7 +8,7 @@ import { portsFor } from "./kernel/configure.js";
 import { serveMedia } from "./media.js"; // §6.12.4
 import { bound, fresh, release } from "./db/client.js";
 import { applyCacheHeaders } from "./http/cache.js"; // §6.12.5
-import { renderedToResponse, notFound } from "./http.js";
+import { renderedToResponse, notFound, withSettlement } from "./http.js";
 import { parseResourceUrl, STATIC_ROUTES } from "./router.js"; // §7.10.1
 import { handleEvents } from "./routes/events.js"; // §13.4.3
 import { handleFeedForYou, handleFeedReels, handleFeedScored } from "./routes/feed.js"; // §9.21
@@ -123,15 +123,18 @@ export default {
         // §7.10.2's negotiated response: Vary: Accept and private, no-store on
         // top of the twin's own cache headers — the URL serves two
         // representations and a shared cache must never mix them.
-        return applyCacheHeaders(res, decision, env, true);
+        return withSettlement(applyCacheHeaders(res, decision, env, true), decision);
       }
       if (!decision.allow) {
         const rendered = await kernel.renderResource(resource, target.as, decision);
-        return applyCacheHeaders(renderedToResponse(rendered), decision, env);
+        return withSettlement(
+          applyCacheHeaders(renderedToResponse(rendered), decision, env),
+          decision,
+        );
       }
 
       const res = await toOrigin(request, env, { actor, resource });
-      return applyCacheHeaders(res, decision, env);
+      return withSettlement(applyCacheHeaders(res, decision, env), decision);
     } finally {
       release(ctx, db);
     }

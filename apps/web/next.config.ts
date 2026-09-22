@@ -13,7 +13,14 @@ const nextConfig: NextConfig = {
       allowedOrigins: ["musebook.dev", "www.musebook.dev", "127.0.0.1:8787"],
     },
   },
-  transpilePackages: ["@musebook/ui", "@musebook/content", "@musebook/kernel", "@musebook/media"],
+  transpilePackages: [
+    "@musebook/ui",
+    "@musebook/content",
+    "@musebook/kernel",
+    "@musebook/media",
+    "@musebook/schema",
+    "@musebook/x402",
+  ],
   turbopack: {
     resolveAlias: {
       // Optional Solana path in @coinbase/cdp-sdk — never imported on the

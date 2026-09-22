@@ -229,9 +229,7 @@ describe("audit", () => {
       request_id: "req",
     };
     await audit(fresh, rec);
-    expect(query).toHaveBeenCalledWith("select app.audit_log_insert($1::jsonb)", [
-      JSON.stringify(rec),
-    ]);
+    expect(query).toHaveBeenCalledWith("select app.audit_log_insert($1::jsonb)", [rec]);
   });
 
   it("auditFromActor maps each actor class", () => {

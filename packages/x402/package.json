@@ -15,7 +15,8 @@
   "dependencies": {
     "@musebook/schema": "workspace:*",
     "@x402/core": "2.26.0",
-    "@x402/evm": "2.26.0"
+    "@x402/evm": "2.26.0",
+    "@musebook/kernel": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "26.6.2",
@@ -23,6 +24,7 @@
     "@cloudflare/vitest-plugin": "catalog:",
     "@cloudflare/workers-types": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "viem": "2.56.8"
   }
 }

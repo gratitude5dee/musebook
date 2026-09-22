@@ -11,3 +11,4 @@ export type {
   DraftInput,
   SavedDraft,
 } from "./compose/types";
+export { UnlockGate, type UnlockGateProps, type UnlockState } from "./UnlockGate";

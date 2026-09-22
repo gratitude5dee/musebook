@@ -15,6 +15,7 @@ export function SignInButton() {
       theme="dark"
       appMetadata={{ name: "Musebook", url: "https://musebook.dev" }}
       connectModal={{ size: "compact", showThirdwebBranding: false }}
+      connectButton={{ label: "Sign in" }}
       autoConnect={{ timeout: 15_000 }}
       auth={{
         getLoginPayload: async ({ address, chainId }) => {

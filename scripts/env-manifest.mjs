@@ -275,11 +275,18 @@ export const GROUPS = [
       },
       {
         name: "X402_FACILITATOR_URL",
-        scope: ["E", "M", "L"],
+        scope: ["E", "M", "J", "L"],
         kind: "var",
         local: "https://api.cdp.coinbase.com/platform/v2/x402",
       },
       { name: "X402_IDEMPOTENT_WINDOW_SECONDS", scope: ["E", "L"], kind: "var", local: "120" },
+      {
+        name: "X402_TEST_PAYER_KEY",
+        scope: ["L", "CI"],
+        kind: "secret",
+        comment:
+          "Base Sepolia payer key — the live-facilitator gate tier (m8-wire, packages/x402/test/live) only. Never a Worker binding.",
+      },
       { name: "X402_GRANT_CACHE_TTL_S", scope: ["E", "M"], kind: "var", local: "86400" },
       { name: "X402_PAYOUT_NETWORK", scope: ["J"], kind: "var", local: "eip155:8453" },
       { name: "X402_PAYOUT_BATCH_MIN_ATOMIC", scope: ["J"], kind: "var", local: "5000000" },

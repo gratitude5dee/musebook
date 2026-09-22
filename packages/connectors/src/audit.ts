@@ -44,5 +44,5 @@ export const auditFromActor = (
  * jobs-plane plpgsql entry point for exactly one row (§4.13's "one plpgsql call").
  */
 export async function audit(fresh: Client, rec: AuditRecord): Promise<void> {
-  await fresh.query(`select app.audit_log_insert($1::jsonb)`, [JSON.stringify(rec)]);
+  await fresh.query(`select app.audit_log_insert($1::jsonb)`, [rec]);
 }

@@ -37,9 +37,7 @@ begin
       p.kind::text, p.status::text, p.publish_mode::text, p.slug, p.title,
       p.summary, p.canonical_url, p.language_code, p.tags, p.content_hash,
       b.canonical_markdown, p.price_atomic::text, p.price_asset, p.price_network,
-      -- literal until 20260922091600 lands at M8: its backfill writes this
-      -- same default onto every pre-M8 row, so the literal is identity-true.
-      'rs_2026_09_v1'::text,
+      p.revenue_share_version,
       p.license_spdx, p.license_url, p.train_ai,
       p.ai_use, p.search_indexable, p.attribution_required, p.citation_template,
       -- ISO text, not raw timestamptz: drivers hand back Date objects but
@@ -80,7 +78,7 @@ begin
       p.kind::text, p.status::text, p.publish_mode::text, p.slug, p.title,
       p.summary, p.canonical_url, p.language_code, p.tags, p.content_hash,
       b.canonical_markdown, p.price_atomic::text, p.price_asset, p.price_network,
-      'rs_2026_09_v1'::text,
+      p.revenue_share_version,
       p.license_spdx, p.license_url, p.train_ai,
       p.ai_use, p.search_indexable, p.attribution_required, p.citation_template,
       to_char(p.published_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
@@ -240,7 +238,7 @@ begin
       p.language_code, p.tags, p.content_hash,
       case when p.publish_mode = 'free' then b.canonical_markdown else '' end,
       p.price_atomic::text, p.price_asset, p.price_network,
-      'rs_2026_09_v1'::text,
+      p.revenue_share_version,
       p.license_spdx, p.license_url, p.train_ai, p.ai_use,
       p.search_indexable, p.attribution_required, p.citation_template,
       to_char(p.published_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
@@ -284,7 +282,7 @@ begin
       p.language_code, p.tags, p.content_hash,
       case when p.publish_mode = 'free' then b.canonical_markdown else '' end,
       p.price_atomic::text, p.price_asset, p.price_network,
-      'rs_2026_09_v1'::text,
+      p.revenue_share_version,
       p.license_spdx, p.license_url, p.train_ai, p.ai_use,
       p.search_indexable, p.attribution_required, p.citation_template,
       to_char(p.published_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),

@@ -1127,6 +1127,72 @@ export const GATES = {
       run: checks.m7BucketNaming,
     },
   ],
+
+  // §16.5 M8 — x402 v2 paywall in the Worker, grants, ledger, paid-media gate.
+  // The wire tier (m8-wire) settles real testnet USDC through the x402.org
+  // facilitator; the DB tier (m8-x402) proves the nonce claim at SQL level.
+  M8: [
+    {
+      id: "M8.1",
+      kind: "fn",
+      desc: "testnet round trip: 402 names X402_PAY_TO + X402_NETWORK, Base Sepolia pay, replay → 200 body",
+      run: checks.m8RoundTrip,
+    },
+    {
+      id: "M8.2",
+      kind: "fn",
+      desc: "100-way replay of one signed authorization → exactly 1 x402_settlements row, no second settle",
+      run: checks.m8OneSettlement,
+    },
+    {
+      id: "M8.3",
+      kind: "fn",
+      desc: "G-FRESH green and it bites: a deliberate CACHED grant-read fixture turns it red",
+      run: checks.m8FreshBites,
+    },
+    {
+      id: "M8.4",
+      kind: "fn",
+      desc: "KV caches positives only: no deny/false/null GRANTS.put; miss falls through to Postgres",
+      run: checks.m8KvPositivesOnly,
+    },
+    {
+      id: "M8.5",
+      kind: "fn",
+      desc: "mintsDurableGrant honest on the wire: settled hfap → content_hash grant; x402_always → none",
+      run: checks.m8DurableGrantHonest,
+    },
+    {
+      id: "M8.6",
+      kind: "fn",
+      desc: "paid-media gate: no grant → 402 + zero bytes; grant → 200; G-R2-SEAL over all buckets",
+      run: checks.m8PaidMediaGate,
+    },
+    {
+      id: "M8.7",
+      kind: "fn",
+      desc: "EIP-712 domain on target net: assert-asset-domain exits 0; wrong-domain sign → facilitator invalid_exact_evm",
+      run: checks.m8AssetDomain,
+    },
+    {
+      id: "M8.8",
+      kind: "fn",
+      desc: "no settlement key / EIP-712 recovery at the edge (hashTypedData|recoverTypedDataAddress|createPublicClient) + G-BUNDLE",
+      run: checks.m8NoEdgeRecovery,
+    },
+    {
+      id: "M8.11",
+      kind: "fn",
+      desc: "ledger carries policy version: no null revenue_share_version on settlements/posts; no platform_fee_bps in edge src",
+      run: checks.m8PolicyVersioned,
+    },
+    {
+      id: "M8.12",
+      kind: "fn",
+      desc: "mainnet fallback as config: OPERATIONS.md records prod X402_MODE + date + /supported evidence; wrangler agrees",
+      run: checks.m8MainnetModeRecorded,
+    },
+  ],
 };
 
 export const MILESTONE_TITLES = {

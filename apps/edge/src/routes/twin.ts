@@ -3,7 +3,7 @@
 // render, add nothing the kernel did not already attach.
 import { createKernel, etagFor, loadResource } from "@musebook/kernel";
 import { representationSchema, type Actor } from "@musebook/schema";
-import { paymentRequiredHttp } from "@musebook/x402"; // the HTTP half lives ONLY in this Worker
+import { paymentRequiredHttp, withSettlement } from "@musebook/x402"; // the HTTP half lives ONLY in this Worker
 import { loadPostBySlug } from "../db/posts.js";
 import { cached, fresh, release } from "../db/client.js";
 import { configureForRequest } from "../kernel/index.js";
@@ -57,20 +57,25 @@ export async function twin(
     }
 
     const rendered = await kernel.renderResource(resource, as.data, decision);
-    return applyCacheHeaders(
-      new Response(rendered.body, {
-        status: rendered.status,
-        headers: {
-          ...rendered.headers, // link, content-usage, vary, etag — §6.6 headersFor
-          "content-type": rendered.mediaType,
-          "last-modified": new Date(resource.updatedAt).toUTCString(),
-          "cache-tag": `content:${resource.contentHash}`,
-          "x-musebook-access": decision.reason,
-          "x-musebook-mcp": "https://mcp.musebook.dev/mcp",
-        },
-      }),
+    // §6.8: the settle receipt travels back on the served 200 — without this,
+    // a paid twin render proves the settle only in the database.
+    return withSettlement(
+      applyCacheHeaders(
+        new Response(rendered.body, {
+          status: rendered.status,
+          headers: {
+            ...rendered.headers, // link, content-usage, vary, etag — §6.6 headersFor
+            "content-type": rendered.mediaType,
+            "last-modified": new Date(resource.updatedAt).toUTCString(),
+            "cache-tag": `content:${resource.contentHash}`,
+            "x-musebook-access": decision.reason,
+            "x-musebook-mcp": "https://mcp.musebook.dev/mcp",
+          },
+        }),
+        decision,
+        env,
+      ),
       decision,
-      env,
     );
   } finally {
     release(ctx, ro, rwDb);

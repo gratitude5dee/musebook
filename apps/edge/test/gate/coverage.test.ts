@@ -567,7 +567,7 @@ describe("kernel ports and media conditionals (configure, payments, grants, medi
     });
     await expect(
       ports.payments.settle({ resource, actor: human, resourceUrl: url }),
-    ).resolves.toEqual({ kind: "unavailable" });
+    ).resolves.toEqual({ kind: "invalid", invalidReason: "no_payment" });
     await waitOnExecutionContext(ctx);
   });
 
@@ -589,13 +589,13 @@ describe("kernel ports and media conditionals (configure, payments, grants, medi
     await db(
       `insert into public.x402_settlements
          (id, post_id, content_hash, network, asset, payer, nonce,
-          amount_atomic, pay_to, transaction, status, facilitator_url, settled_at)
+          amount_atomic, pay_to, transaction, status, facilitator_url, settled_at, revenue_share_version)
        select $1::uuid, p.id, p.content_hash, 'eip155:84532',
               '0x036cbd53842c5426634e7929541ec2318f3dcf7e', $2,
               '0x' || lpad(encode(gen_random_bytes(28), 'hex'), 56, '0') || '00c0e1ff',
               p.price_atomic, '0x0000000000000000000000000000000000000001',
               '0x' || lpad(encode(gen_random_bytes(28), 'hex'), 56, '0') || '00c0e1ee',
-              'settled'::settlement_status, 'https://x402.org/facilitator', now()
+              'settled'::settlement_status, 'https://x402.org/facilitator', now(), p.revenue_share_version
          from public.posts p where p.id = $3::uuid`,
       [g.settlementId, g.payer, HFAP_POST],
     );
@@ -605,13 +605,13 @@ describe("kernel ports and media conditionals (configure, payments, grants, medi
     await db(
       `insert into public.x402_settlements
          (id, post_id, content_hash, network, asset, payer, nonce,
-          amount_atomic, pay_to, transaction, status, facilitator_url, settled_at)
+          amount_atomic, pay_to, transaction, status, facilitator_url, settled_at, revenue_share_version)
        select $1::uuid, p.id, p.content_hash, 'eip155:84532',
               '0x036cbd53842c5426634e7929541ec2318f3dcf7e', $2,
               '0x' || lpad(encode(gen_random_bytes(28), 'hex'), 56, '0') || '00c0e1dd',
               p.price_atomic, '0x0000000000000000000000000000000000000001',
               '0x' || lpad(encode(gen_random_bytes(28), 'hex'), 56, '0') || '00c0e1cc',
-              'settled'::settlement_status, 'https://x402.org/facilitator', now()
+              'settled'::settlement_status, 'https://x402.org/facilitator', now(), p.revenue_share_version
          from public.posts p where p.id = $3::uuid`,
       [secondSettlement, g.payer, HFAP_POST],
     );
@@ -759,7 +759,14 @@ describe("branch arms: catalog/posts/ops helpers, parseBody, twin + feed arms", 
     ).toBe(404);
     // A signed agent denied on the bare page lands on the !decision.allow html
     // arm. seed-note-hfap has no crawler grant — the article's does, and an
-    // allowed html page proxies to an origin this suite does not run.
+    // allowed html page proxies to an origin this suite does not run. The
+    // m8-wire suite mints the crawler a durable grant on this very post and
+    // grant rows survive a db reset — clear it or a re-run reads allow.
+    await db(
+      `delete from public.access_grants
+        where post_id = '44444444-4444-4444-8444-000000000002'
+          and subject_agent_id = '33333333-3333-4333-8333-000000000002'`,
+    );
     const denied = await SELF.fetch("https://musebook.dev/p/seed-note-hfap", {
       headers: await signedBotAuthHeaders("https://musebook.dev/p/seed-note-hfap"),
     });

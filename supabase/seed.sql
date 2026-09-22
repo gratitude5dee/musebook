@@ -1136,14 +1136,14 @@ on conflict (id) do nothing;
 insert into public.x402_settlements
   (id, quote_id, post_id, content_hash, network, asset, payer, nonce,
    amount_atomic, pay_to, transaction, status, facilitator_url,
-   verify_response, settle_response, created_at, settled_at)
+   verify_response, settle_response, revenue_share_version, created_at, settled_at)
 select 'aaaaaaaa-aaaa-4aaa-8aaa-000000000002'::uuid, 'aaaaaaaa-aaaa-4aaa-8aaa-000000000001'::uuid, '44444444-4444-4444-8444-000000000005'::uuid, p.content_hash,
        'eip155:8453', '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', '0x3333333333333333333333333333333333333333',
        '0x' || repeat('0', 56) || 'feed0001',
        2000, '0x2222222222222222222222222222222222222222',
        '0x' || repeat('0', 56) || 'feed0001',
        'settled'::settlement_status, 'https://x402.org/facilitator',
-       '{"valid":true}'::jsonb, '{"settled":true}'::jsonb,
+       '{"valid":true}'::jsonb, '{"settled":true}'::jsonb, 'rs_2026_09_v1',
        c.epoch + interval '72 seconds', c.epoch + interval '75 seconds'
 from public.posts p, seed_const c
 where p.id = '44444444-4444-4444-8444-000000000005'::uuid
