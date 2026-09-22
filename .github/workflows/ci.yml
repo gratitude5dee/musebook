@@ -56,7 +56,7 @@ jobs:
         run: pnpm lint
 
       - name: Format
-        run: pnpm format:check
+        run: pnpm format
 
       - name: Unit + integration tests
         run: pnpm test
