@@ -63,10 +63,14 @@ if (!existsSync(proxyPath)) {
     "must never delete or overwrite an x-mb-* header — they carry the Worker's plane decision to the origin",
   );
 
-  // 4. matcher covers everything.
+  // 4. matcher covers everything but the never-Worker paths. §6.12's verbatim
+  //    matcher excludes _next/static, _next/image and _vercel — those never
+  //    reach the Worker, so carrying the secret check there would 404 every
+  //    build asset. Everything else MUST be matched: an unmatched page is
+  //    served by Vercel without the origin-auth check.
   has(
-    /matcher\s*:\s*\[\s*["'`]\/:path\*["'`]/,
-    "config.matcher must cover '/:path*' — a partial matcher leaves some paths unauthenticated",
+    /matcher\s*:\s*\[\s*["'`]\/\(\(\?!_next\/static\|_next\/image\|_vercel\)\.\*\)["'`]/,
+    "config.matcher must be '/((?!_next/static|_next/image|_vercel).*)' — §6.12's exact form; covering _next/static 404s build assets, narrower leaves pages unauthenticated",
   );
 }
 

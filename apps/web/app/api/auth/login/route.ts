@@ -89,9 +89,9 @@ export async function POST(req: Request) {
   }
 
   // (5) Mint the opaque session. Only the hash is stored.
-  //     ip_hash comes from x-mb-client-ip, which musebook-edge sets from
-  //     CF-Connecting-IP (§2.7). x-forwarded-for is Cloudflare PoP data here and
-  //     hashing it would bucket every user in a region into one value.
+  //     ip_hash comes from x-mb-client-ip, which musebook-edge sets from the
+  //     PoP client-IP header (§2.7). x-forwarded-for is Cloudflare PoP data
+  //     here and hashing it would bucket every user in a region into one value.
   const raw = `mbs_${randomBytes(32).toString("base64url")}`;
   const expiresAt = new Date(Date.now() + SESSION_TTL_SECONDS * 1000);
   const { error: sessErr } = await serviceDb.from("sessions").insert({

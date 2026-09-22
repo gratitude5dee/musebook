@@ -13,6 +13,27 @@ export default defineConfig({
     hookTimeout: 30_000,
     // Deterministic file order so a golden-fixture failure reproduces from the printed seed.
     sequence: { shuffle: false, concurrent: false },
+    // postgres.js's workerd socket pump rejects AFTER end() resolves ("This
+    // socket has been closed", cf/polyfills.js read()) — a teardown artifact
+    // of the edge-gate pg shim, never a test failure. The waitUntil'd
+    // db.end() similarly orphans a tracing span when the request context
+    // ends ("SpanParent"). Resolved only at root level; returns false to
+    // drop ONLY those known strings — every other unhandled error still
+    // fails the run. Stringify defensively: a null-prototype rejection
+    // crashes String() and wedges the reporter itself.
+    onUnhandledError: (e: unknown) => {
+      try {
+        const m =
+          e instanceof Error
+            ? e.message
+            : typeof e === "object" && e !== null
+              ? JSON.stringify(e)
+              : String(e);
+        return !(m.includes("socket has been closed") || m.includes("SpanParent"));
+      } catch {
+        return true;
+      }
+    },
     reporters: process.env.CI ? ["default", "junit"] : ["default"],
     outputFile: { junit: "./reports/junit.xml" },
     coverage: {
@@ -32,7 +53,9 @@ export default defineConfig({
         "packages/content/src/**/*.ts",
         "packages/kernel/src/**/*.ts",
         "packages/connectors/src/**/*.ts",
+        "packages/telemetry/src/**/*.ts",
         "apps/edge/src/**/*.ts",
+        "apps/worker/src/**/*.ts",
         "apps/web/proxy.ts",
       ],
       exclude: [
@@ -92,6 +115,7 @@ export default defineConfig({
       // workerd tier: the SAME pure packages a second time (§17.1.2), plus the three Workers.
       "packages/*/vitest.workers.config.ts",
       "apps/edge/vitest.config.ts",
+      "apps/edge/vitest.gate.config.ts",
       "apps/mcp/vitest.config.ts",
       "apps/worker/vitest.config.ts",
       "apps/web/vitest.config.ts",

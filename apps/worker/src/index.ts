@@ -1,40 +1,40 @@
-// musebook-worker — 14 queue consumers + Cron, no public surface (§3.1).
-// One queue() entrypoint switches on batch.queue; one scheduled() entrypoint
-// switches on event.cron against the canonical crons array in wrangler.jsonc.
-export default {
-  queue(batch: MessageBatch, env: Env): void {
-    void env.HYPERDRIVE_FRESH;
-    void env.HYPERDRIVE_CACHED;
-    void env.PUBLIC_MEDIA;
-    void env.PAID_MEDIA;
-    void env.ARTIFACTS;
-    void env.UPLOADS;
-    void env.GRANTS;
-    void env.TELEMETRY;
-    void env.PAYWALL;
-    void env.Q_CLASSIFY;
-    void env.Q_MEDIA;
-    void env.Q_MEDIA_FINALIZE;
-    void env.Q_DISTRIBUTE;
-    void env.Q_EMBED;
-    void env.Q_AGENT_CANCEL;
-    void env.Q_R2_EVENTS;
-    // Consumers land from M4 (the outbox sweeper is O8 — ships with the first queue).
-    for (const message of batch.messages) {
-      message.ack();
-    }
-  },
-  scheduled(event: ScheduledEvent, env: Env): void {
-    void env;
-    void event;
-  },
+// apps/worker/src/index.ts — 14 queue consumers + Cron, no public surface
+// (§3.1). One queue() entrypoint switches on batch.queue; one scheduled()
+// entrypoint switches on controller.cron against the canonical crons array in
+// wrangler.jsonc — a cron with no matching case is a §15.28 acceptance failure.
+import { sweepOutbox } from "./cron/outbox.js";
+import { rebuildAnonSlates } from "./cron/slates.js";
+import { dispatch } from "./consumers/index.js";
+import { SlateBuilder } from "./slate-builder.js";
+
+/** §9.21: the service musebook-edge reaches over its MIXER binding — the
+ *  wrangler services entry names this entrypoint class. buildSlate() is the
+ *  RPC — never a route. */
+export { SlateBuilder };
+
+const noop = async (): Promise<void> => {
+  // M10-M15 crons — declared so every declared cron has a case today.
 };
 
-// musebook-edge calls this entrypoint inside ctx.waitUntil() to kick a stale
-// slate rebuild (CF-SPINE §4, §9.21). Declared now so the MIXER service
-// binding resolves; the implementation lands with the slate writer (M6/M9).
-export class SlateBuilder {
-  fetch(): Response {
-    return new Response("SlateBuilder: not yet implemented", { status: 501 });
-  }
-}
+export default {
+  async queue(batch: MessageBatch, env: Env): Promise<void> {
+    await dispatch(batch, env);
+  },
+
+  async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
+    switch (controller.cron) {
+      case "* * * * *":
+        return sweepOutbox(env, ctx);
+      case "*/5 * * * *":
+        return noop(); // §15's runAlertPass lands at M15
+      case "0 * * * *":
+        return rebuildAnonSlates(env, ctx); // §9.19 + §13 rollups hang off this one
+      case "0 4 * * 1":
+        return noop(); // §12's refreshPlatformConstraints lands later
+      case "*/15 * * * *":
+        return noop(); // §10's agent maintenance lands at M10
+      case "17 3 * * *":
+        return noop(); // §10.10.4's reputation pass
+    }
+  },
+} satisfies ExportedHandler<Env>;

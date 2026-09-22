@@ -258,7 +258,7 @@ export async function gBound() {
     } catch {
       srcHits = [];
     }
-    const { GROUPS, IGNORED } = await import("../env-manifest.mjs");
+    const { GROUPS, IGNORED, BINDINGS } = await import("../env-manifest.mjs");
     const manifestVars = new Set(GROUPS.flatMap((g) => g.vars).map((v) => v.name));
     const read = new Set(srcHits.map((h) => h.split("env.")[1]));
     for (const name of read) {
@@ -269,7 +269,11 @@ export async function gBound() {
       }
     }
     for (const name of declared) {
-      if (!read.has(name)) {
+      // §3.6's verbatim wrangler specs declare bindings ahead of their readers
+      // (apps/worker's R2/KV/AE/Q_R2_EVENTS land at M7+/M11). A registry name
+      // that is unread is plan-declared, not an orphan; an UNREGISTERED unread
+      // binding is the speculative config this arm exists to catch.
+      if (!read.has(name) && !BINDINGS.includes(name)) {
         errors.push(
           `${appDir}: wrangler.jsonc declares binding ${name} but src never reads it (orphan)`,
         );
@@ -1477,7 +1481,9 @@ const MIGRATION_REGISTRY = [
   ["20260922091900_platform_constraints", 10],
   ["20260922091901_platform_seed", 10],
   ["20260922092000_telemetry_facets", 11],
-  ["20260922092002_telemetry_salts", 11],
+  ["20260922092001_edge_read", 6],
+  ["20260922092002_telemetry_salts", 6],
+  ["20260922092004_edge_helpers", 6],
   ["20260922092003_telemetry_rollups", 11],
   ["20260922092100_ops_internal_auth", 11],
   ["20260922092101_ops_metrics", 11],
@@ -1815,4 +1821,408 @@ export function m5EtagSingleProducer() {
 // M5.11 — mintsDurableGrant: true only for human_free_agent_paid.
 export function m5MintsDurableGrant() {
   return vitestSlice(`${KERNEL_NODE} test/projections.test.ts`, "mintsDurableGrant");
+}
+
+// ---------------------------------------------------------------------------
+// M6 milestone checks — §16.5 verbatim. Deployed-curl checks have a local
+// equivalent: the same assertions run through SELF.fetch on the real Worker
+// under @cloudflare/vitest-plugin with live Postgres (test/gate/wire.test.ts,
+// r2-split.test.ts, origin-lockdown.test.ts, gate.test.ts).
+// ---------------------------------------------------------------------------
+
+const EG = "pnpm vitest run --project edge-gate";
+const WG = "pnpm vitest run --project worker";
+
+// M6.1 — Worker in the path + origin closed (incl. wrong-secret negative).
+export function m6WorkerInPath() {
+  return vitestSlice(`${EG} test/gate/origin-lockdown.test.ts`, "origin lockdown");
+}
+
+// M6.3 — twin byte-consistency + ETag form + If-None-Match 304 + Accept.
+export function m6TwinWire() {
+  return vitestSlice(`${EG} test/gate/wire.test.ts`, "twin byte-consistency");
+}
+
+// M6.4 — twins served by the Worker; the Vercel-era /api/twin route is gone.
+export function m6TwinsWorkerOnly() {
+  const slice = vitestSlice(`${EG} test/gate/wire.test.ts`, "twin byte-consistency");
+  if (!slice.ok) return slice;
+  const errors = [];
+  if (existsSync(join(ROOT, "apps/web/app/api/twin")))
+    errors.push("apps/web/app/api/twin exists — twins must never reach Vercel");
+  return { ok: errors.length === 0, errors };
+}
+
+// M6.5 — O3: no event lacks a position; the NOT NULL columns catch drift.
+export function m6EventPositions() {
+  return sqlCheck(
+    "select count(*)::int from public.action_events where slate_id is null or position is null or weights_version is null or model_version is null",
+    "0",
+  );
+}
+
+// M6.6 — O3: bootstrap literals are server-set, and a forged weights_version
+// still stores 'none'. Wire slice covers the forged-batch posting.
+export function m6BootstrapLiterals() {
+  const sql = sqlCheck(
+    "select count(*)::int from public.action_events where weights_version <> 'none' or model_version <> 'reverse_chron'",
+    "0",
+  );
+  if (!sql.ok) return sql;
+  return vitestSlice(`${EG} test/gate/wire.test.ts`, "authed batch");
+}
+
+// M6.7 — O3: every viewer-owned slate carries events. Anonymous slates are
+// AE-only by design (ingest.ts writes no Postgres row for them) — the check
+// is scoped to viewer_user_id is not null; DEVIATIONS.md records this.
+export function m6SlateCoverage() {
+  const slice = vitestSlice(`${EG} test/gate/wire.test.ts`, "every slate row has impressions");
+  if (!slice.ok) return slice;
+  return sqlCheck(
+    "select count(*)::int from public.slates s where s.viewer_user_id is not null and not exists (select 1 from public.action_events e where e.slate_id = s.id)",
+    "0",
+  );
+}
+
+// M6.8 — O3: positions dense + zero-based per slate. Scoped to action =
+// 'impression': view/play events legitimately share positions with the
+// impression at that slot — the check's rationale is a dropped impression or
+// two impressions claiming one slot (§16.5; DEVIATIONS.md).
+export function m6PositionDensity() {
+  const slice = vitestSlice(`${EG} test/gate/wire.test.ts`, "dense 0-based positions");
+  if (!slice.ok) return slice;
+  return sqlCheck(
+    "select count(*)::int from (select slate_id, array_agg(position order by position) p from public.action_events where action = 'impression' group by slate_id) s where s.p <> (select array_agg(i) from generate_series(0, array_length(s.p, 1) - 1) i)",
+    "0",
+  );
+}
+
+// M6.9 — the request path reads, it does not score: no muse-mixer import,
+// no direct slates/slate_items select in apps/edge (one definer call instead),
+// and a page-2 continuation is a read of the same slate.
+export function m6ReadNotScore() {
+  const errors = [];
+  const mixer = rg("@musebook/muse-mixer", ["apps/edge/"]);
+  errors.push(...mixer);
+  const directReads = rg("from\\s+(public\\.)?(slates|slate_items)\\b", ["apps/edge/src"]);
+  errors.push(...directReads);
+  if (errors.length) return { ok: false, errors };
+  return vitestSlice(`${EG} test/gate/wire.test.ts`, "feed reads the slate");
+}
+
+// M6.10 — slate INSERTs live only under apps/worker/src.
+export function m6SlateWriterPlacement() {
+  const hits = rg("insert into public\\.slates", ["apps", "packages"], ["-g", "*.ts"]).filter(
+    (h) => !h.startsWith("apps/worker/src/"),
+  );
+  return { ok: hits.length === 0, errors: hits };
+}
+
+// M6.11 — forged x-mb-* never reaches the origin; x-mb-request-id is minted.
+export function m6ForgedTrustHeaders() {
+  return vitestSlice(`${EG} test/gate/gate.test.ts`, "x-mb-* header never reaches");
+}
+
+// M6.12 — geo from request.cf: x-mb-country falls back to XX in index.ts,
+// and no Vercel-era geo API is read anywhere in apps or packages.
+export function m6GeoFromCf() {
+  const errors = [];
+  const src = readFileSync(join(ROOT, "apps/edge/src/index.ts"), "utf8");
+  if (!/request\.cf\?\.country(\s+as\s+[\w |]+)?\s*\)*\s*\?\?\s*["']XX["']/.test(src))
+    errors.push("index.ts does not set x-mb-country from request.cf.country ?? 'XX'");
+  const vercel = rg(
+    "x-vercel-ip-country|geolocation\\(\\)|ipAddress\\(\\)",
+    ["apps", "packages"],
+    ["-g", "*.ts", "-g", "*.tsx"],
+  );
+  errors.push(...vercel);
+  return { ok: errors.length === 0, errors };
+}
+
+// M6.13 — DNT: zero rows in BOTH stores, impressions counter still +1.
+export function m6DntOptOut() {
+  return vitestSlice(`${EG} test/gate/wire.test.ts`, "DNT");
+}
+
+// M6.14 — CF-Connecting-IP is read in exactly two files.
+export function m6ClientIpScope() {
+  const hits = rg("CF-Connecting-IP", ["apps", "packages"], ["-g", "*.ts"]);
+  const files = [...new Set(hits.map((h) => h.split(":")[0]))].sort();
+  const want = ["apps/edge/src/index.ts", "apps/edge/src/telemetry/privacy.ts"];
+  return {
+    ok: JSON.stringify(files) === JSON.stringify(want),
+    errors:
+      JSON.stringify(files) === JSON.stringify(want)
+        ? []
+        : [`CF-Connecting-IP files ${JSON.stringify(files)} != ${JSON.stringify(want)}`],
+  };
+}
+
+// M6.15 — one-statement outbox: no explicit BEGIN anywhere in either Worker,
+// and the enqueue path is a single plpgsql call (app.enqueue_job).
+export function m6OneStatementOutbox() {
+  const errors = [];
+  const txs = rg("\\bBEGIN\\b|client\\.query\\(['\"]begin['\"]\\)", [
+    "apps/edge/src",
+    "apps/worker/src",
+  ]);
+  errors.push(...txs);
+  const enqueue = readFileSync(join(ROOT, "apps/edge/src/enqueue.ts"), "utf8");
+  if (!/app\.enqueue_job\(/.test(enqueue))
+    errors.push("enqueue.ts does not call app.enqueue_job — outbox write is not one statement");
+  return { ok: errors.length === 0, errors };
+}
+
+// M6.16 — the sweeper recovers a dropped enqueue within ~60 s.
+export function m6SweeperRecovery() {
+  return vitestSlice(`${WG} test/outbox-sweeper.test.ts`, "sweeper");
+}
+
+// M6.17 — a message that fails every retry lands in the DLQ AND is consumed:
+// state 'dead' on the job_outbox row + an ops_events error.
+export function m6DlqConsumed() {
+  return vitestSlice(`${WG} test/queue-idempotency.test.ts`, "dead");
+}
+
+// M6.18 — every consumer is idempotent, keyed on job_outbox.dedupe_key.
+export function m6IdempotentConsumers() {
+  return vitestSlice(`${WG} test/queue-idempotency.test.ts`, "idempotent");
+}
+
+// M6.19 — ≤128 KB per message, ids/R2 keys only, no inlined body.
+export function m6MessageSize() {
+  return vitestSlice(`${WG} test/outbox-sweeper.test.ts`, "128");
+}
+
+// M6.20 — cdn. never touches a Worker: the cache-everything + edge_ttl rule
+// exists on http_request_cache_settings and Smart Tiered Cache is on.
+export function m6CdnCacheEverything() {
+  if (!process.env.CF_API_TOKEN || !process.env[ZONE_ENV])
+    return { ok: false, errors: [], blocked: `CF_API_TOKEN/${ZONE_ENV} unset` };
+  const errors = [];
+  const ruleset = cf(
+    `/zones/${process.env[ZONE_ENV]}/rulesets/phases/http_request_cache_settings/entrypoint`,
+  );
+  const rules = ruleset.json?.result?.rules ?? [];
+  const rule = rules.find((r) => r.description === "cache-everything-cdn" && r.enabled);
+  if (!rule) errors.push("no enabled cache-everything-cdn rule");
+  else {
+    if (rule.action_parameters?.cache !== true) errors.push("cdn rule cache is not true");
+    if (!rule.expression?.includes('http.host eq "cdn.musebook.dev"'))
+      errors.push(`cdn rule expression not host-scoped: ${rule.expression}`);
+    if (rule.action_parameters?.edge_ttl?.mode !== "override_origin")
+      errors.push("cdn rule has no override_origin edge_ttl — .m3u8/.ts/.json stay DYNAMIC");
+  }
+  const tiered = cf(`/zones/${process.env[ZONE_ENV]}/cache/tiered_cache_smart_topology_enable`);
+  if (tiered.json?.result?.value !== "on")
+    errors.push(`tiered_cache_smart_topology_enable is '${tiered.json?.result?.value}' not 'on'`);
+  return { ok: errors.length === 0, errors };
+}
+
+// M6.21 — paid media only through the Worker after the grant check; buckets
+// sealed (r2-seal universal) and a direct bucket-host fetch is refused.
+export function m6PaidMediaGate() {
+  return vitestSlice(`${EG} test/gate/r2-split.test.ts`, "paid media");
+}
+
+// M6.22 — no presigned URL is ever minted on a read path.
+export function m6NoPresignReads() {
+  const hits = rg("aws4|X-Amz-Signature|presign", [
+    "apps/edge/src/media.ts",
+    "apps/edge/src/routes/",
+  ]);
+  return { ok: hits.length === 0, errors: hits };
+}
+
+// M6.23 — Range returns 206 + Content-Range from R2Object.size; an
+// unsatisfiable precondition returns 412 with no body.
+export function m6RangeCorrectness() {
+  return vitestSlice(`${EG} test/gate/r2-split.test.ts`, "Range");
+}
+
+// M6.24 — reels: surface='reels' slate serves; play/play_through reach
+// Postgres (label side) AND Analytics Engine (volume side).
+export function m6ReelsEvents() {
+  return vitestSlice(`${EG} test/gate/wire.test.ts`, "reels");
+}
+
+// M6.25 — O9: both stores written, each holding only what §13.1.1 assigns —
+// AE gets every event; Postgres gets the label-sample side.
+export function m6TelemetrySplit() {
+  const a = vitestSlice(`${EG} test/gate/wire.test.ts`, "authed batch");
+  if (!a.ok) return a;
+  return vitestSlice(`${EG} test/gate/wire.test.ts`, "DNT");
+}
+
+// M6.26 — §13.3.1's Point carries no subject fields (a @ts-expect-error
+// contract test enforced by tsc --build), and exactly one writeDataPoint site.
+export function m6AeNoSubjects() {
+  const errors = [];
+  const hits = rg("writeDataPoint", ["apps", "packages"], ["-g", "*.ts"]).filter(
+    (h) =>
+      !h.includes("packages/telemetry/src/ae.ts") &&
+      !h.includes("/test/") &&
+      !h.includes("worker-configuration.d.ts"), // wrangler types output, not a call site
+  );
+  errors.push(...hits);
+  if (!existsSync(join(ROOT, "packages/telemetry/src/point-contract.ts")))
+    errors.push("packages/telemetry/src/point-contract.ts missing (subject-field contract)");
+  const tc = run("pnpm --filter @musebook/telemetry typecheck");
+  if (tc.code !== 0)
+    errors.push(`telemetry typecheck failed (point contract): ${tc.out.slice(-800)}`);
+  return { ok: errors.length === 0, errors };
+}
+
+// M6.27 — the firehose never goes through Queues.
+export function m6NoTelemetryQueue() {
+  const hits = rg("Q_TELEMETRY|queue.*impression", ["apps/edge/src"]);
+  return { ok: hits.length === 0, errors: hits };
+}
+
+// M6.28 — /_next/static/* is not routed through the Worker: no route pattern
+// in apps/edge/wrangler.jsonc matches it.
+export function m6StaticNotRouted() {
+  const errors = [];
+  const cfg = readJsonc(join(ROOT, "apps/edge/wrangler.jsonc"));
+  const routes = (cfg.routes ?? []).map((r) => (typeof r === "string" ? r : r.pattern));
+  // §15.28's row is scoped to the apex: `/_next/static/*` must not be billed
+  // through the Worker on musebook.dev itself. The plan's own route list
+  // (§3.6.1) declares `www.musebook.dev/*` verbatim and media./artifacts.
+  // never serve Next at all — a host other than the apex is out of scope.
+  for (const r of routes) {
+    const host = String(r).split("/")[0];
+    if (host !== "musebook.dev") continue;
+    const path = String(r).replace(/^[^/]*musebook\.dev/, "");
+    // path "/" is the literal root — it does NOT match /_next/static/*.
+    if (path === "" || path === "*" || path === "/*" || path.startsWith("/_next"))
+      errors.push(`route '${r}' would carry /_next/static/* through the Worker`);
+  }
+  const edge = edgeRoutes();
+  if (!edge.ok) errors.push(...edge.errors);
+  return { ok: errors.length === 0, errors };
+}
+
+// M6.29 — /_next/image IS cached: the cache rule exists covering both paths
+// with cache:true + cache_deception_armor; custom_key is Enterprise-entitled —
+// the zone can't set it, and the default key already keys on the full query
+// string (url, w, q — the only params Next emits). Polish and Mirage off.
+export function m6NextImageCached() {
+  if (!process.env.CF_API_TOKEN || !process.env[ZONE_ENV])
+    return { ok: false, errors: [], blocked: `CF_API_TOKEN/${ZONE_ENV} unset` };
+  const errors = [];
+  const ruleset = cf(
+    `/zones/${process.env[ZONE_ENV]}/rulesets/phases/http_request_cache_settings/entrypoint`,
+  );
+  const rule = (ruleset.json?.result?.rules ?? []).find(
+    (r) => r.description === "cache-next-image" && r.enabled,
+  );
+  if (!rule) errors.push("no enabled cache-next-image rule");
+  else {
+    if (rule.action_parameters?.cache !== true) errors.push("image rule cache is not true");
+    for (const p of ["/_next/image", "/_vercel/image"])
+      if (!rule.expression?.includes(p)) errors.push(`image rule does not match ${p}`);
+    if (rule.action_parameters?.cache_key?.cache_deception_armor !== true)
+      errors.push("cache_deception_armor is not on for the image rule");
+    // custom_key on url/w/q is the verbatim ask but is an Enterprise
+    // entitlement this zone lacks; the default cache key already includes
+    // host + path + the full query string, and /_next/image emits only
+    // url/w/q — equivalent key, recorded in DEVIATIONS.md.
+  }
+  for (const s of ["polish", "mirage"]) {
+    const v = cf(`/zones/${process.env[ZONE_ENV]}/settings/${s}`);
+    if (v.json?.result?.value !== "off")
+      errors.push(`${s} is '${v.json?.result?.value}' not 'off'`);
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// M6.30 — no bare CDN-Cache-Control (both CDNs read it → double-caching),
+// denied/gated responses are Vary:* + no-store on all three layers (wire
+// slice), and no Cache Rule override_origin on a gated path prefix.
+export function m6NoDoubleCache() {
+  const errors = [];
+  const hits = rg("CDN-Cache-Control", ["apps", "packages"], ["-g", "*.ts", "-g", "*.tsx"]).filter(
+    (h) => !h.includes("Cloudflare-CDN-Cache-Control") && !h.includes("Vercel-CDN-Cache-Control"),
+  );
+  // filter strips lines that ONLY name the vendor forms; a line could still
+  // carry a bare header elsewhere — drop hits whose bare match is absent.
+  const bare = hits.filter((h) =>
+    /(?<!Cloudflare-)(?<!Vercel-)\bCDN-Cache-Control/.test(
+      h.replace(/Cloudflare-CDN-Cache-Control/g, "").replace(/Vercel-CDN-Cache-Control/g, ""),
+    ),
+  );
+  // Plan-required test names + doc comments legitimately name the header
+  // (§6.12.5 requires cache.test.ts to assert its absence). What matters is a
+  // header EMITTED: a literal in code position. Drop test files entirely and
+  // any hit whose match sits on a comment line.
+  const emitted = bare.filter((h) => {
+    const line = h.split(":").slice(2).join(":");
+    if (h.includes("/test/") || h.includes(".test.")) return false;
+    const trimmed = line.trimStart();
+    return !(trimmed.startsWith("//") || trimmed.startsWith("*"));
+  });
+  errors.push(...emitted);
+  const slice = vitestSlice(`${EG} test/gate/wire.test.ts`, "cache headers");
+  if (!slice.ok) errors.push(...slice.errors);
+  if (process.env.CF_API_TOKEN && process.env[ZONE_ENV]) {
+    const ruleset = cf(
+      `/zones/${process.env[ZONE_ENV]}/rulesets/phases/http_request_cache_settings/entrypoint`,
+    );
+    const text = JSON.stringify(ruleset.json?.result?.rules ?? []);
+    if (/override_origin.{0,200}(gated|\/p\/|\/api\/|\/mcp)/s.test(text))
+      errors.push("a cache rule applies override_origin edge-ttl to a gated path prefix");
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// M6.31 — paid bytes never reach a crawl surface (wire slices), and the
+// always-free lists in ORIGIN_PASSTHROUGH + STATIC_ROUTES are identical to
+// §6.12.8's enumeration.
+export function m6CrawlNoPaidBytes() {
+  const slice = vitestSlice(`${EG} test/gate/wire.test.ts`, "crawl surface");
+  if (!slice.ok) return slice;
+  const errors = [];
+  // §6.12.8's enumeration, verbatim.
+  const S6128 = [
+    "/robots.txt",
+    "/sitemap.xml",
+    "/security.txt",
+    "/crawlers.json",
+    "/llms.txt",
+    "/llms-full.txt",
+    "/.well-known/",
+  ];
+  const idx = readFileSync(join(ROOT, "apps/edge/src/index.ts"), "utf8");
+  const router = readFileSync(join(ROOT, "apps/edge/src/router.ts"), "utf8");
+  // ORIGIN_PASSTHROUGH is `new Set([...])`; STATIC_ROUTES a Record. Each of
+  // the seven §6.12.8 paths must be reachable through one of the two lists
+  // (or the /.well-known prefix test) — extras in STATIC_ROUTES are fine:
+  // feeds are worker-rendered too but do their own §7.13 trimming.
+  const ptM = idx.match(/ORIGIN_PASSTHROUGH\s*=\s*new Set\(\[([\s\S]*?)\]\)/);
+  const passthrough = ptM ? [...ptM[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]) : null;
+  const srM = router.match(/STATIC_ROUTES[^=]*=\s*\{([\s\S]*?)\};/);
+  const statics = srM ? [...srM[1].matchAll(/"([^"]+)"\s*:/g)].map((x) => x[1]) : null;
+  const wellKnown = /pathname\.startsWith\(["']\/\.well-known\/["']\)/.test(idx);
+  if (passthrough === null) errors.push("ORIGIN_PASSTHROUGH Set not found in index.ts");
+  if (statics === null) errors.push("STATIC_ROUTES record not found in router.ts");
+  if (!wellKnown) errors.push("/.well-known/ prefix test not found in index.ts");
+  const reachable = (p) =>
+    p === "/.well-known/"
+      ? wellKnown
+      : (passthrough ?? []).includes(p) || (statics ?? []).includes(p);
+  for (const p of S6128)
+    if (!reachable(p))
+      errors.push(`${p} is not in ORIGIN_PASSTHROUGH, STATIC_ROUTES or the /.well-known test`);
+  return { ok: errors.length === 0, errors };
+}
+
+// M6.32 — G-FAKE-TX skips here: its activeFrom is M8 where the settlement
+// code it guards first exists (the runner prints SKIP automatically).
+export function m6FakeTxSkipped() {
+  const hits = rg("G-FAKE-TX", ["scripts/gates/manifest.mjs"], ["-A", "8"]);
+  const hasM8 = hits.some((h) => /activeFrom:\s*"M8"/.test(h));
+  return {
+    ok: hasM8,
+    errors: hasM8 ? [] : ["G-FAKE-TX activeFrom is not M8 in manifest.mjs"],
+  };
 }

@@ -201,7 +201,12 @@ describe("M3.2 web bot auth outcomes", () => {
     await seedDirectory(AGENT_ORIGIN, pubJwk);
     const signer = await signerFromJWK(privJwk);
     const v = await classifySignature(await signedRequest(signer), testEnv());
-    expect(v).toEqual({ kind: "agent", keyid: signer.keyid, agentOrigin: AGENT_ORIGIN });
+    expect(v).toEqual({
+      kind: "agent",
+      keyid: signer.keyid,
+      agentUri: AGENT_ORIGIN,
+      agentOrigin: AGENT_ORIGIN,
+    });
   });
 
   it("tampered signature → 401", async () => {

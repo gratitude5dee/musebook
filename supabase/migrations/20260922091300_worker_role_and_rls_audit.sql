@@ -31,6 +31,10 @@ grant musebook_public_reader, musebook_kernel, musebook_jobs to musebook_worker;
 
 grant usage on schema public, app to
   musebook_public_reader, musebook_kernel, musebook_jobs;
+-- `extensions` holds pgvector — jobs casts (r->>'embedding')::extensions.vector
+-- in app.record_embeddings; without USAGE the type lookup itself 42501s.
+grant usage on schema extensions to
+  musebook_public_reader, musebook_kernel, musebook_jobs;
 grant execute on function app.actor_id(), app.is_evm_address(text), app.sha256_hex(text) to
   musebook_public_reader, musebook_kernel, musebook_jobs;
 

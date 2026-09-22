@@ -21,6 +21,7 @@
     "@types/node": "26.6.2",
     "@vitest/coverage-v8": "catalog:",
     "@cloudflare/vitest-plugin": "catalog:",
+    "@cloudflare/workers-types": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

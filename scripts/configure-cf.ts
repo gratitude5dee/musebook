@@ -99,49 +99,143 @@ if (bot === null) {
   await expectSetting("ai_bots.search", "allow", ai.search, async () => {});
 }
 
-// 3. Pay-per-crawl fenced off: a Configuration Rule disabling it on the money
-//    paths even if the zone-level toggle is ever flipped.
-const rulesets = await cf(`/zones/${ZONE}/rulesets`).catch(() => []);
-const hasPpcFence = JSON.stringify(rulesets ?? []).includes("disable-ppc-x402-paths");
+// 3. Pay-per-crawl: there is no surface to fence. The `pay_per_crawl` action
+//    parameter is rejected by http_config_settings on this account and no
+//    /zones/{id}/{ai_crawl,ppc,pay_per_crawl} endpoint exists — PPC is closed
+//    private beta and cannot be enabled here (§6.12.6). The drift item is the
+//    surface *appearing*: if a PPC endpoint ever answers 200, a human must
+//    ensure it is never set to charge.
+const ppcProbe = await Promise.all(
+  ["ai_crawl", "aibot", "ppc", "pay_per_crawl", "ai_crawl_control"].map((p) =>
+    fetch(`${API}/zones/${ZONE}/${p}`, {
+      headers: { Authorization: `Bearer ${TOKEN}` },
+    })
+      .then((r) => ({ p, status: r.status }))
+      .catch(() => ({ p, status: 0 })),
+  ),
+);
+const ppcSurface = ppcProbe.filter((x) => x.status === 200).map((x) => x.p);
 await expectSetting(
-  "ruleset disable-ppc-x402-paths",
-  "present",
-  hasPpcFence ? "present" : "absent",
-  async () => {
-    const entrypoints = await cf(
-      `/zones/${ZONE}/rulesets/phases/http_config_settings/entrypoint`,
-    ).catch(() => null);
-    const existing = entrypoints?.rules ?? [];
-    const rule = {
-      description: "disable-ppc-x402-paths",
-      expression:
-        '(http.request.uri.path matches "^/p/" or http.request.uri.path matches "^/api/" or http.request.uri.path matches "^/mcp" or http.request.uri.path matches "^/media/")',
-      action: "set_config",
-      action_parameters: { pay_per_crawl: false },
-      enabled: true,
-    };
-    await cf(`/zones/${ZONE}/rulesets/phases/http_config_settings/entrypoint`, {
-      method: "PUT",
-      body: JSON.stringify({
-        rules: [...existing.filter((r: any) => r.description !== "disable-ppc-x402-paths"), rule],
-      }),
-    });
-  },
+  "pay-per-crawl surface",
+  "absent",
+  ppcSurface.length === 0 ? "absent" : `present on ${ppcSurface.join(",")}`,
+  async () => {},
 );
 
-// 4. Cache rules (§15): never override_origin on a gated prefix; deception
-//    armor everywhere HTML is cacheable. Recorded as assertions on the
-//    http_request_cache_settings ruleset.
+// 4. Cache rules (§15): one http_request_cache_settings ruleset, three rules
+//    in this order — (a) bypass on the money headers and /api/x402 + /mcp
+//    (Cloudflare honours an arbitrary Vary only through a bypass rule, so this
+//    is what actually separates the two planes of human_free_agent_paid);
+//    (b) /_next/image + /_vercel/image, extension-less and therefore DYNAMIC
+//    without a rule — every image request would bill Vercel forever — with a
+//    custom cache key on url/w/q and cache_deception_armor on; (c) Cache
+//    Everything + Edge TTL on cdn.musebook.dev because default caching is
+//    extension-based and skips .m3u8, .ts and .json. cdn. is the public bucket
+//    — never a gated prefix — so override_origin is safe there and nowhere else.
+const wantCacheRules = [
+  {
+    description: "bypass-cache-x402-money-headers",
+    expression:
+      'starts_with(http.request.uri.path, "/api/x402") or starts_with(http.request.uri.path, "/mcp") or len(http.request.headers["payment-signature"]) > 0 or len(http.request.headers["signature-agent"]) > 0',
+    action: "set_cache_settings",
+    action_parameters: { cache: false },
+    enabled: true,
+  },
+  {
+    description: "cache-next-image",
+    expression:
+      'starts_with(http.request.uri.path, "/_next/image") or starts_with(http.request.uri.path, "/_vercel/image")',
+    action: "set_cache_settings",
+    action_parameters: {
+      cache: true,
+      // §16.5 M6.29 asks for a custom_key on url/w/q. `custom_key` is an
+      // Enterprise entitlement this zone doesn't have — but the DEFAULT key
+      // already includes host + path + full query string, and /_next/image
+      // emits only url/w/q, so the key it wants is the key it gets. Deviation
+      // recorded in DEVIATIONS.md; the gate check asserts custom_key OR
+      // default-key-equivalence.
+      cache_key: { cache_deception_armor: true },
+    },
+    enabled: true,
+  },
+  {
+    description: "cache-everything-cdn",
+    expression: 'http.host eq "cdn.musebook.dev"',
+    action: "set_cache_settings",
+    action_parameters: {
+      cache: true,
+      // cdn. objects are content-keyed and immutable; 30d edge TTL. §15's
+      // override_origin ban is for gated path prefixes — this host can only
+      // serve the public bucket.
+      edge_ttl: { mode: "override_origin", default: 2592000 },
+    },
+    enabled: true,
+  },
+];
+
 const cacheRules = await cf(
   `/zones/${ZONE}/rulesets/phases/http_request_cache_settings/entrypoint`,
 ).catch(() => null);
-const cacheText = JSON.stringify(cacheRules?.rules ?? []);
+const existingCacheRules: any[] = cacheRules?.rules ?? [];
+const rulePresent = (want: any) =>
+  existingCacheRules.some((r) => r.description === want.description && r.enabled);
+const cacheText = JSON.stringify(existingCacheRules);
+
+for (const want of wantCacheRules) {
+  await expectSetting(
+    `cache-rule ${want.description}`,
+    "present",
+    rulePresent(want) ? "present" : "absent",
+    async () => {
+      const rules = [
+        ...existingCacheRules.filter(
+          (r) => !wantCacheRules.some((w) => w.description === r.description),
+        ),
+        ...wantCacheRules,
+      ];
+      await cf(`/zones/${ZONE}/rulesets/phases/http_request_cache_settings/entrypoint`, {
+        method: "PUT",
+        body: JSON.stringify({ rules }),
+      });
+    },
+  );
+}
+
 await expectSetting(
   "no override_origin edge-ttl on gated paths",
   "absent",
   /override_origin.*(gated|\/p\/|\/api\/)/is.test(cacheText) ? "present" : "absent",
   async () => {},
 );
+
+// Smart Tiered Cache on (Cache Reserve stays off — it is R2-priced storage in
+// front of R2, duplicate cost for zero benefit, §15).
+const tiered = await cf(`/zones/${ZONE}/cache/tiered_cache_smart_topology_enable`).catch(
+  () => null,
+);
+await expectSetting("tiered_cache.smart_topology", "on", tiered?.value, async () => {
+  await cf(`/zones/${ZONE}/cache/tiered_cache_smart_topology_enable`, {
+    method: "PATCH",
+    body: JSON.stringify({ value: "on" }),
+  });
+});
+
+// Polish and Mirage OFF — both produce their own variants and are documented
+// as incompatible with Vary-based variants (§15, §7.20 check 29).
+const polish = await cf(`/zones/${ZONE}/settings/polish`).catch(() => null);
+await expectSetting("polish", "off", polish?.value, async () => {
+  await cf(`/zones/${ZONE}/settings/polish`, {
+    method: "PATCH",
+    body: JSON.stringify({ value: "off" }),
+  });
+});
+const mirage = await cf(`/zones/${ZONE}/settings/mirage`).catch(() => null);
+await expectSetting("mirage", "off", mirage?.value, async () => {
+  await cf(`/zones/${ZONE}/settings/mirage`, {
+    method: "PATCH",
+    body: JSON.stringify({ value: "off" }),
+  });
+});
 
 // ---------------------------------------------------------------------------
 

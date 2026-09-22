@@ -85,6 +85,10 @@ async function withClient<T>(
 type AgentSighting = { signatureAgent: string; keyid: string; seenAt: string };
 
 /** Test seam: swap the pg round trip for a stubbed query function. */
+/** `wrangler types` marks every binding optional; wrangler.jsonc declares
+ *  these four unconditionally. Narrow once at the boundary. */
+export const asIdentityEnv = (env: Env): IdentityEnv => env as IdentityEnv;
+
 export type ResolveActorDeps = {
   query?: (
     connectionString: string,
@@ -219,7 +223,7 @@ export function makeResolveActor(
     // ── Row 3: the signature from row 0 verified → crawler_agent (web_bot_auth).
     //    agent_identities read is pure catalog data → HYPERDRIVE_CACHED. ──
     if (wba.kind === "agent") {
-      const signatureAgent = request.headers.get("signature-agent") ?? wba.agentOrigin;
+      const signatureAgent = wba.agentUri;
       const identity = (
         await runQuery(
           env.HYPERDRIVE_CACHED.connectionString,
@@ -240,7 +244,7 @@ export function makeResolveActor(
             const rows = await runQuery(
               env.HYPERDRIVE_FRESH.connectionString,
               `select app.enqueue_sighting($1, $2::jsonb) as job_id`,
-              [`sighting:${wba.keyid}:${sighting.seenAt.slice(0, 13)}`, JSON.stringify(sighting)],
+              [`sighting:${wba.keyid}:${sighting.seenAt.slice(0, 13)}`, sighting],
             );
             const jobId = rows[0]?.job_id as number | null | undefined;
             if (jobId !== null && jobId !== undefined) await env.Q_CLASSIFY.send({ job_id: jobId });
@@ -354,4 +358,39 @@ export function makeResolveActor(
       directoryKeyid: null,
     };
   };
+}
+
+/**
+ * §5.6.2's fail-direction table at the HTTP boundary: a presented-but-bad
+ * credential becomes a RESPONSE, not a thrown exception escaping fetch().
+ * WebBotAuthRejected keeps its own status (401, or 503 + Retry-After: 30 on an
+ * unreachable directory); CredentialRejected is always a 401. Anything else
+ * still throws — spine invariant 9 covers the access check, not this ladder.
+ */
+export async function actorOrResponse(
+  env: IdentityEnv,
+  ctx: ExecutionContext,
+  request: Request,
+  deps: ResolveActorDeps = {},
+): Promise<Actor | Response> {
+  try {
+    return await makeResolveActor(env, ctx, deps)(request);
+  } catch (e) {
+    if (e instanceof WebBotAuthRejected) {
+      return new Response(`${e.reason}\n`, {
+        status: e.status,
+        headers:
+          e.retryAfter === undefined
+            ? { "content-type": "text/plain; charset=utf-8" }
+            : { "content-type": "text/plain; charset=utf-8", "retry-after": String(e.retryAfter) },
+      });
+    }
+    if (e instanceof CredentialRejected) {
+      return new Response(`${e.reason}\n`, {
+        status: 401,
+        headers: { "content-type": "text/plain; charset=utf-8" },
+      });
+    }
+    throw e;
+  }
 }

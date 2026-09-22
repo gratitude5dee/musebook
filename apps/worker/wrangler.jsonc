@@ -34,12 +34,12 @@
     {
       "binding": "HYPERDRIVE_FRESH",
       "id": "5288b46cce7340438e840e1d0daeb23d",
-      "localConnectionString": "postgres://postgres:postgres@127.0.0.1:54322/postgres"
+      "localConnectionString": "postgres://musebook_worker:postgres@127.0.0.1:54322/postgres"
     },
     {
       "binding": "HYPERDRIVE_CACHED",
       "id": "48c4c1c7cc734a8cb4031bd546160eae",
-      "localConnectionString": "postgres://postgres:postgres@127.0.0.1:54322/postgres"
+      "localConnectionString": "postgres://musebook_worker:postgres@127.0.0.1:54322/postgres"
     }
   ],
   "r2_buckets": [

@@ -62,7 +62,9 @@ export function mintsDurableGrant(resource: Resource): boolean {
 }
 
 export type { KernelPorts, SettleOutcome } from "./ports.js";
+export type { ResourcePort, GrantPort, PaymentPort, PolicyPort, Grant } from "./ports.js";
 export { loadResource } from "./load.js";
+export type { ResourceRow } from "./load.js";
 export { etagFor, linkHeaderFor, usageHeadersFor } from "./headers.js";
 export { formatPriceUsd } from "./price.js";
 export { variantIntentFor, accessToPublishMode, pricingLineFor } from "./projections.js";
