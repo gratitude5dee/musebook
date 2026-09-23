@@ -136,9 +136,13 @@ export async function consumeEmbedBatch(batch: MessageBatch, env: Env): Promise<
         dim,
         embedding: `[${(embeddings[i] ?? []).join(",")}]`,
       }));
-      // node-postgres would serialize a raw object array as a Postgres array
-      // literal ("{..}","{..}") — send JSON text and let the cast parse it.
-      await db.query("select app.record_embeddings($1::jsonb)", [JSON.stringify(rows)]);
+      // Driver-portable bind: node-postgres sends the JSON string as text
+      // (it would serialize a raw object array as a Postgres array literal),
+      // and the $1::text hint stops postgres.js from re-quoting the value —
+      // both arrive as text the inner cast then parses to a jsonb array.
+      await db.query("select app.record_embeddings(($1::text)::jsonb)", [
+        JSON.stringify(rows),
+      ]);
     }
 
     // 4. Mark done + ack. Rows already embedded land here too — redelivery
