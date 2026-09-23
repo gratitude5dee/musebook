@@ -5,13 +5,7 @@
 // The provider call is a plain fetch to the AI Gateway's OpenAI-compatible
 // /v1/embeddings — the §9.23 UNVERIFIED note's safe fallback (ai@7.x on
 // workerd is unproven); same batch semantics, nothing downstream changes.
-import {
-  claimJob,
-  finishJob,
-  pgFresh,
-  retryDelaySeconds,
-  type DbClient,
-} from "../db.js";
+import { claimJob, finishJob, pgFresh, retryDelaySeconds, type DbClient } from "../db.js";
 
 export const BODY_CHAR_BUDGET = 12_000;
 
@@ -142,9 +136,9 @@ export async function consumeEmbedBatch(batch: MessageBatch, env: Env): Promise<
         dim,
         embedding: `[${(embeddings[i] ?? []).join(",")}]`,
       }));
-      // The params array serializes the row array to a jsonb array itself —
-      // JSON.stringify here would double-encode into a scalar.
-      await db.query("select app.record_embeddings($1::jsonb)", [rows as never[]]);
+      // node-postgres would serialize a raw object array as a Postgres array
+      // literal ("{..}","{..}") — send JSON text and let the cast parse it.
+      await db.query("select app.record_embeddings($1::jsonb)", [JSON.stringify(rows)]);
     }
 
     // 4. Mark done + ack. Rows already embedded land here too — redelivery

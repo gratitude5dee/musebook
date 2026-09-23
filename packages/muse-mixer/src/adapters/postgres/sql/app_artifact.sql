@@ -11,7 +11,7 @@ select p.id as post_id, p.content_hash, p.author_user_id,
    and p.kind in ('app', 'model3d')
  order by
    -- posts co-installed with what this viewer already installed rank first
-   (select count(*)
+   (select count(v.viewer_user_id)
       from public.viewer_recent_actions v
      where v.viewer_user_id = $1::uuid
        and v.actions @> jsonb_build_array(jsonb_build_object(

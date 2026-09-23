@@ -51,9 +51,7 @@ beforeAll(async () => {
   viewerId = viewer.rows[0].id;
   // The fixture needs a slate-less viewer; prior builds (this suite included)
   // may have written one — delete rather than require a pristine database.
-  await client.query(`delete from public.slates where viewer_user_id = $1`, [
-    viewerId,
-  ]);
+  await client.query(`delete from public.slates where viewer_user_id = $1`, [viewerId]);
   follows = (
     await client.query<{ followee_user_id: string }>(
       `select followee_user_id from public.follows

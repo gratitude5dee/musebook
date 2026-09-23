@@ -51,8 +51,7 @@ const PARAM_ENV_ALIASES: Record<string, string> = {
 
 function envNameFor(paramName: string): string {
   return (
-    PARAM_ENV_ALIASES[paramName] ??
-    paramName.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toUpperCase()
+    PARAM_ENV_ALIASES[paramName] ?? paramName.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toUpperCase()
   );
 }
 

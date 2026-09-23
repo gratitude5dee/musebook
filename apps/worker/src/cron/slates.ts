@@ -38,9 +38,7 @@ export async function rebuildWarmSlates(env: Env): Promise<void> {
       const chunk = viewerIds.slice(i, i + WARM_CHUNK);
       await Promise.allSettled(
         chunk.flatMap((viewerUserId) =>
-          SURFACES.map((surface) =>
-            buildSlateCore(env, { surface, actorUserId: viewerUserId }),
-          ),
+          SURFACES.map((surface) => buildSlateCore(env, { surface, actorUserId: viewerUserId })),
         ),
       );
     }

@@ -109,10 +109,7 @@ class PgGraph implements GraphPort {
     const { rows } = await this.cached.query<{
       muted_user_id: string | null;
       muted_keyword: string | null;
-    }>(
-      "select muted_user_id, muted_keyword from app.viewer_mutes($1::uuid)",
-      [viewerUserId],
-    );
+    }>("select muted_user_id, muted_keyword from app.viewer_mutes($1::uuid)", [viewerUserId]);
     return {
       userIds: rows.flatMap((r) => (r.muted_user_id === null ? [] : [r.muted_user_id])),
       keywords: rows.flatMap((r) => (r.muted_keyword === null ? [] : [r.muted_keyword])),

@@ -35,8 +35,7 @@ beforeEach(resetSeed);
 beforeEach(() => {
   env.AI_GATEWAY_API_KEY = "test";
   vi.stubGlobal("fetch", async (_input: unknown, init?: { body?: string }) => {
-    const texts =
-      (JSON.parse(init?.body ?? "{}") as { input?: string[] }).input ?? [];
+    const texts = (JSON.parse(init?.body ?? "{}") as { input?: string[] }).input ?? [];
     return new Response(
       JSON.stringify({
         data: texts.map(() => ({ embedding: new Array(1536).fill(0.001) })),

@@ -44,18 +44,19 @@ create policy viewer_seen_bloom_jobs_all on public.viewer_seen_bloom
 
 -- Degradation ladder rung B3 (section 9.20) sorts by sourceScore without weights and
 -- must still satisfy the FKs on slates and action_events. One row in each dimension.
-insert into public.ranking_weights (weights_version, cohort, weights, is_active, notes)
+insert into public.ranking_weights (weights_version, cohort, weights, is_active, notes, created_at)
 values ('degraded', 'degraded',
         '{"discrete":{},"continuous":{},"gates":{}}'::jsonb, false,
-        'Sentinel: slate served by sourceScore only. Never activated, never deleted.')
+        'Sentinel: slate served by sourceScore only. Never activated, never deleted.',
+        timestamptz '2026-09-22 12:00:00+00')
 on conflict (weights_version) do nothing;
 -- `status` is 'retired', not a bespoke 'sentinel': section 4.8's
 -- model_registry_status_allowed admits only candidate|shadow|active|retired, and a
 -- retired row still satisfies the foreign keys on slates and action_events while
 -- model_registry_one_active (unique on family where status = 'active') stays free for
 -- the live 'reverse_chron' row section 4.15 seeds.
-insert into public.model_registry (model_version, family, status)
-values ('degraded', 'reverse_chron', 'retired')
+insert into public.model_registry (model_version, family, status, created_at)
+values ('degraded', 'reverse_chron', 'retired', timestamptz '2026-09-22 12:00:00+00')
 on conflict (model_version) do nothing;
 
 -- ---------------------------------------------------------------- read_slate
@@ -198,7 +199,8 @@ grant execute on function app.retrieve_similar_posts(
 -- family 'linear' (logistic priors = linear family); 'active' for that family —
 -- the one_active index is per-family, so 'reverse_chron' stays untouched.
 insert into public.model_registry (model_version, family, status, metrics, trained_at, created_at)
-values ('v1.model-heuristic', 'linear', 'active', '{}'::jsonb, now(), now())
+values ('v1.model-heuristic', 'linear', 'active', '{}'::jsonb,
+        timestamptz '2026-09-22 12:00:00+00', timestamptz '2026-09-22 12:00:00+00')
 on conflict (model_version) do nothing;
 
 -- §9.23: the embed consumer's body read. post_bodies is kernel-plane (§4.14)
@@ -366,3 +368,11 @@ grant select on public.assets to musebook_jobs;
 -- musebook_jobs`; EXECUTE binds to the current role there.
 grant execute on function app.read_slate_doc(uuid, uuid, text, uuid, integer, integer, uuid)
   to musebook_jobs;
+
+-- Grants alone don't pass RLS: assets has no jobs-plane read policy, so
+-- MediaHydrator's loadMedia join returned zero rows for reels candidates.
+-- Every row is already `using (true)` public to musebook_public_reader;
+-- opening the same read to musebook_jobs expands nothing beyond that.
+create policy assets_jobs_read on public.assets
+  for select to musebook_jobs
+  using (true);

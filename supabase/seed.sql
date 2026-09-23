@@ -986,6 +986,38 @@ from public.post_bodies b
      seed_const c
 on conflict (content_hash) do nothing;
 
+-- Playable media for the six video/audio posts. Without these rows the reels
+-- surface has no servable candidates (ReelsPlayableFilter requires
+-- mediaUrl + duration_ms >= 2000 + storage = 'r2_public'), so §9.23's
+-- "seeded viewer has a reels slate with candidate_count > 0" could never hold.
+insert into public.assets
+  (id, owner_user_id, storage, object_key, url, content_type, byte_len, sha256,
+   width, height, duration_ms, alt_text, created_at)
+select v.aid, '11111111-1111-4111-8111-000000000001'::uuid, 'r2_public',
+       'seed/media/' || v.slug || v.ext,
+       'https://cdn.musebook.dev/seed/media/' || v.slug || v.ext,
+       v.ct, 1048576, app.sha256_hex(v.aid::text), 1280, 720, v.dur, v.alt, c.epoch
+from (values
+  ('55555555-5555-4555-8555-00000000000a'::uuid, 'seed-video-free',  '.mp4', 'video/mp4',  8100, 'Seed video, free mode.'),
+  ('55555555-5555-4555-8555-00000000000b'::uuid, 'seed-video-hfap',  '.mp4', 'video/mp4',  8200, 'Seed video, human_free_agent_paid mode.'),
+  ('55555555-5555-4555-8555-00000000000c'::uuid, 'seed-video-x402',  '.mp4', 'video/mp4',  8300, 'Seed video, x402_always mode.'),
+  ('55555555-5555-4555-8555-00000000000d'::uuid, 'seed-audio-free',  '.mp3', 'audio/mpeg', 4100, 'Seed audio, free mode.'),
+  ('55555555-5555-4555-8555-00000000000e'::uuid, 'seed-audio-hfap',  '.mp3', 'audio/mpeg', 4200, 'Seed audio, human_free_agent_paid mode.'),
+  ('55555555-5555-4555-8555-00000000000f'::uuid, 'seed-audio-x402',  '.mp3', 'audio/mpeg', 4300, 'Seed audio, x402_always mode.')
+) as v(aid, slug, ext, ct, dur, alt),
+     seed_const c
+on conflict (id) do nothing;
+
+insert into public.post_assets (post_id, asset_id, position)
+values
+  ('44444444-4444-4444-8444-00000000000a'::uuid, '55555555-5555-4555-8555-00000000000a'::uuid, 0),
+  ('44444444-4444-4444-8444-00000000000b'::uuid, '55555555-5555-4555-8555-00000000000b'::uuid, 0),
+  ('44444444-4444-4444-8444-00000000000c'::uuid, '55555555-5555-4555-8555-00000000000c'::uuid, 0),
+  ('44444444-4444-4444-8444-00000000000d'::uuid, '55555555-5555-4555-8555-00000000000d'::uuid, 0),
+  ('44444444-4444-4444-8444-00000000000e'::uuid, '55555555-5555-4555-8555-00000000000e'::uuid, 0),
+  ('44444444-4444-4444-8444-00000000000f'::uuid, '55555555-5555-4555-8555-00000000000f'::uuid, 0)
+on conflict do nothing;
+
 insert into public.user_embeddings (user_id, model, embedding, n_events, updated_at)
 select v.id, 'seed-deterministic-v0',
        (select array_agg((('x' || substr(app.sha256_hex(v.id::text), 1 + mod(g, 59), 6))::bit(24)::int % 10000)::real / 10000.0)

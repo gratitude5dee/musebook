@@ -49,8 +49,17 @@ export async function backfillPostEmbeddings(env: Env): Promise<number> {
 // §9.23's positive-action set — the actions jsonb element's `action` key
 // (the rollup writer names it `action`, not `kind`; DEVIATIONS entry).
 const POSITIVE_ACTIONS = [
-  "like", "comment", "repost", "bookmark", "share", "remix",
-  "fork_app", "install_app", "tip", "x402_pay", "play_through",
+  "like",
+  "comment",
+  "repost",
+  "bookmark",
+  "share",
+  "remix",
+  "fork_app",
+  "install_app",
+  "tip",
+  "x402_pay",
+  "play_through",
 ] as const;
 
 /** Viewers with fewer than 20 actions are never written — §9.14's cohort
@@ -118,10 +127,10 @@ export async function recomputeUserEmbeddings(env: Env): Promise<number> {
       const { rows } = await db.query<{ user_id: string }>(CLAIM_STALE_SQL, [intervalH]);
       const computed: { userId: string; emb: string; n: number }[] = [];
       for (const { user_id } of rows) {
-        const { rows: agg } = await db.query<{ emb: string | null; n: number }>(
-          VIEWER_EMBED_SQL,
-          [user_id, POSITIVE_ACTIONS],
-        );
+        const { rows: agg } = await db.query<{ emb: string | null; n: number }>(VIEWER_EMBED_SQL, [
+          user_id,
+          POSITIVE_ACTIONS,
+        ]);
         const r = agg[0];
         if (r === undefined || r.emb === null || Number(r.n) === 0) continue;
         computed.push({ userId: user_id, emb: r.emb, n: Number(r.n) });

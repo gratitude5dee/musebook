@@ -56,8 +56,7 @@ export async function buildSlateCore(
   const fresh = await pgFreshJobs(env);
   try {
     const ports = feedPorts({ cached, fresh, ae: env.TELEMETRY });
-    const minRemainingSeconds =
-      Number(envRecord(env)["MUSE_SLATE_TTL_SECONDS"] ?? 900) / 3;
+    const minRemainingSeconds = Number(envRecord(env)["MUSE_SLATE_TTL_SECONDS"] ?? 900) / 3;
     if (
       !(await ports.slates.needsBuild(
         req.actorUserId ?? null,
@@ -106,9 +105,7 @@ export async function buildSlateCore(
       weightsLoader: loader,
     };
     const pipeline =
-      req.surface === "reels"
-        ? reelsPipeline(pipelineOpts)
-        : musePipeline(pipelineOpts);
+      req.surface === "reels" ? reelsPipeline(pipelineOpts) : musePipeline(pipelineOpts);
 
     try {
       const result = await execute(pipeline, query, execCtx);

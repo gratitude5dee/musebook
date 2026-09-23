@@ -636,6 +636,7 @@ export const GROUPS = [
       { name: "MUSE_COLDSTART_IMPRESSION_SCALE", scope: ["J", "L"], kind: "var", local: "1.0" },
       { name: "MUSE_COLDSTART_TS_TOP_K", scope: ["J", "L"], kind: "var", local: "5" },
       { name: "MUSE_VIEWER_EMBED_INTERVAL_H", scope: ["J", "L"], kind: "var", local: "24" },
+      { name: "MUSE_MIXER_WARM_VIEWER_HOURS", scope: ["J", "L"], kind: "var", local: "24" },
       { name: "OUTBOX_SWEEP_MAX_ROWS", scope: ["J", "L"], kind: "var", local: "500" },
       { name: "EMBEDDING_MODEL", scope: ["J", "L"], kind: "var", local: "text-embedding-3-small" },
       { name: "EMBEDDING_DIMENSIONS", scope: ["J", "L"], kind: "var", local: "1536" },

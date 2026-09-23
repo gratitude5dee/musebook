@@ -80,18 +80,14 @@ export async function insertAgentActions(
     position: r["position"] ?? null,
     // version alone — the candidate's version/cohort compound is not the FK.
     weights_version:
-      typeof r["weights_version"] === "string"
-        ? weightsRowVersion(r["weights_version"])
-        : "none",
+      typeof r["weights_version"] === "string" ? weightsRowVersion(r["weights_version"]) : "none",
     model_version: r["model_version"] ?? "reverse_chron",
     dwell_ms: null,
     client: null,
     ip_hash: null,
     request_id: null,
   }));
-  await fresh.query("select app.ingest_action_events($1::jsonb)", [
-    events as never[],
-  ]);
+  await fresh.query("select app.ingest_action_events($1::jsonb)", [events as never[]]);
 }
 
 /** §9.23's `feedPorts(env)`: the whole DbHandles over both Hyperdrive
@@ -100,7 +96,9 @@ export async function insertAgentActions(
 export function feedPorts(input: {
   cached: DbClient;
   fresh: DbClient;
-  ae?: { writeDataPoint(point: { indexes?: string[]; doubles?: number[]; blobs?: string[] }): void };
+  ae?: {
+    writeDataPoint(point: { indexes?: string[]; doubles?: number[]; blobs?: string[] }): void;
+  };
 }): DbHandles {
   const { cached, fresh } = input;
   return postgresDbHandles({
