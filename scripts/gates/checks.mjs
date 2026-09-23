@@ -3814,7 +3814,7 @@ export async function m11CostControls() {
 
   // (b) Budget alerts 2×/4× — alerting API (may be permission-blocked).
   const alerts = await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${account}/alerting/v3/alerts`,
+    `https://api.cloudflare.com/client/v4/accounts/${account}/alerting/v3/policies`,
     { headers: { Authorization: `Bearer ${token}` } },
   );
   const missingPerms = [];
