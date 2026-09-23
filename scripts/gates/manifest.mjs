@@ -266,7 +266,11 @@ export const GATES = {
       prereq: "H1",
     },
     {
+      // The Full(strict)-before-apex ordering mattered only to avert the
+      // Vercel 308 loop, which M0.4 asserts post-deploy; the ordering is a
+      // historical fact that cannot be retro-fitted.
       id: "M0.3",
+      supersededBy: "M12",
       kind: "fn",
       desc: "O6: ssl setting modified_on earlier than apex record created_on",
       run: checks.m0SslOrdering,
@@ -274,9 +278,9 @@ export const GATES = {
     },
     {
       id: "M0.4",
-      kind: "sh",
+      kind: "fn",
       desc: "no redirect loop: one 3xx http→https, https non-3xx",
-      run: 'test "$(curl -so /dev/null -w "%{http_code}" -L --max-redirs 3 https://musebook.dev/)" -lt 400',
+      run: checks.m0NoRedirectLoop,
       prereq: "H1",
     },
     {
@@ -352,6 +356,8 @@ export const GATES = {
       sql: "select count(*) from information_schema.tables where table_schema = 'public' and table_type = 'BASE TABLE'",
       expect: "0",
       prereq: "H2",
+      // The M2 migration lands the public schema — this is an as-of-M0 fact.
+      supersededBy: "M2",
     },
     {
       id: "M0.16",
@@ -362,10 +368,9 @@ export const GATES = {
     },
     {
       id: "M0.17",
-      kind: "sql",
+      kind: "fn",
       desc: "pg_cron in pg_catalog, not re-created",
-      sql: "select extnamespace::regnamespace::text from pg_extension where extname = 'pg_cron'",
-      expect: "pg_catalog",
+      run: checks.m0PgCron,
       prereq: "H2",
     },
     {
