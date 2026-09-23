@@ -29,6 +29,10 @@ let topics: string[];
 beforeAll(async () => {
   client = new pg.Client({ connectionString: DB_URL });
   await client.connect();
+  // The migration ships no worker credential (§4.14): a fresh local supabase
+  // leaves musebook_worker unable to log in until the dev password is
+  // re-asserted — the same idempotent ALTER scripts/gate.mjs runs.
+  await client.query("alter role musebook_worker password 'postgres'");
   // Adapter statements run through `jobsClient` — musebook_worker under
   // `set role musebook_jobs`, exactly the production feed-build scope
   // (apps/worker pgFreshJobs/pgCachedJobs). The postgres client stays for
@@ -68,8 +72,8 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await jobsClient.end();
-  await client.end();
+  await jobsClient?.end();
+  await client?.end();
 });
 
 describe("pg adapter source queries", () => {
