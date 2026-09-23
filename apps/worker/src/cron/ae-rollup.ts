@@ -19,7 +19,7 @@ async function aeQuery<T>(env: Env, sql: string): Promise<T[]> {
 }
 
 /** The twelve dwell buckets of app.dwell_bucket, as SUM(IF(...)) columns.
- *  SUM(_sample_interval), never count(*): Analytics Engine samples its own
+ *  SUM(_sample_interval), never a bare row count: Analytics Engine samples its own
  *  writes and _sample_interval is how many real events a stored row stands for. */
 const EDGES = [
   0,

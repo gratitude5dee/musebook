@@ -61,7 +61,7 @@ export async function collectPlatformAnalytics(env: Env): Promise<void> {
       // Already collected today -> all remaining ticks ride the next day.
       const { rows: have } = await jobsTx(db, async () =>
         db.query<{ n: string }>(
-          `select count(*)::text as n from public.platform_analytics
+          `select count(1)::text as n from public.platform_analytics
             where channel_id = $1::uuid and platform_post_id = $2
               and collected_for = $3::date`,
           [job.channel_id, job.postiz_post_id, today],

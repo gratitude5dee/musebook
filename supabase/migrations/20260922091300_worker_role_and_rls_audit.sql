@@ -135,8 +135,8 @@ begin
   -- through them check their ACL directly (leaf partitions' own ACLs are
   -- never consulted, and the action_events_jobs_all policy already covers
   -- every leaf row).
-  grant select on public.action_events_human, public.action_events_agent
-    to musebook_jobs;
+  grant select on public.action_events_human to musebook_jobs;
+  grant select on public.action_events_agent to musebook_jobs;
 
   -- Dimension tables the jobs plane reads but must never write.
   foreach t in array array['ranking_weights','model_registry','channels','delegations'] loop

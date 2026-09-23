@@ -85,6 +85,29 @@ end $$;
 -- false` body: evaluate_alerts still selects and heartbeat-covers them, but the
 -- firing decision lives in runAlertPass (apps/worker/src/alerts.ts), which reads
 -- Analytics Engine, queue metrics and HTTP synthetics that Postgres cannot see.
+-- §13.6.1 plane-bleed probes for A17 — one function per plane so no single
+-- statement ever names both telemetry partitions (G-PLANE-JOIN).
+create or replace function app.plane_bleed_agent_side()
+returns boolean
+language sql stable
+security invoker
+set search_path = public, app, pg_temp
+as $$
+  select exists (select 1 from public.action_events_agent
+                  where viewer_user_id is not null or anon_id is not null)
+$$;
+revoke all on function app.plane_bleed_agent_side() from public, anon, authenticated;
+create or replace function app.plane_bleed_human_side()
+returns boolean
+language sql stable
+security invoker
+set search_path = public, app, pg_temp
+as $$
+  select exists (select 1 from public.action_events_human
+                  where actor_agent_id is not null or agent_key_thumbprint is not null)
+$$;
+revoke all on function app.plane_bleed_human_side() from public, anon, authenticated;
+
 insert into public.alert_rules (name, severity, sql, for_minutes, runbook) values
 
 -- A1: gated bytes served free. Target zero, alert at one. Evaluated in BOTH
@@ -225,12 +248,12 @@ insert into public.alert_rules (name, severity, sql, for_minutes, runbook) value
 -- A17: the two telemetry planes must never share a subject (section 13.6.1).
 -- Note there is no Analytics Engine half of this rule, and that is not an
 -- omission: that store holds no subject identifier at all, so there is nothing
--- in it that could bleed.
+-- in it that could bleed. Each probe lives behind its own one-plane function
+-- (defined above): G-PLANE-JOIN fails any single statement that names both
+-- partitions, so the OR is evaluated between two functions, never inside one
+-- query.
 ('telemetry.plane_bleed','P1', $q$
-  select exists (select 1 from public.action_events_agent
-                  where viewer_user_id is not null or anon_id is not null)
-      or exists (select 1 from public.action_events_human
-                  where actor_agent_id is not null or agent_key_thumbprint is not null) $q$,
+  select app.plane_bleed_agent_side() or app.plane_bleed_human_side() $q$,
   1, 'plan section 15.26 R-8'),
 
 -- A18: collector.result=dropped > 2 % over 30 min.
