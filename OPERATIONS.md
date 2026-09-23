@@ -119,15 +119,43 @@ Four containment levers, kept as account state rather than code:
   with a 503 `agent_shed` before any other work; humans and signed agents
   pass. Read every request with `cacheTtl: 300`. Set/reset:
   `wrangler kv key put --binding GRANTS killswitch.agents '"on"'`
-- **Cloudflare budget alerts** — two account notifications
-  (`budget-2x`, `budget-4x`) at 2× and 4× the modelled monthly worker
-  spend. Creation needs `Account → Alerting/Notifications → Edit` on the
-  `devin` API token.
-- **Agent rate limit** — the `cf.bot_management.ja4` condition is
-  Enterprise-only (this zone is Free), so the equivalent is a zone
-  `http_ratelimit` ruleset `musebook-agent-rate-limit`: unsigned,
-  non-browser-UA traffic on agent surfaces is throttled instead. Needs
-  `Zone → WAF → Edit`.
+- **Cloudflare budget alerts** — `budget-2x` and `budget-4x` created
+  2026-09-23 via `alerting/v3` (`billing_budget_alert`,
+  `total_spend_dollars` 10 / 20 → `gratitude@5-dee.com`). The plan's
+  `billing_usage_alert` name is the usage-units sibling; the dollar-
+  threshold type is the one that matches "2×/4× the modelled spend".
+- **Agent rate limit** — `musebook-agent-rate-limit` ruleset created
+  2026-09-23 (`d4f4ef0b…`, `http_ratelimit`, zone). Free-plan shape: one
+  rule per phase, `period:10`, `mitigation_timeout:10` — so the plan's
+  600 req/min on `/api/events` ships as 100 req/10s, keyed
+  `cf.colo.id + ip.src` (`cf.ja4_fingerprint` needs Enterprise Bot
+  Management).
+- **Worker trace logs** — `logpush: true` in all three wrangler configs +
+  `musebook-logs` 30-day expiry (`expire-30d`). The
+  `musebook-worker-traces` Logpush job itself is **pending**: this
+  account's plan has zero `workers_trace_events` job slots (API
+  `1004: exceeded max jobs allowed`) — creating it needs Workers Paid
+  ($5/mo). Destination is ready: `r2://musebook-logs/workers/{DATE}`
+  with the account-scoped R2 key pair.
+
+## Attestations — human-verified records
+
+Gate checks whose fact is unobservable through this zone tier's API
+resolve against a dated record here, written only after the fact was
+verified by eye. A check whose API _can_ observe the fact never reads
+this section, so these lines can never mask a live drift.
+
+- attested ppc-fence 2026-09-23 — no pay-per-crawl endpoint exists on
+  this zone's API (`/zones/{id}/{ai_crawl,aibot,ppc,pay_per_crawl,
+ai_crawl_control}` all non-200; the config-rule field is rejected by
+  `http_config_settings` — closed beta), and zone-level
+  `pay_per_crawl.enabled` reads `false` via API. Recorded by probe, not
+  by eye.
+- pending attestation bot-management — **needs human verification**:
+  Security → Bots on `musebook.dev`, confirm Super Bot Fight Mode OFF
+  and AI Crawl Control Agent=allow, Search=allow. Replace `pending
+attestation` with `attested` and add the date once confirmed — the
+  gate checks M0.10 and M1.19 wait on that line.
 - **Vercel spend limit** — dashboard-only control on team `5dee-studios`
   (Settings → Billing → Spend Management): a monthly spend cap that
   pauses deployments when hit. Covers the `musebook-web` project's

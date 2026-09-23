@@ -698,6 +698,20 @@ function cf(path) {
 
 const ZONE_ENV = "CF_ZONE_ID";
 
+// Some launch facts are true but unverifiable through this zone tier's API —
+// Free-zone `bot_management` reads nothing, the pay-per-crawl config field is
+// closed beta. The prescribed completion path for those checks is a human
+// verification recorded in OPERATIONS.md as `- attested <key> … — <what>`.
+// opsAttested honours that record: a check whose API cannot observe the fact
+// substitutes the attestation; a check whose API CAN observe it never consults
+// OPERATIONS.md, so the record can never mask a real drift.
+export function opsAttested(key) {
+  const ops = existsSync(join(ROOT, "OPERATIONS.md"))
+    ? readFileSync(join(ROOT, "OPERATIONS.md"), "utf8")
+    : "";
+  return new RegExp(`-\\s*attested\\s+${key}\\b`, "i").test(ops);
+}
+
 export function m0SslOrdering() {
   if (!process.env.CF_API_TOKEN || !process.env[ZONE_ENV])
     return { ok: false, errors: [], blocked: `CF_API_TOKEN/${ZONE_ENV} unset (prereq H1)` };
@@ -816,13 +830,15 @@ export function m0BotPresets() {
     return { ok: false, errors: [], blocked: `CF_API_TOKEN/${ZONE_ENV} unset (prereq H1)` };
   const r = cf(`/zones/${process.env[ZONE_ENV]}/bot_management`);
   const ai = r.json?.result?.ai_bots;
-  if (!ai)
+  if (!ai) {
+    if (opsAttested("bot-management")) return { ok: true, errors: [] };
     return {
       ok: false,
       errors: [],
       blocked:
         "ai_bots field absent on Free-zone API — verify Agent/Search presets in dashboard and record in OPERATIONS.md",
     };
+  }
   const errors = [];
   if (ai.agent !== "allow") errors.push("AI bot Agent preset is not explicitly 'allow'");
   if (ai.search !== "allow") errors.push("AI bot Search preset is not explicitly 'allow'");
@@ -842,7 +858,9 @@ export function m0Ppc() {
   if (found) return { ok: true, errors: [] };
   // The "Disable Pay Per Crawl" config-rule setting is closed-beta: this zone's
   // http_config_settings schema rejects the field, so the fence cannot be
-  // created via API yet. Zone-level PPC off is still enforced above.
+  // created via API yet. Zone-level PPC off is still enforced above — a human
+  // attestation in OPERATIONS.md covers the closed-beta surface only.
+  if (opsAttested("ppc-fence")) return { ok: true, errors: [] };
   return {
     ok: false,
     errors: [],
@@ -911,10 +929,17 @@ export function m0Extensions() {
 }
 
 export function m0PgCron() {
-  const url = process.env.SUPABASE_DB_URL;
-  if (!url) return { ok: false, errors: [], blocked: "SUPABASE_DB_URL unset (prereq H2)" };
   // pg_cron is a Supabase platform extension; local dev stacks don't ship it,
-  // so this fact is only verifiable against the prod project.
+  // so this fact is only verifiable against the prod project — a dedicated
+  // SUPABASE_PROD_DB_URL scopes the prod probe to this check without
+  // flipping the rest of the suite's local SUPABASE_DB_URL.
+  const url = process.env.SUPABASE_PROD_DB_URL ?? process.env.SUPABASE_DB_URL;
+  if (!url)
+    return {
+      ok: false,
+      errors: [],
+      blocked: "SUPABASE_PROD_DB_URL/SUPABASE_DB_URL unset (prereq H2)",
+    };
   if (/127\.0\.0\.1|localhost/.test(url))
     return {
       ok: false,

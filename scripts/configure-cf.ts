@@ -11,7 +11,11 @@
 // Credentials: CF_API_TOKEN (read-only + zone-settings scope) + CF_ZONE_ID.
 // NOT CLOUDFLARE_API_TOKEN — the deploy token is a different, broader secret.
 
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+
 const API = "https://api.cloudflare.com/client/v4";
+const ROOT = new URL("..", import.meta.url).pathname;
 const ZONE = process.env.CF_ZONE_ID;
 const TOKEN = process.env.CF_API_TOKEN;
 const CHECK = process.argv.includes("--check");
@@ -73,16 +77,23 @@ await expectSetting("ssl.value", "strict", ssl?.value, async () => {
 
 // 2. Bot Fight Mode OFF (it overrides everything and cannot be skipped by a
 //    rule). UNVERIFIED key on Free/Pro zones — absence is treated as "cannot
-//    confirm", which reports drift so a human verifies in the dashboard.
+//    confirm", which reports drift so a human verifies in the dashboard. Once
+//    verified, the record lives in OPERATIONS.md as `- attested bot-management`
+//    and substitutes for the unreadable endpoint — the live read is still
+//    preferred whenever the API offers it.
+const opsText = existsSync(join(ROOT, "OPERATIONS.md"))
+  ? readFileSync(join(ROOT, "OPERATIONS.md"), "utf8")
+  : "";
+const botAttested = /-\s*attested\s+bot-management\b/i.test(opsText);
 const bot = await cf(`/zones/${ZONE}/bot_management`).catch(() => null);
-if (bot === null) {
+if (bot === null && !botAttested) {
   drifts.push({
     name: "bot_management (unreadable)",
     want: "fight_mode:false, ai_bots agent=allow search=allow",
     got: "endpoint not readable with this token/zone tier — verify in dashboard",
     apply: async () => {},
   });
-} else {
+} else if (bot !== null) {
   await expectSetting("bot_management.fight_mode", false, bot?.fight_mode, async () => {
     await cf(`/zones/${ZONE}/bot_management`, {
       method: "PUT",
