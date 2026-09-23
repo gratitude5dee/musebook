@@ -63,11 +63,16 @@ export async function resetSeed(): Promise<void> {
     ]);
     await c.query(`delete from public.channels where postiz_channel_id like 'test-%'`);
     await c.query(`delete from public.platforms where slug = 'testx'`);
-    // seed.sql writes no assets/post_assets — every row here is test-fixture
-    // output (upload promotion, composer flows) that survives resets and
-    // leaks into app.distribution_media's join on the next suite.
-    await c.query(`delete from public.post_assets`);
-    await c.query(`delete from public.assets`);
+    // Everything except the six seeded r2_public media rows (object_key
+    // 'seed/…') is test-fixture output (upload promotion, composer flows)
+    // that survives resets and leaks into app.distribution_media's join on
+    // the next suite. The seeded rows stay: ReelsPlayableFilter needs them
+    // for the reels surface to have servable candidates at all.
+    await c.query(
+      `delete from public.post_assets
+         where asset_id not in (select id from public.assets where object_key like 'seed/%')`,
+    );
+    await c.query(`delete from public.assets where object_key not like 'seed/%'`);
     // dsar_requests + consent_events are FORCE RLS — even their owner can't
     // see rows through a DELETE's RLS filter, so test rows would leak between
     // suites. TRUNCATE isn't RLS-gated; neither table is seeded.

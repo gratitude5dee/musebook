@@ -300,23 +300,25 @@ async function main() {
       // the fetch seam is stubbed exactly the way queue-idempotency.test.ts
       // stubs it — one deterministic 1536-dim vector per input.
       const { consumeEmbedBatch } = await import("../src/consumers/embed.js");
-      const { rows } = await admin.query<{ id: number }>(
-        `with enq as (
-           with todo as (
-             select p.id, p.content_hash
-               from public.posts p
-               left join public.post_embeddings e on e.content_hash = p.content_hash
-              where p.status = 'published' and p.deleted_at is null and e.content_hash is null
-              order by p.published_at asc
-              limit 2000
-           )
-           insert into public.job_outbox (kind, dedupe_key, payload)
-           select 'embed', 'embed:' || todo.content_hash,
-                  jsonb_build_object('post_id', todo.id, 'content_hash', todo.content_hash)
-             from todo
-           on conflict (kind, dedupe_key) do nothing
+      // Two statements: a data-modifying CTE's rows are not visible to the
+      // outer query's snapshot, so the queued select must run separately.
+      await admin.query(
+        `with todo as (
+           select p.id, p.content_hash
+             from public.posts p
+             left join public.post_embeddings e on e.content_hash = p.content_hash
+            where p.status = 'published' and p.deleted_at is null and e.content_hash is null
+            order by p.published_at asc
+            limit 2000
          )
-         select id from public.job_outbox where kind = 'embed' and state = 'queued' order by id`,
+         insert into public.job_outbox (kind, dedupe_key, payload)
+         select 'embed', 'embed:' || todo.content_hash,
+                jsonb_build_object('post_id', todo.id, 'content_hash', todo.content_hash)
+           from todo
+         on conflict (kind, dedupe_key) do nothing`,
+      );
+      const { rows } = await admin.query<{ id: number }>(
+        "select id from public.job_outbox where kind = 'embed' and state = 'queued' order by id",
       );
       if (process.env["M13_DEBUG"] === "1") console.log(`DEBUG enqueued=${rows.length}`);
       if (rows.length > 0) {
