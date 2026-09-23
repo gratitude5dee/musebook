@@ -1444,6 +1444,83 @@ export const GATES = {
       run: checks.m11WorkerRouteless,
     },
   ],
+
+  // §16.6 M12 — launch hardening: every §17 gate asserted at once, against
+  // production, plus the four silent-death API reads.
+  M12: [
+    {
+      id: "M12.1",
+      kind: "fn",
+      desc: "every §17 gate green against production (incl. T5 live tier)",
+      run: checks.m12AllGatesGreen,
+    },
+    {
+      id: "M12.2",
+      kind: "fn",
+      desc: "one real mainnet settlement (tx + revenue_share_version + facilitator_url)",
+      run: checks.m12MainnetSettlement,
+    },
+    {
+      id: "M12.3",
+      kind: "fn",
+      desc: "facilitator /supported lists X402_NETWORK at x402Version 2",
+      run: checks.m12FacilitatorSupported,
+    },
+    {
+      id: "M12.4",
+      kind: "fn",
+      desc: "synthetic 402 live + fired + failure-path drilled",
+      run: checks.m12Synthetic402,
+    },
+    {
+      id: "M12.5",
+      kind: "fn",
+      desc: "nightly suite exists and is green twice consecutively",
+      run: checks.m12NightlyGreen,
+    },
+    {
+      id: "M12.6",
+      kind: "fn",
+      desc: "no preview holds a production route; preview unindexed",
+      run: checks.m12PreviewIsolation,
+    },
+    {
+      id: "M12.7",
+      kind: "fn",
+      desc: "origin still closed + PREVIOUS-first rotation drill recorded",
+      run: checks.m12OriginClosed,
+    },
+    {
+      id: "M12.8",
+      kind: "fn",
+      desc: "sealed buckets still sealed; cdn the only custom domain",
+      run: checks.m12R2Seal,
+    },
+    {
+      id: "M12.9",
+      kind: "fn",
+      desc: "kill-switch drill recorded with elapsed time",
+      run: checks.m12KillSwitchDrill,
+    },
+    {
+      id: "M12.10",
+      kind: "fn",
+      desc: "renew:true, zone active, NS pair, SSL strict — live API reads",
+      run: checks.m12ZoneHealth,
+    },
+    {
+      id: "M12.11",
+      kind: "fn",
+      desc: "no universal check skipping — every activeFrom ≤ M12 but G-ISO",
+      run: checks.m12NoUniversalSkipping,
+    },
+    {
+      id: "M12.12",
+      kind: "fn",
+      desc: "launch copy honest — both prices, Toll sentence, P2 as logged slate",
+      run: checks.m12LaunchCopy,
+    },
+  ],
 };
 
 export const MILESTONE_TITLES = {
@@ -1459,7 +1536,7 @@ export const MILESTONE_TITLES = {
   M9: "musebook-mcp",
   M10: "Postiz sidecar + distributor",
   M11: "Telemetry: AE write path + Postgres rollups",
-  M12: "x402 settlement verification + payouts",
+  M12: "Launch hardening",
   M13: "muse-mixer isolation + replay",
   M14: "Console + agent surface polish",
   M15: "Learned ranker v1.1",

@@ -3704,3 +3704,380 @@ export function m11WorkerRouteless() {
     errors.push("worker still exports a fetch handler");
   return { ok: errors.length === 0, errors };
 }
+
+// ------------------------------------------------------------------ M12 --
+
+let _prodUp = null;
+/** Is musebook.dev serving at all — the precondition every drill record needs. */
+async function prodIsUp() {
+  _prodUp ??= await fetch("https://musebook.dev/", {
+    redirect: "manual",
+    signal: AbortSignal.timeout(8000),
+  })
+    .then((r) => r.status < 500)
+    .catch(() => false);
+  return _prodUp;
+}
+
+// M12.1 — every §17 gate green against production. The honest form of the
+// check: re-run each milestone gate, same code CI runs, and require exit 0.
+// A BLOCK inside any of them is reported per-milestone — §16.6 counts a block
+// as not-green, and hiding which milestone is holding the launch up helps no
+// one.
+export function m12AllGatesGreen() {
+  const errors = [];
+  const notGreen = [];
+  for (let m = 0; m <= 11; m++) {
+    const tag = `M${m}`;
+    const r = run(`pnpm gate ${tag} --allow-dirty`, { timeout: 900000 });
+    if (r.code !== 0) {
+      const line = r.out
+        .split("\n")
+        .filter((l) => /BLOCK|FAIL/.test(l))
+        .slice(0, 4)
+        .join(" | ");
+      notGreen.push(`${tag}${line ? ` (${line.slice(0, 240)})` : ""}`);
+    }
+  }
+  if (notGreen.length)
+    return {
+      ok: false,
+      errors,
+      blocked: `milestones not green against the live suite: ${notGreen.join(", ")}`,
+    };
+  return { ok: true, errors };
+}
+
+// M12.2 — one real mainnet settlement: a row in x402_settlements on
+// eip155:8453 carrying a real tx hash, a revenue_share_version and a
+// facilitator_url, with its payout_ledger split derived from the policy. The
+// §16.6 shadow fallback keeps the check amber, not red, when H9/H10 aren't
+// landed yet.
+export function m12MainnetSettlement() {
+  const errors = [];
+  if (!process.env.SUPABASE_DB_URL)
+    return { ok: false, errors, blocked: "SUPABASE_DB_URL unset (prod probe)" };
+  if (/127\.0\.0\.1|localhost/.test(process.env.SUPABASE_DB_URL))
+    return {
+      ok: false,
+      errors,
+      blocked: "SUPABASE_DB_URL is loopback — point it at the prod project for this check",
+    };
+  const { r, cmd, blocked } = psqlCmd(
+    `select transaction is not null and transaction <> '' and ` +
+      `revenue_share_version is not null and facilitator_url is not null ` +
+      `from public.x402_settlements where network='eip155:8453' ` +
+      `order by created_at desc limit 1`,
+  );
+  if (blocked) return { ok: false, errors, blocked };
+  const res = run(cmd);
+  if (res.out.trim() === "t") return { ok: true, errors };
+  const ops = existsSync(join(ROOT, "OPERATIONS.md"))
+    ? readFileSync(join(ROOT, "OPERATIONS.md"), "utf8")
+    : "";
+  const shadow = /X402_MODE\s*=\s*shadow/i.test(ops);
+  return {
+    ok: false,
+    errors: shadow ? [] : ["no eip155:8453 row in x402_settlements with tx+rsv+facilitator"],
+    blocked: shadow
+      ? "mainnet running X402_MODE=shadow (H9/H10 pending) — documented fallback, still not a settlement"
+      : `no mainnet settlement yet (H9: funded Base wallet; H10: CDP facilitator)${res.code ? ` — psql ${res.out.slice(-200)}` : ""}`,
+  };
+}
+
+// M12.3 — the facilitator /supported lists X402_NETWORK at x402Version 2. The
+// failure mode this names: a mainnet route pointed at a testnet facilitator
+// returns plausible 402s and never settles anything (H10).
+export async function m12FacilitatorSupported() {
+  const errors = [];
+  const url = process.env.X402_FACILITATOR_URL;
+  const network = process.env.X402_NETWORK;
+  if (!url || !network)
+    return { ok: false, errors, blocked: "X402_FACILITATOR_URL/X402_NETWORK unset (H10)" };
+  const res = await fetch(`${url.replace(/\/$/, "")}/supported`, {
+    signal: AbortSignal.timeout(10000),
+  }).catch((e) => e);
+  if (res instanceof Error || !res.ok)
+    return {
+      ok: false,
+      errors,
+      blocked: `facilitator /supported unreachable: ${res instanceof Error ? res.message : res.status}`,
+    };
+  const body = await res.json().catch(() => null);
+  const text = JSON.stringify(body);
+  if (!text.includes(network)) errors.push(`/supported does not list ${network}`);
+  if (!/"x402Version"\s*:\s*2/.test(text) && !/"version"\s*:\s*2/.test(text))
+    errors.push("/supported carries no x402Version 2 entry");
+  return { ok: errors.length === 0, errors };
+}
+
+// M12.4 — the synthetic 402 probe is live: the gated slug 402s on the apex,
+// the origin refuses it, and the ops_counters rows prove the scheduled pass
+// has fired — with the failure path drilled (recorded in OPERATIONS.md).
+export async function m12Synthetic402() {
+  const errors = [];
+  const slug = process.env.SYNTHETIC_GATED_SLUG;
+  if (!slug) return { ok: false, errors, blocked: "SYNTHETIC_GATED_SLUG unset" };
+  const gate = await fetch(`https://musebook.dev/p/${slug}`, {
+    headers: { accept: "text/markdown" },
+    redirect: "manual",
+    signal: AbortSignal.timeout(10000),
+  }).catch((e) => e);
+  if (gate instanceof Error)
+    return { ok: false, errors, blocked: `musebook.dev unreachable: ${gate.message}` };
+  if (gate.status === 404)
+    return {
+      ok: false,
+      errors,
+      blocked: `musebook.dev/p/${slug} → 404 — edge + gated post not deployed yet`,
+    };
+  if (gate.status !== 402) errors.push(`https://musebook.dev/p/${slug} → ${gate.status}, want 402`);
+
+  const originHost = process.env.ORIGIN_HOST;
+  if (originHost) {
+    const origin = await fetch(`https://${originHost}/p/${slug}`, {
+      redirect: "manual",
+      signal: AbortSignal.timeout(10000),
+    }).catch(() => null);
+    if (origin && origin.status !== 404)
+      errors.push(`origin /p/${slug} → ${origin.status}, want 404`);
+  }
+
+  if (process.env.SUPABASE_DB_URL) {
+    const { r, cmd, blocked } = psqlCmd(
+      `select coalesce(sum(value),0) from public.ops_counters ` +
+        `where metric='musebook.synthetic_402.gate'`,
+    );
+    if (!blocked) {
+      const res = run(cmd);
+      if (Number(res.out.trim()) < 1)
+        errors.push("ops_counters shows no successful synthetic-402 probe yet");
+    }
+  }
+  const ops = existsSync(join(ROOT, "OPERATIONS.md"))
+    ? readFileSync(join(ROOT, "OPERATIONS.md"), "utf8")
+    : "";
+  if (!/synthetic.?402[^\n]*fail|broken price/i.test(ops)) {
+    if (gate instanceof Error || gate.status !== 402)
+      return {
+        ok: false,
+        errors,
+        blocked: "failure-path drill needs a live 402 to break — deploy first",
+      };
+    errors.push("OPERATIONS.md does not record the failure-path drill (broken-price run)");
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// M12.5 — the nightly suite exists and has been green twice consecutively.
+// The workflow shape is asserted statically; the two green runs are evidence
+// recorded in OPERATIONS.md once the scheduled runs exist.
+export async function m12NightlyGreen() {
+  const errors = [];
+  const f = join(ROOT, ".github/workflows/nightly.yml");
+  if (!existsSync(f)) return { ok: false, errors: ["nightly.yml missing"] };
+  const w = readFileSync(f, "utf8");
+  if (!/cron:/.test(w)) errors.push("nightly.yml has no schedule");
+  if (!/vitest\.live\.config|live.*tier|live-external/i.test(w))
+    errors.push("nightly.yml does not run the T5 live-external tier");
+  if (!/pnpm gate M12|gate M12/.test(w)) errors.push("nightly.yml does not run the M12 gate");
+  const ops = existsSync(join(ROOT, "OPERATIONS.md"))
+    ? readFileSync(join(ROOT, "OPERATIONS.md"), "utf8")
+    : "";
+  const greenRuns = (ops.match(/nightly[^\n]*(green|pass)/gi) ?? []).length;
+  if (greenRuns < 2)
+    return {
+      ok: false,
+      errors,
+      blocked: (await prodIsUp())
+        ? "two consecutive green nightly runs not yet recorded in OPERATIONS.md"
+        : "nightly suite unproven — the workflow needs the deployment secrets (VERCEL_*/CLOUDFLARE_*) before its first green run exists",
+    };
+  return { ok: errors.length === 0, errors };
+}
+
+// M12.6 — no preview holds a production route: edge's preview env is
+// workers_dev-only with no routes, and the Vercel preview surface is
+// unpaywalled-by-design + indexed by nothing (robots.ts preview branch).
+export function m12PreviewIsolation() {
+  const errors = [];
+  const cfg = readFileSync(join(ROOT, "apps/edge/wrangler.jsonc"), "utf8");
+  if (!/"preview"\s*:\s*\{[^}]*"workers_dev"\s*:\s*true/s.test(cfg))
+    errors.push("edge wrangler env.preview lacks workers_dev:true");
+  const preview = cfg.match(/"preview"\s*:\s*\{([\s\S]*?)\n  \}\n\}/)?.[1] ?? "";
+  if (/"routes"\s*:/.test(preview)) errors.push("edge preview env declares routes");
+  const prod = cfg.slice(0, cfg.indexOf('"env"'));
+  if (!/"routes"\s*:/.test(prod))
+    errors.push("edge prod config declares no routes — the paywall has no surface");
+
+  const robots = join(ROOT, "apps/web/app/robots.ts");
+  if (!existsSync(robots)) errors.push("app/robots.ts missing (preview must be unindexed)");
+  else {
+    const r = readFileSync(robots, "utf8");
+    if (!/VERCEL_ENV\s*={2,3}\s*["']preview["']/.test(r))
+      errors.push("robots.ts has no preview branch");
+    if (!/disallow:\s*"\/"|disallow:\s*\[?"\/"\]?/.test(r))
+      errors.push("robots.ts preview branch does not disallow all");
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// M12.7 — origin still closed: proxy.ts still sends x-musebook-edge and the
+// PREVIOUS-first rotation order is drilled and recorded (O7, §3.11).
+export async function m12OriginClosed() {
+  const errors = [];
+  const proxy = join(ROOT, "apps/web/proxy.ts");
+  if (!existsSync(proxy)) errors.push("apps/web/proxy.ts missing");
+  else {
+    const p = readFileSync(proxy, "utf8");
+    if (!/x-musebook-edge/.test(p)) errors.push("proxy.ts does not gate on x-musebook-edge");
+    if (!/PREVIOUS|_PREVIOUS/.test(p))
+      errors.push("proxy.ts does not accept the _PREVIOUS rotation slot");
+  }
+  const ops = existsSync(join(ROOT, "OPERATIONS.md"))
+    ? readFileSync(join(ROOT, "OPERATIONS.md"), "utf8")
+    : "";
+  if (!/MUSEBOOK_EDGE_SECRET_PREVIOUS|rotation[^\n]*drill|drill[^\n]*rotation/i.test(ops)) {
+    if (await prodIsUp()) errors.push("OPERATIONS.md records no origin-secret rotation drill");
+    else
+      return {
+        ok: false,
+        errors,
+        blocked: "rotation drill needs a live origin — deploy first, then run it",
+      };
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// M12.8 — the three sealed buckets still sealed and cdn.musebook.dev still
+// the only custom domain on any bucket. G-R2-SEAL's assertions re-run, plus
+// the public bucket's domain list read back.
+export async function m12R2Seal() {
+  const seal = await r2Seal();
+  const errors = [...seal.errors];
+  if (seal.blocked) return { ok: false, errors, blocked: seal.blocked };
+  const token = process.env.CLOUDFLARE_API_TOKEN ?? process.env.CF_API_TOKEN;
+  const account = process.env.CF_ACCOUNT_ID ?? process.env.CLOUDFLARE_ACCOUNT_ID;
+  if (!token || !account)
+    return { ok: false, errors, blocked: "CF token/account unset (custom-domain read)" };
+  const list = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${account}/r2/buckets/musebook-public/domains/custom`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  ).catch((e) => e);
+  if (list instanceof Error) return { ok: false, errors, blocked: list.message };
+  const body = await list.json().catch(() => ({}));
+  const domains = (body.result?.domains ?? []).map((d) => d.domain ?? d.hostname ?? "");
+  const extras = domains.filter((d) => d !== "cdn.musebook.dev");
+  if (!domains.includes("cdn.musebook.dev")) errors.push("cdn.musebook.dev not on musebook-public");
+  if (extras.length) errors.push(`unexpected custom domains on musebook-public: ${extras.join()}`);
+  return { ok: errors.length === 0, errors };
+}
+
+// M12.9 — the kill-switch drill is recorded with an elapsed time: the lever
+// that replaces pause-on-limit is only real if it's been flipped and timed.
+export async function m12KillSwitchDrill() {
+  const errors = [];
+  const ops = existsSync(join(ROOT, "OPERATIONS.md"))
+    ? readFileSync(join(ROOT, "OPERATIONS.md"), "utf8")
+    : "";
+  if (!/kill.?switch/i.test(ops)) errors.push("OPERATIONS.md does not record the kill-switch");
+  if (!/kill.?switch[^\n]*(drill|elapsed|\d+\s*(min|s)\b)/i.test(ops)) {
+    if (await prodIsUp()) errors.push("no kill-switch drill with an elapsed time in OPERATIONS.md");
+    else
+      return {
+        ok: false,
+        errors,
+        blocked: "kill-switch drill needs live traffic to shed — deploy first",
+      };
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// M12.10 — four one-line API reads that catch the four ways the platform
+// silently stops existing: Vercel renew:true, zone active, the assigned NS
+// pair, SSL strict.
+export async function m12ZoneHealth() {
+  const errors = [];
+  const token = process.env.CF_API_TOKEN ?? process.env.CLOUDFLARE_API_TOKEN;
+  const zone = process.env.CF_ZONE_ID;
+  if (!token || !zone) return { ok: false, errors, blocked: "CF_API_TOKEN/CF_ZONE_ID unset" };
+  const z = await fetch(`https://api.cloudflare.com/client/v4/zones/${zone}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }).then((r) => r.json());
+  const zr = z.result ?? {};
+  if (zr.status !== "active") errors.push(`zone status '${zr.status}'`);
+  const ns = new Set(zr.name_servers ?? []);
+  for (const want of ["aria.ns.cloudflare.com", "coen.ns.cloudflare.com"])
+    if (!ns.has(want)) errors.push(`nameserver ${want} not assigned`);
+  const ssl = await fetch(`https://api.cloudflare.com/client/v4/zones/${zone}/settings/ssl`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }).then((r) => r.json());
+  if (ssl.result?.value !== "strict") errors.push(`ssl '${ssl.result?.value}'`);
+  if (!process.env.VERCEL_TOKEN) errors.push("VERCEL_TOKEN unset — renew:true unread");
+  else {
+    const r = run(
+      `curl -sf -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v3/domains/musebook.dev?teamId=team_PYXAVq4jrHw8k0bNffmhc2jE"`,
+    );
+    let renew = null;
+    try {
+      const d = JSON.parse(r.out);
+      renew = (d.domain ?? d).renew;
+    } catch {}
+    if (renew !== true) errors.push("musebook.dev Vercel renew is not true");
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// M12.11 — no universal skipping: every UNIVERSAL activeFrom is at or below
+// M12 except exactly one — G-ISO, whose whole job is arriving later.
+export function m12NoUniversalSkipping() {
+  const errors = [];
+  const src = readFileSync(join(ROOT, "scripts/gates/manifest.mjs"), "utf8");
+  const uni = src.slice(src.indexOf("export const UNIVERSAL"));
+  const later = [...uni.matchAll(/id:\s*"(G-[A-Z-]+)"[\s\S]*?activeFrom:\s*"M(\d+)"/g)]
+    .map((m) => ({ id: m[1], at: Number(m[2]) }))
+    .filter((e) => e.at > 12);
+  if (later.length !== 1 || later[0].id !== "G-ISO")
+    errors.push(
+      `universals deferred past M12: ${later.map((e) => `${e.id}(M${e.at})`).join(", ") || "none — expected exactly G-ISO"}`,
+    );
+  return { ok: errors.length === 0, errors };
+}
+
+// M12.12 — launch copy honest: same two prices as platform_publishing_defaults
+// everywhere the money is described, the Toll sentence unmodified, and the
+// feed described as a logged reverse-chron slate — never a live ranker (§1.6).
+export function m12LaunchCopy() {
+  const errors = [];
+  const page = join(ROOT, "apps/web/app/(marketing)/page.tsx");
+  if (!existsSync(page)) return { ok: false, errors: ["(marketing)/page.tsx missing"] };
+  const src = readFileSync(page, "utf8");
+  const TOLL =
+    "An agent that doesn't declare itself is served as a person. Toll is a declared contract, not a detection guarantee.";
+  if (!src.includes(TOLL)) errors.push("Toll sentence missing or modified on the landing page");
+  if (!src.includes("$0.002"))
+    errors.push("agent crawl price $0.002 missing from the landing page");
+  if (!src.includes("USDC on Base")) errors.push("'USDC on Base' missing");
+  for (const a of ["Claude", "Codex", "OpenClaw", "Hermes"])
+    if (!src.includes(a)) errors.push(`agent strip is missing ${a}`);
+  for (const banned of ["muse is coming"])
+    if (new RegExp(banned, "i").test(src)) errors.push(`landing copy contains '${banned}'`);
+  // No fabricated testimonials may render at launch — the flag wiring is
+  // allowed to exist, but nothing may branch on it into visible copy yet.
+  if (/SHOW_TESTIMONIALS\s*&&|SHOW_TESTIMONIALS\s*\?/.test(src))
+    errors.push("testimonial content renders under the flag — launch has zero published");
+  if (!/reverse-chronological|recency/i.test(src))
+    errors.push("feed section does not describe the launch slate honestly (reverse-chron)");
+  if (/ranked feed (is )?(live|now|here)|now ranked/i.test(src))
+    errors.push("landing claims a live ranked feed — P2 is a logged reverse-chron slate at launch");
+  if (/^"use client"/m.test(src)) errors.push("page.tsx is not a Server Component");
+
+  const picker = join(ROOT, "packages/ui/src/compose/ModePicker.tsx");
+  const pick = existsSync(picker) ? readFileSync(picker, "utf8") : "";
+  if (
+    !pick.includes("declare itself") ||
+    !pick.includes("is served as a person. Toll is a declared contract, not a detection guarantee.")
+  )
+    errors.push("Toll sentence missing or modified in ModePicker");
+  return { ok: errors.length === 0, errors };
+}

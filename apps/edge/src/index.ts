@@ -29,6 +29,7 @@ import {
   handleMeRequestDownload,
 } from "./routes/me.js"; // §15.11
 import { handleCreatorStats } from "./routes/creator-stats.js"; // §13.8
+import { handleNetworkStats } from "./routes/network-stats.js"; // §14.3 S9c
 import { routeUploads } from "./routes/uploads.js"; // §11.7.3
 import { twin } from "./routes/twin.js"; // §7.11
 import { authorTwin } from "./routes/authors.js";
@@ -60,6 +61,7 @@ const API_ROUTES: Readonly<
   "/api/me/delete": handleMeDelete,
   "/api/me/objection": handleMeObjection,
   "/api/creator/stats": handleCreatorStats,
+  "/api/network/stats": handleNetworkStats,
 };
 
 export default {

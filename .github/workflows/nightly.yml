@@ -1,0 +1,133 @@
+name: nightly
+
+# §16.6 M12.5 — the nightly suite. Runs the full local verification plus the
+# live-external T5 tier (Base Sepolia facilitator round-trip) when its secrets
+# are present, then the M12 launch gate itself: until production is real the
+# gate's BLOCKed items keep this red, which is the point — two consecutive
+# green nights are part of the launch evidence.
+
+on:
+  schedule:
+    # 03:30 UTC — just after rollup-daily (03:25) so a green night also proves
+    # yesterday's telemetry landed before the assertions read it.
+    - cron: "30 3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  verify:
+    name: typecheck / lint / test / build / bundle
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.5.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Generated Worker types are current
+        run: |
+          pnpm cf:types
+          git diff --quiet -- 'apps/*/worker-configuration.d.ts'
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm format
+      - name: Start local Supabase
+        run: pnpm exec supabase start
+      - name: Unit + integration tests
+        run: pnpm test
+      - name: Build (Next.js)
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_SITE_URL: https://musebook.dev
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_THIRDWEB_CLIENT_ID: ${{ vars.NEXT_PUBLIC_THIRDWEB_CLIENT_ID }}
+          NEXT_PUBLIC_THIRDWEB_AUTH_DOMAIN: musebook.dev
+      - name: Bundle all three Workers (dry run)
+        run: pnpm cf:dry
+      - name: Edge bundle guard
+        run: pnpm gate --check edge-bundle
+
+  live-x402:
+    name: x402 T5 — live facilitator round-trip (Base Sepolia)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    # Skips cleanly when the funded test-wallet secrets aren't configured yet —
+    # a missing precondition is not a red night; a settled live payment is the
+    # only green this job accepts.
+    if: ${{ vars.X402_LIVE_TIER_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.5.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Start local Supabase
+        run: pnpm exec supabase start
+      - name: T5 live-external suite
+        working-directory: packages/x402
+        run: pnpm exec vitest run --config vitest.live.config.ts
+        env:
+          X402_FACILITATOR_URL: ${{ vars.X402_FACILITATOR_URL }}
+          X402_TEST_PAYER_KEY: ${{ secrets.X402_TEST_PAYER_KEY }}
+          X402_NETWORK: ${{ vars.X402_NETWORK }}
+
+  launch-gate:
+    name: pnpm gate M12
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    needs: [verify]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.5.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install ripgrep
+        run: sudo apt-get update -qq && sudo apt-get install -y ripgrep
+      - name: Start local Supabase
+        run: pnpm exec supabase start
+      # Same env the milestone gate reads locally; absent credentials surface
+      # as BLOCK, which keeps the suite red until the resource exists — the
+      # correct answer for launch hardening, per §16.6 M12.5.
+      - name: M12 gate
+        run: pnpm gate M12 --allow-dirty
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          CF_ZONE_ID: ${{ vars.CF_ZONE_ID }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          MUSEBOOK_WORKER_DB_PASSWORD: ${{ secrets.MUSEBOOK_WORKER_DB_PASSWORD }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          X402_FACILITATOR_URL: ${{ vars.X402_FACILITATOR_URL }}
+          X402_TEST_PAYER_KEY: ${{ secrets.X402_TEST_PAYER_KEY }}
+          X402_NETWORK: ${{ vars.X402_NETWORK }}
+          SYNTHETIC_GATED_SLUG: ${{ vars.SYNTHETIC_GATED_SLUG }}
