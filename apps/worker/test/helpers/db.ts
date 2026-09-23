@@ -68,6 +68,10 @@ export async function resetSeed(): Promise<void> {
     // leaks into app.distribution_media's join on the next suite.
     await c.query(`delete from public.post_assets`);
     await c.query(`delete from public.assets`);
+    // dsar_requests + consent_events are FORCE RLS — even their owner can't
+    // see rows through a DELETE's RLS filter, so test rows would leak between
+    // suites. TRUNCATE isn't RLS-gated; neither table is seeded.
+    await c.query(`truncate public.dsar_requests, public.consent_events`);
   });
 }
 

@@ -105,6 +105,10 @@
       {
         "binding": "Q_R2_EVENTS",
         "queue": "musebook-r2-events"
+      },
+      {
+        "binding": "Q_DSAR",
+        "queue": "musebook-dsar"
       }
     ],
     "consumers": [
@@ -166,6 +170,14 @@
         "dead_letter_queue": "musebook-r2-events-dlq"
       },
       {
+        "queue": "musebook-dsar",
+        "max_batch_size": 5,
+        "max_batch_timeout": 30,
+        "max_retries": 3,
+        "retry_delay": 60,
+        "dead_letter_queue": "musebook-dsar-dlq"
+      },
+      {
         "queue": "musebook-classify-dlq",
         "max_batch_size": 100,
         "max_batch_timeout": 60,
@@ -203,6 +215,12 @@
       },
       {
         "queue": "musebook-r2-events-dlq",
+        "max_batch_size": 100,
+        "max_batch_timeout": 60,
+        "max_retries": 1
+      },
+      {
+        "queue": "musebook-dsar-dlq",
         "max_batch_size": 100,
         "max_batch_timeout": 60,
         "max_retries": 1
@@ -304,6 +322,7 @@
     "ANALYTICS_AGENT_BREAKDOWN_CACHE_S": "900",
     "SENTRY_DSN": "",
     "ALERT_WEBHOOK_URL": "",
-    "SYNTHETIC_GATED_SLUG": ""
+    "SYNTHETIC_GATED_SLUG": "",
+    "ORIGIN_HOST": ""
   }
 }

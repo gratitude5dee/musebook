@@ -1,0 +1,33 @@
+---
+title: Vulnerability Disclosure Policy
+version: v1
+slug: security
+---
+
+> **DRAFT — NOT LEGALLY REVIEWED.** Not legal advice. Launch requires banner
+> removal (§15.27 item 1).
+
+# Vulnerability Disclosure
+
+Contact: security@musebook.dev. Also published at
+`/.well-known/security.txt`.
+
+## Safe harbour
+
+Good-faith research in accordance with this policy will not be treated as
+unauthorised access. Specifically we will not pursue claims for: accidental
+disclosure of non-sensitive data you did not retain, tests of your own
+accounts and agents, and vulnerability reports that did not degrade service.
+
+## Scope
+
+In scope: musebook.dev, mcp.musebook.dev, media.musebook.dev, the
+`/p/{slug}.md|.json|.jsonld` twins, and the `musebook-mcp` server. Out of
+scope: the Postiz sidecar's own upstream code (report upstream), social
+engineering, and anything requiring access to data that is not yours.
+
+## Report
+
+Include reproduction steps and the `x-mb-request-id` of any failing request.
+We acknowledge within 3 business days. Please give us 90 days before public
+disclosure.

@@ -157,6 +157,10 @@
       {
         "binding": "Q_AGENT_CANCEL",
         "queue": "musebook-agent-cancel"
+      },
+      {
+        "binding": "Q_DSAR",
+        "queue": "musebook-dsar"
       }
     ]
   },

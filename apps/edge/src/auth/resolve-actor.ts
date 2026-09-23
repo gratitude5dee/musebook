@@ -5,6 +5,7 @@ import pg from "pg";
 import { paymentPayloadSchema, type Actor, type PaymentPayload } from "@musebook/schema";
 import { classifySignature, type AgentVerdict } from "./web-bot-auth.js";
 import { verifiedCrawler } from "./rdns.js";
+import { rawClientIp } from "../telemetry/privacy.js";
 
 export interface IdentityEnv {
   HYPERDRIVE_FRESH: Hyperdrive;
@@ -273,7 +274,7 @@ export function makeResolveActor(
     }
 
     // ── Row 4: forward-confirmed reverse DNS → crawler_agent (verified_crawler). ──
-    const clientIp = request.headers.get("cf-connecting-ip") ?? "";
+    const clientIp = rawClientIp(request.headers);
     const userAgent = request.headers.get("user-agent") ?? "";
     if (clientIp && userAgent) {
       const slug = await verifiedCrawler(env, clientIp, userAgent);

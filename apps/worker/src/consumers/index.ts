@@ -7,6 +7,7 @@ import { consumeDlq } from "./dlq.js";
 import { handleR2ObjectCreated } from "./r2-events.js";
 import { runAgentCancel } from "./agent-cancel.js";
 import { runDistribute } from "./distribute.js";
+import { runDsar } from "./dsar.js";
 
 interface JobMessage {
   // postgres.js returns int8 as BigInt; producers JSON.stringify it away but a
@@ -39,6 +40,7 @@ export const QUEUE_MAP: Readonly<Record<string, string>> = {
   "musebook-media-finalize": "media_finalize",
   "musebook-agent-cancel": "agent_cancel",
   "musebook-r2-events": "r2_events",
+  "musebook-dsar": "dsar",
   "musebook-slates": "slates",
   "musebook-classify-dlq": "classify",
   "musebook-embed-dlq": "embed",
@@ -47,6 +49,7 @@ export const QUEUE_MAP: Readonly<Record<string, string>> = {
   "musebook-media-finalize-dlq": "media_finalize",
   "musebook-agent-cancel-dlq": "agent_cancel",
   "musebook-r2-events-dlq": "r2_events",
+  "musebook-dsar-dlq": "dsar",
 };
 
 const BACKOFF_BASE_SECONDS = 5;
@@ -156,6 +159,10 @@ export async function dispatch(batch: MessageBatch, env: Env): Promise<void> {
         await runAgentCancel(env, payload);
       }),
     "musebook-r2-events": (m) => handleR2ObjectCreated(env, m),
+    "musebook-dsar": (m) =>
+      consume(env, m, "dsar", async (db, payload) => {
+        await runDsar(db, env, payload);
+      }),
     "musebook-slates": (m) =>
       consume(env, m, "slates", async (_db, payload) => {
         await runSlateJob(env, payload as unknown as SlateRequest);
@@ -170,6 +177,7 @@ export async function dispatch(batch: MessageBatch, env: Env): Promise<void> {
     "musebook-media-finalize-dlq": (m) => consumeDlq(env, m, "media_finalize"),
     "musebook-agent-cancel-dlq": (m) => consumeDlq(env, m, "agent_cancel"),
     "musebook-r2-events-dlq": (m) => consumeDlq(env, m, "r2_events"),
+    "musebook-dsar-dlq": (m) => consumeDlq(env, m, "dsar"),
   };
 
   const handler = handlers[batch.queue] ?? dlqHandlers[batch.queue];

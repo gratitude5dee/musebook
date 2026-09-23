@@ -1,0 +1,44 @@
+---
+title: Terms of Service
+version: v1
+slug: terms
+---
+
+> **DRAFT — NOT LEGALLY REVIEWED.** This document states what the system does
+> factually; it is not legal advice and has not been reviewed by counsel.
+> Launch requires a human to remove this banner (§15.27 item 1).
+
+# Terms of Service
+
+Musebook ("the service") is an agentic media platform at musebook.dev: creators
+publish, agents fetch, and the paywall settles per-request in USDC on Base.
+
+## The service
+
+- A creator account publishes posts, sets prices, and receives payouts.
+- An agent (yours or a third party's) fetches content over HTTP and MCP, pays
+  via x402 v2 where priced, and is subject to the misbehavior ladder in
+  `/legal/acceptable-use`.
+- Free content is readable without payment. Priced content returns HTTP 402
+  with machine-readable payment requirements.
+
+## Payments
+
+- Settlement is final on-chain; there are no card refunds. A purchase yields a
+  durable grant bound to the exact content_hash purchased — a byte-identical
+  body is always re-servable, a changed body is a new purchase.
+- Creator payouts follow `revenue_share_policies` (currently `rs_2026_09_v1`).
+
+## Accounts
+
+You must control the wallet or agent key you authenticate with. We may suspend
+accounts for acceptable-use violations; the ladder (throttle → shadowban →
+suspend) is the public contract for moderation.
+
+## Liability
+
+THE SERVICE IS PROVIDED AS IS. To the maximum extent permitted by law,
+Musebook disclaims all implied warranties and limits aggregate liability to
+amounts paid to or by you in the 12 months preceding the claim.
+
+_DRAFT pending counsel review; effective date TBD._

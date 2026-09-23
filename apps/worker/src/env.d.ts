@@ -16,5 +16,16 @@ declare global {
     /** §10.8.4 — Ed25519 private JWK (JSON) for outbound signing; Worker
      *  secret. Absent → guardedFetch sends unsigned. */
     CONNECTOR_SIGNING_PRIVATE_KEY?: string;
+
+    /** §15.19 — Cloudflare API token for the Analytics Engine SQL API, the
+     *  DLQ realtime-metrics endpoint and the GraphQL cost read. Worker secret. */
+    CF_API_TOKEN?: string;
+    /** §15.19 — bearer on the alert webhook POST. Worker secret. */
+    ALERT_WEBHOOK_SECRET?: string;
+    /** §15.19/A27 — the Vercel origin host the synthetic must see 404. */
+    ORIGIN_HOST?: string;
+    ALERT_WEBHOOK_URL?: string;
+    SYNTHETIC_GATED_SLUG?: string;
+    CF_ACCOUNT_ID?: string;
   }
 }

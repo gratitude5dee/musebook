@@ -35,7 +35,7 @@ export const GROUPS = [
       { name: "MUSEBOOK_EDGE_SECRET_PREVIOUS", scope: ["VP", "VPr"], kind: "secret" },
       {
         name: "ORIGIN_HOST",
-        scope: ["E"],
+        scope: ["E", "J"],
         kind: "var",
         local: "musebook-web.vercel.app",
         comment:
@@ -93,6 +93,13 @@ export const GROUPS = [
       },
       { name: "SECURITY_CONTACT_EMAIL", scope: ["VP", "VPr"], kind: "var" },
       { name: "PRIVACY_CONTACT_EMAIL", scope: ["VP", "VPr"], kind: "var" },
+      {
+        name: "LEGAL_REVIEW_STRICT",
+        scope: ["VP", "VPr", "CI", "L"],
+        kind: "var",
+        comment:
+          '"1" makes check-legal-review fail a build on any unreviewed legal doc; production VERCEL_ENV already does.',
+      },
     ],
   },
   {
@@ -746,6 +753,7 @@ export const BINDINGS = [
   "Q_MEDIA",
   "Q_MEDIA_FINALIZE",
   "Q_DISTRIBUTE",
+  "Q_DSAR",
   "Q_EMBED",
   "Q_AGENT_CANCEL",
   "Q_R2_EVENTS",

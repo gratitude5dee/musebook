@@ -19,6 +19,16 @@ import { handleChannelsSync } from "./routes/channels-sync.js"; // §12.2.7
 import { handlePostizWebhook } from "./routes/postiz-webhook.js"; // §12.2.6
 import { handleAgentsMe } from "./routes/agents-me.js"; // §12.2.9
 import { handleInboundPost } from "./routes/inbound-post.js"; // §12.2.9
+import { handleConsent } from "./routes/consent.js"; // §15.10
+import { rawClientIp } from "./telemetry/privacy.js"; // §13.11 check 7
+import {
+  handleMeExport,
+  handleMeDelete,
+  handleMeObjection,
+  handleMeRequestStatus,
+  handleMeRequestDownload,
+} from "./routes/me.js"; // §15.11
+import { handleCreatorStats } from "./routes/creator-stats.js"; // §13.8
 import { routeUploads } from "./routes/uploads.js"; // §11.7.3
 import { twin } from "./routes/twin.js"; // §7.11
 import { authorTwin } from "./routes/authors.js";
@@ -45,11 +55,42 @@ const API_ROUTES: Readonly<
   "/api/channels/sync": handleChannelsSync,
   "/api/v1/agents/me": handleAgentsMe,
   "/api/v1/posts": handleInboundPost,
+  "/api/consent": handleConsent,
+  "/api/me/export": handleMeExport,
+  "/api/me/delete": handleMeDelete,
+  "/api/me/objection": handleMeObjection,
+  "/api/creator/stats": handleCreatorStats,
 };
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+
+    // §15.24's containment lever, read on every request off isolate-cached KV.
+    // "on" 503s ONLY unauthenticated agent traffic — humans and paying agents
+    // (a signature or session) keep working; that is the whole point of the
+    // switch over pause-on-limit, which would take the site down.
+    const killswitch =
+      env.GRANTS === undefined
+        ? null
+        : await env.GRANTS.get("killswitch.agents", { cacheTtl: 300 });
+    if (killswitch === "on") {
+      // Humans keep working whether signed in or not; unsigned AGENTS are shed.
+      // The distinction is the only signal available this early — a browser UA
+      // or any credential header means "not an unsigned agent".
+      const ua = (request.headers.get("user-agent") ?? "").toLowerCase();
+      const looksHuman =
+        request.headers.has("cookie") || /mozilla|chrome|safari|firefox|edge|opera|lynx/.test(ua);
+      const signed =
+        request.headers.has("http-signature") ||
+        request.headers.has("signature") ||
+        request.headers.has("signature-input") ||
+        request.headers.has("signature-agent") ||
+        request.headers.has("authorization");
+      if (!looksHuman && !signed) {
+        return new Response("agent_shed", { status: 503 });
+      }
+    }
 
     if (ORIGIN_PASSTHROUGH.has(url.pathname) || url.pathname.startsWith("/.well-known/")) {
       return toOrigin(request, env);
@@ -81,6 +122,16 @@ export default {
     const webhookMatch = url.pathname.match(/^\/api\/webhooks\/postiz\/([A-Za-z0-9]+)$/);
     if (webhookMatch?.[1] !== undefined) {
       return handlePostizWebhook(request, env, ctx, webhookMatch[1]);
+    }
+
+    // §15.11's read-backs: status and the export.zip stream.
+    const dsarMatch = url.pathname.match(
+      /^\/api\/me\/requests\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(\/download)?$/,
+    );
+    if (dsarMatch?.[1] !== undefined) {
+      return dsarMatch[2] === "/download"
+        ? handleMeRequestDownload(request, env, ctx, dsarMatch[1])
+        : handleMeRequestStatus(request, env, ctx, dsarMatch[1]);
     }
 
     // The crawl surface. §7.10.1 owns this table; the handlers render IN THE
@@ -225,7 +276,7 @@ async function toOrigin(
   //     trustworthy at the origin ONLY because (1) stripped and (2) authenticated.
   req.headers.set("x-mb-request-id", crypto.randomUUID());
   req.headers.set("x-mb-country", (request.cf?.country as string | undefined) ?? "XX");
-  req.headers.set("x-mb-client-ip", request.headers.get("CF-Connecting-IP") ?? "");
+  req.headers.set("x-mb-client-ip", rawClientIp(request.headers));
 
   // (4) The kernel's own projections, so apps/web never needs the mode (§6.3).
   if (ctx !== undefined) {
