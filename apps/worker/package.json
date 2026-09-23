@@ -23,7 +23,8 @@
     "@musebook/muse-mixer": "workspace:*",
     "@musebook/schema": "workspace:*",
     "pg": "catalog:",
-    "@musebook/x402": "workspace:*"
+    "@musebook/x402": "workspace:*",
+    "fflate": "0.8.3"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "catalog:",

@@ -1,0 +1,22 @@
+---
+title: Cookie and Storage Inventory
+version: v1
+slug: cookies
+---
+
+> **DRAFT — NOT LEGALLY REVIEWED.** States the actual storage inventory; not
+> legal advice. Launch requires banner removal (§15.27 item 1).
+
+# Cookie and Storage Inventory
+
+| Name                  | Kind                           | Purpose                                        | Lifespan         |
+| --------------------- | ------------------------------ | ---------------------------------------------- | ---------------- |
+| `__Secure-mb-session` | cookie, HttpOnly, SameSite=Lax | signed-in session id                           | 30 days, rolling |
+| `mb-anon`             | cookie, HttpOnly               | anonymous-viewer correlation id for telemetry  | 30 days          |
+| `mb-consent`          | cookie                         | your analytics-consent choice (banner regions) | 13 months        |
+| `mb-theme`            | localStorage                   | theme preference                               | until cleared    |
+| `mb-compose-draft`    | sessionStorage                 | unsent compose buffer                          | tab lifetime     |
+
+Nothing else. No advertising cookies, no cross-site identifiers, no
+fingerprint storage, no third-party pixels. `Do Not Track` and `Sec-GPC`
+disable all behavioural writes unconditionally (§13.9.1).

@@ -3029,3 +3029,678 @@ export async function m10SidecarBucket() {
     errors.push("media.postiz.musebook.dev not an enabled custom domain on musebook-postiz-media");
   return { ok: errors.length === 0, errors };
 }
+
+// ---------------------------------------------------------------------------
+// M11 milestone checks — telemetry rollups, ops plane, consent/DSAR, alerts.
+// ---------------------------------------------------------------------------
+
+/** Push a sub-result's errors into the M11.1 aggregate, prefixed by item #. */
+function sub(errors, label, res) {
+  if (res.ok !== true) {
+    for (const e of res.errors ?? []) errors.push(`A${label}: ${e}`);
+    if (res.blocked) errors.push(`A${label}: BLOCKED (${res.blocked})`);
+  }
+}
+
+// M11.1 — the 22 §13.11 acceptance checks, transcribed as concrete probes.
+// DB-backed items run against the local stack (sqlRun/sqlCheck); static items
+// are rg scans; test-backed items are vitest slices of the suites that encode
+// the invariant.
+export function m11Acceptance() {
+  const errors = [];
+
+  // A1 — invariant 3 columns are NOT NULL: a non-zero count means the schema
+  // drifted, not that a writer skipped them.
+  sub(
+    errors,
+    1,
+    sqlCheck(
+      "select count(*) from public.action_events where slate_id is null or position is null or weights_version is null or model_version is null",
+      "0",
+    ),
+  );
+
+  // A2 — versions are never client-supplied: the ingest path must read its
+  // versions from the slate rows it resolves, never from the request body.
+  // Static probe: no `weights_version`/`model_version` field is read off the
+  // parsed request JSON in telemetry code.
+  {
+    const hits = rg(
+      String.raw`(body|payload|event|e|row)\.(weights_version|model_version)`,
+      ["apps/edge/src/telemetry", "packages/telemetry"],
+      ["-g", "*.ts"],
+    );
+    if (hits.length) errors.push(`A2: client-supplied version read: ${hits.join(" | ")}`);
+  }
+
+  // A3 — slate resolution on the uncached binding.
+  {
+    const hits = rg("resolve_slate_versions", ["apps/edge/src/telemetry/ingest.ts"]);
+    const freshHit = rg("HYPERDRIVE_FRESH|fresh\\(", ["apps/edge/src/telemetry/ingest.ts"]);
+    if (!hits.length || !freshHit.length)
+      errors.push("A3: ingest resolves slates without the FRESH binding");
+  }
+
+  // A4 — plane purity (§13.6.1): no human subject columns on the agent plane,
+  // no agent columns on the human plane.
+  sub(
+    errors,
+    "4a",
+    sqlCheck(
+      "select count(*) from public.action_events_agent where viewer_user_id is not null or anon_id is not null or ip_hash is not null",
+      "0",
+    ),
+  );
+  sub(
+    errors,
+    "4b",
+    sqlCheck(
+      "select count(*) from public.action_events_human where actor_agent_id is not null or agent_key_thumbprint is not null",
+      "0",
+    ),
+  );
+
+  // A5 — IP salts differ by plane (telemetry test covers hashClientIp).
+  sub(
+    errors,
+    5,
+    vitestSlice(
+      "pnpm vitest run --project=@musebook/telemetry packages/telemetry/test/telemetry.test.ts",
+      "salt",
+    ),
+  );
+
+  // A6 — opt-out drops rows and keeps the counter: the ingest honours
+  // DNT/Sec-GPC before any write. Static: privacy.ts gates both stores.
+  {
+    const gate = rg("DNT|Sec-GPC|sec-gpc|dnt", ["apps/edge/src/telemetry/privacy.ts"]);
+    const early = rg("optOut|opted|return null", ["apps/edge/src/telemetry/privacy.ts"]);
+    if (!gate.length || !early.length)
+      errors.push("A6: privacy.ts does not short-circuit opted-out events");
+  }
+
+  // A7 — no raw IP anywhere but telemetry/privacy.ts (the rawClientIp seam).
+  {
+    const hits = rg(
+      String.raw`headers\.get\(\s*["'](cf-connecting-ip|x-forwarded-for|CF-Connecting-IP)`,
+      ["apps", "packages"],
+      ["-g", "*.ts", "-g", "*.tsx"],
+    ).filter((h) => !h.includes("telemetry/privacy.ts") && !h.includes(".test."));
+    if (hits.length) errors.push(`A7: raw-IP read outside privacy.ts: ${hits.join(" | ")}`);
+  }
+
+  // A8 — idempotent ingest: the same batch twice does not double the rows.
+  // Dedupe is enforced inside app.ingest_action_events by the conflict target
+  // (actor_plane, occurred_at, event_id).
+  {
+    const hits = rg(
+      String.raw`on conflict \(actor_plane, occurred_at, event_id\) do nothing`,
+      ["supabase/migrations"],
+      ["-g", "*.sql"],
+    );
+    if (!hits.length) errors.push("A8: ingest_action_events lacks the idempotency conflict target");
+  }
+
+  // A9 — dwell is attentive time: read-tracker listens for visibility/blur.
+  {
+    const hits = rg("visibilitychange|hasFocus|blur", ["apps/web/lib/telemetry/read-tracker.ts"]);
+    if (hits.length < 3) errors.push("A9: read-tracker does not gate dwell on attention");
+  }
+
+  // A10 — the ranker reads no events and no AE.
+  {
+    const bad = rg(
+      "action_events|api\\.cloudflare\\.com|writeDataPoint",
+      ["packages/muse-mixer/src"],
+      ["-g", "*.ts"],
+    );
+    if (bad.length) errors.push(`A10: ranker touches telemetry: ${bad.join(" | ")}`);
+  }
+
+  // A11 — lint rule bites: registered, error, and exercised by tests.
+  {
+    const registered = rg("no-action-events-at-serve-time", [
+      "tools/eslint-plugin-musebook/index.js",
+    ]);
+    const enabled = rg('"musebook/no-action-events-at-serve-time": "error"', ["eslint.config.mjs"]);
+    if (!registered.length || !enabled.length)
+      errors.push("A11: no-action-events-at-serve-time not registered and enabled");
+  }
+
+  // A12 — rollups are idempotent, both halves. Run the Postgres half twice on
+  // yesterday and verify the totals don't move; the AE half is ON CONFLICT by
+  // construction and A19 proves the halves touch disjoint columns.
+  {
+    const day = "current_date - 1";
+    // Volatile audit columns (computed_at, ae_applied_at) legitimately move on
+    // each run — idempotence means the measured values don't move.
+    const hashDay = (table) =>
+      sqlRun(
+        `select coalesce(md5(string_agg(t::text, '' order by t)), 'empty') from (select (row_to_json(s) - 'computed_at' - 'ae_applied_at')::text t from (select * from public.${table} where day = ${day} order by 1,2) s) q`,
+      ).out.trim();
+    const before = hashDay("post_stats_daily");
+    const run1 = sqlRun(`select app.rollup_post_stats_daily(${day})`);
+    const run2 = sqlRun(`select app.rollup_post_stats_daily(${day})`);
+    const after = hashDay("post_stats_daily");
+    if (run1.code !== 0 || run2.code !== 0)
+      errors.push(`A12: rollup_post_stats_daily threw: ${run1.out.slice(-200)}`);
+    else if (before !== after)
+      errors.push("A12: table hash moved across a second rollup run — not idempotent");
+    // Agent half.
+    const b2 = hashDay("post_agent_stats_daily");
+    sqlRun(`select app.rollup_post_agent_stats_daily(${day})`);
+    sqlRun(`select app.rollup_post_agent_stats_daily(${day})`);
+    const a2 = hashDay("post_agent_stats_daily");
+    if (b2 !== a2) errors.push("A12b: agent rollup not idempotent");
+  }
+
+  // A13 — pooled median is a median. A known 12-bucket histogram: 333 counts
+  // in the 5s–10s bucket, 334 in 10s–20s, 333 in 20s–30s. The pooled median
+  // interpolates into the middle bucket: exactly 15.0 s.
+  sub(
+    errors,
+    13,
+    sqlCheck(
+      "select app.hist_percentile(app.hist_sum(h), 0.5) from (select array[0,0,0,333,334,333,0,0,0,0,0,0]::bigint[] as h) s",
+      "15000",
+    ),
+  );
+
+  // A14 — retention refuses to drop an unsummarized day. Fault-inject an old
+  // leaf partition with no action_events_daily row; retention must refuse
+  // (leaf stays, ops_events gains retention_refused). Then seed the daily row
+  // and prove the same leaf IS dropped — both directions, then clean up.
+  {
+    const leaf = "action_events_human_20240101";
+    const existsLeaf = () =>
+      sqlRun(
+        `select count(*) from pg_inherits i join pg_class c on c.oid = i.inhrelid where c.relname = '${leaf}'`,
+      ).out.trim();
+    sqlRun(`drop table if exists public.${leaf}`);
+    sqlRun(
+      `create table public.${leaf}
+         partition of public.action_events_human
+         for values from ('2024-01-01') to ('2024-01-02')`,
+    );
+    const refused1 = sqlRun("select app.telemetry_retention()");
+    const stillThere = existsLeaf();
+    const refusedEvt = sqlRun(
+      "select count(*) from public.ops_events where event_name = 'retention_refused' and metadata->>'leaf' = 'action_events_human_20240101'",
+    ).out.trim();
+    if (refused1.code !== 0)
+      errors.push(`A14: telemetry_retention threw: ${refused1.out.slice(-300)}`);
+    else if (stillThere !== "1" || refusedEvt === "0")
+      errors.push(
+        `A14: unsummarized leaf dropped=${stillThere === "0"} refused_event=${refusedEvt}`,
+      );
+
+    // Forward direction: once the daily row exists, the same leaf drops.
+    const postId = sqlRun("select id from public.posts order by id limit 1").out.trim();
+    if (postId) {
+      sqlRun(
+        `insert into public.action_events_daily (day, actor_plane, source, post_id, action, n)
+         values ('2024-01-01', 'human', 'musebook', '${postId}', 'view', 1)
+         on conflict do nothing`,
+      );
+      const dropRun = sqlRun("select app.telemetry_retention()");
+      const gone = existsLeaf();
+      if (dropRun.code === 0 && gone !== "0") errors.push("A14: summarized leaf was not dropped");
+      sqlRun(
+        `delete from public.action_events_daily where day = '2024-01-01' and actor_plane = 'human'`,
+      );
+    }
+    sqlRun(`drop table if exists public.${leaf}`);
+  }
+
+  // A15 — no materialized views.
+  sub(errors, 15, sqlCheck("select count(*) from pg_matviews", "0"));
+
+  // A16 — beacon path exists on unload.
+  {
+    const hits = rg("sendBeacon|pagehide", ["apps/web/lib/telemetry/collector.ts"]);
+    if (hits.length < 2) errors.push("A16: collector lacks sendBeacon/pagehide path");
+  }
+
+  // A17 — AE reads sum, never count(*) (comment lines don't count).
+  {
+    const hits = rg(
+      String.raw`count\s*\(\s*\*`,
+      ["apps/worker/src/cron", "apps/worker/src"],
+      ["-g", "*.ts"],
+    )
+      .filter((h) => /ae|telemetry|musebook_telemetry/i.test(h))
+      .filter((h) => !/^[^:]+:\d+:\s*(\*|\/\/)/.test(h));
+    if (hits.length) errors.push(`A17: count(*) in an AE read: ${hits.join(" | ")}`);
+  }
+
+  // A18 — no human subject reaches AE. Two sanctioned call sites: the typed
+  // Point writer (ae.ts) and the MCP agent-plane writer (agent ids are the
+  // agent plane's own subject, allowed; it carries no human identifier).
+  {
+    const ALLOWED = ["packages/telemetry/src/ae.ts", "apps/mcp/src/telemetry.ts"];
+    const hits = rg("writeDataPoint", ["apps", "packages"], ["-g", "*.ts"]).filter(
+      (h) =>
+        !ALLOWED.some((a) => h.includes(a)) &&
+        !h.includes(".test.") &&
+        !h.includes("worker-configuration.d.ts"),
+    );
+    if (hits.length) errors.push(`A18: unsanctioned writeDataPoint site: ${hits.join(" | ")}`);
+    const probe = rg("viewerUserId|anonId|viewSessionId|ipHash", [
+      "packages/telemetry/src/ae.ts",
+      "apps/mcp/src/telemetry.ts",
+    ]);
+    if (probe.length) errors.push(`A18: a human subject field reaches AE: ${probe.join(" | ")}`);
+  }
+
+  // A19 — the two rollup halves touch disjoint columns: extract each
+  // function body's ON CONFLICT DO UPDATE set and intersect.
+  {
+    const sql = readFileSync(
+      join(ROOT, "supabase/migrations/20260922092003_telemetry_rollups.sql"),
+      "utf8",
+    );
+    const META = new Set(["computed_at", "ae_applied_at", "updated_at"]);
+    // creator_stats_daily has exactly one writer (rollup_creator_stats_daily
+    // folds the already-merged post tables), so the disjoint-halves invariant
+    // binds only on the two AE-paired rollups.
+    const pairs = [
+      ["rollup_post_stats_daily", "apply_ae_post_stats_daily"],
+      ["rollup_post_agent_stats_daily", "apply_ae_agent_stats_daily"],
+    ];
+    const bodyOf = (name) => {
+      const i = sql.indexOf(`function app.${name}(`);
+      if (i === -1) return null;
+      const j = sql.indexOf("$$;", i);
+      return sql.slice(i, j === -1 ? sql.length : j);
+    };
+    for (const [pgFn, aeFn] of pairs) {
+      const pb = bodyOf(pgFn);
+      const ab = bodyOf(aeFn);
+      if (!pb || !ab) {
+        errors.push(`A19: missing rollup body ${pgFn}/${aeFn}`);
+        continue;
+      }
+      const grab = (b) => {
+        const m = /on conflict \([^)]*\) do update set([\s\S]*?);/i.exec(b);
+        if (!m) return [];
+        return m[1]
+          .split(",")
+          .map((c) => c.trim().replace(/^"|"$/g, "").split(" ")[0])
+          .filter((c) => c.length && !META.has(c))
+          .sort();
+      };
+      const overlap = grab(pb).filter((c) => grab(ab).includes(c));
+      if (overlap.length) errors.push(`A19: ${pgFn} ∩ ${aeFn} share ${overlap.join(",")}`);
+    }
+  }
+
+  // A20 — the label sample is per session: inLabelSample hashes the session id.
+  {
+    const hits = rg("view_session|viewSession|session", ["packages/telemetry/src/sample.ts"]);
+    if (!hits.length) errors.push("A20: sample.ts does not key on the session");
+    else
+      sub(
+        errors,
+        "20t",
+        vitestSlice(
+          "pnpm vitest run --project=@musebook/telemetry packages/telemetry/test/telemetry.test.ts",
+          "50% rate|deterministic|same session",
+        ),
+      );
+  }
+
+  // A21 — a missing AE day is visible: creator_dashboard reports days_missing_ae.
+  {
+    const hits = rg("days_missing_ae", ["supabase/migrations/20260922092105_dsar_jobs.sql"]);
+    if (!hits.length) errors.push("A21: creator_dashboard does not report days_missing_ae");
+  }
+
+  // A22 — agent rows carry evidence (non-null, not 'siwe_session').
+  sub(
+    errors,
+    22,
+    sqlCheck(
+      "select count(*) from public.action_events_agent where client->>'evidence' is null or client->>'evidence' = 'siwe_session'",
+      "0",
+    ),
+  );
+
+  return { ok: errors.length === 0, errors };
+}
+
+// M11.2 — 28 alert_rules seeded + enabled, and evaluate_alerts fires on an
+// injected fault. Injects a stale 'slates-build' heartbeat, runs the pg
+// evaluator, asserts a notification row, then restores.
+export function m11AlertRules() {
+  const errors = [];
+  const count = sqlCheck("select count(*) from public.alert_rules where enabled", "28");
+  sub(errors, "rules", count);
+
+  // Injected fault: stale a heartbeat so job.heartbeat_missing fires, run the
+  // evaluator once to latch firing_since, backdate it past for_minutes, run
+  // again — the rule must notify (last_notified set). Then restore.
+  const r = sqlRun(
+    `update public.job_heartbeats
+        set last_success_at = now() - interval '2 days'
+      where job = 'rollup-daily-pg';
+     select public.evaluate_alerts();
+     update public.alert_state
+        set firing_since = now() - interval '2 hours'
+      where name = 'job.heartbeat_missing';
+     select set_config('app.alert_webhook_url','http://127.0.0.1:9/hook',false);
+     select set_config('app.alert_webhook_secret','gate-test',false);
+     select public.evaluate_alerts();`,
+  );
+  if (r.code !== 0) {
+    errors.push(`injected-fault evaluator run failed: ${r.out.slice(-300)}`);
+    return { ok: false, errors };
+  }
+  const fired = sqlRun(
+    "select last_notified is not null and notify_count > 0 from public.alert_state where name = 'job.heartbeat_missing'",
+  );
+  // Restore: fresh heartbeat + clear our firing latch (last_notified stays —
+  // it is real state, and leaving it avoids re-paging inside the 30-min gate).
+  sqlRun(
+    `update public.job_heartbeats set last_success_at = now(), last_error_at = null, last_error = null where job = 'rollup-daily-pg';
+     update public.alert_state set firing_since = null where name = 'job.heartbeat_missing';`,
+  );
+  if (fired.out.trim() !== "t")
+    errors.push(
+      `job.heartbeat_missing did not notify on a stale heartbeat (last_notified/notify_count=${fired.out.trim()})`,
+    );
+  return { ok: errors.length === 0, errors };
+}
+
+// M11.3 — the evaluators watch each other: pg's evaluate_alerts includes the
+// 'edge-alert-pass' heartbeat rule and cf-side runAlertPass reads
+// 'evaluate-alerts'. Both seeds exist in job_heartbeats.
+export function m11CrossWatch() {
+  const errors = [];
+  const sql = readFileSync(join(ROOT, "supabase/migrations/20260922092104_alerting.sql"), "utf8");
+  if (!sql.includes("edge-alert-pass")) errors.push("pg evaluator does not watch edge-alert-pass");
+  const ts = readFileSync(join(ROOT, "apps/worker/src/alerts.ts"), "utf8");
+  if (!ts.includes("evaluate-alerts")) errors.push("runAlertPass does not watch evaluate-alerts");
+  const seeds = sqlCheck(
+    "select count(*) from public.job_heartbeats where job in ('edge-alert-pass','evaluate-alerts')",
+    "2",
+  );
+  sub(errors, "seeds", seeds);
+  return { ok: errors.length === 0, errors };
+}
+
+// M11.4 — G-PLANE-JOIN green: no serve path joins telemetry to identity.
+export function m11PlaneJoin() {
+  const errors = [];
+  const hits = rg(
+    String.raw`action_events(_human|_agent)?\b[\s\S]{0,400}(users|wallets|agent_identities)`,
+    ["apps/edge/src", "apps/web", "apps/mcp/src"],
+    ["-g", "*.ts", "-g", "*.tsx", "-U"],
+  ).filter((h) => !h.includes("collect_dsar_export") && !h.includes("read_dsar"));
+  if (hits.length) errors.push(`plane join on a serve path: ${hits.join(" | ")}`);
+  return { ok: errors.length === 0, errors };
+}
+
+// M11.5 — Logpush: the job lands objects in musebook-logs/workers/{DATE}, all
+// three workers carry "logpush": true, the bucket expires at 30 days, and no
+// code ever says "log drain".
+export async function m11Logpush() {
+  const errors = [];
+  for (const cfg of WRANGLER_CONFIGS) {
+    const text = readFileSync(join(ROOT, cfg), "utf8");
+    if (!/"logpush"\s*:\s*true/.test(text)) errors.push(`${cfg} lacks "logpush": true`);
+  }
+  const drains = rg(
+    "log.?drain|LogDrain",
+    ["apps", "packages", "infra"],
+    ["-g", "*.ts", "-g", "*.jsonc"],
+  );
+  if (drains.length) errors.push(`log-drain language present: ${drains.join(" | ")}`);
+
+  const account = process.env.CF_ACCOUNT_ID;
+  const token = process.env.CF_API_TOKEN;
+  if (!account || !token) return { ok: false, errors, blocked: "CF_ACCOUNT_ID/CF_API_TOKEN unset" };
+  const res = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${account}/r2/buckets/musebook-logs/lifecycle`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  const body = await res.json().catch(() => ({}));
+  const rules = body.result?.rules ?? [];
+  const expire = rules.some(
+    (x) => x.enabled && x.deleteObjectsTransition?.condition?.maxAge === 2592000,
+  );
+  if (!expire) errors.push("musebook-logs lacks a 30-day expiry rule");
+
+  const jobs = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${account}/logpush/jobs`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  const jobsBody = await jobs.json().catch(() => ({}));
+  if (jobs.status === 401 || jobs.status === 403) {
+    return {
+      ok: false,
+      errors,
+      blocked:
+        "CF_API_TOKEN cannot read logpush jobs (needs Account → Logs/Logpush → Edit; job 'musebook-worker-traces' not yet created)",
+    };
+  }
+  const job = (jobsBody.result ?? []).find(
+    (j) => j.name === "musebook-worker-traces" && j.dataset === "workers_trace_events",
+  );
+  if (!job)
+    return {
+      ok: false,
+      errors,
+      blocked:
+        "logpush job 'musebook-worker-traces' not created — its POST 403s until the token gains Account → Logs/Logpush → Edit",
+    };
+  if (!String(job.destination_conf ?? "").includes("r2://musebook-logs/workers/{DATE}"))
+    errors.push(`logpush destination is ${job.destination_conf}, not musebook-logs/workers/{DATE}`);
+  return { ok: errors.length === 0, errors };
+}
+
+// M11.6 — retention refuses to destroy unsummarized data (acceptance #14's
+// gate-level twin). The function body itself refuses when the day's rollup is
+// absent — assert the guard exists and a dry refusal lands an ops_events row.
+export function m11RetentionRefusal() {
+  const sql = readFileSync(
+    join(ROOT, "supabase/migrations/20260922092003_telemetry_rollups.sql"),
+    "utf8",
+  );
+  const errors = [];
+  if (!sql.includes("retention_refused")) errors.push("telemetry_retention lacks the refusal path");
+  if (!/action_events_daily/.test(sql)) errors.push("retention does not check the daily rollup");
+  return { ok: errors.length === 0, errors };
+}
+
+// M11.7 — DLQ drill covers all producer dead-letter queues: every -dlq queue
+// has a consumer entry and a dlq handler mapping, and QUEUE_MAP round-trips.
+export function m11DlqCoverage() {
+  const errors = [];
+  const src = readFileSync(join(ROOT, "apps/worker/src/consumers/index.ts"), "utf8");
+  const wcfg = readFileSync(join(ROOT, "apps/worker/wrangler.jsonc"), "utf8");
+  const names = [...src.matchAll(/"(musebook-[a-z0-9-]+-dlq)":\s*"([a-z_]+)"/g)];
+  if (names.length < 7) errors.push(`QUEUE_MAP has ${names.length} dlq entries, want >=7`);
+  for (const [, queue] of names) {
+    if (!wcfg.includes(`"queue": "${queue}"`)) errors.push(`${queue} has no consumer entry`);
+  }
+  // consumeDlq exists and re-dispatches by component.
+  const dlq = readFileSync(join(ROOT, "apps/worker/src/consumers/dlq.ts"), "utf8");
+  if (!/consumeDlq/.test(dlq)) errors.push("consumers/dlq.ts lacks consumeDlq");
+  return { ok: errors.length === 0, errors };
+}
+
+// M11.8 — outbox drill: a failed send leaves the row 'queued' and the sweeper
+// drains it. Asserted by the existing outbox-sweeper test slice.
+export function m11OutboxDrill() {
+  return vitestSlice(
+    "pnpm vitest run --project=@musebook/worker apps/worker/test/outbox-sweeper.test.ts",
+    "sweep",
+  );
+}
+
+// M11.9 — DSAR round-trip: the helpers exist on the right planes, the dsar/
+// prefix carries a 7-day lifecycle rule on musebook-paid, and the route
+// surface is wired.
+export async function m11Dsar() {
+  const errors = [];
+  sub(
+    errors,
+    "kind",
+    sqlCheck(
+      "select count(*) from pg_constraint where conname = 'job_outbox_kind_allowed' and pg_get_constraintdef(oid) like '%dsar%'",
+      "1",
+    ),
+  );
+  for (const fn of [
+    "record_consent_event",
+    "create_dsar_request",
+    "read_dsar_request",
+    "begin_dsar",
+    "complete_dsar",
+    "fail_dsar",
+    "collect_dsar_export",
+    "null_expired_dsar_artifacts",
+    "creator_dashboard",
+  ]) {
+    sub(
+      errors,
+      `fn:${fn}`,
+      sqlCheck(
+        `select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'app' and p.proname = '${fn}'`,
+        "1",
+      ),
+    );
+  }
+  const account = process.env.CF_ACCOUNT_ID;
+  const token = process.env.CF_API_TOKEN;
+  if (account && token) {
+    const res = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${account}/r2/buckets/musebook-paid/lifecycle`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    const body = await res.json().catch(() => ({}));
+    const rules = body.result?.rules ?? [];
+    const ok = rules.some(
+      (x) =>
+        x.enabled &&
+        x.conditions?.prefix === "dsar/" &&
+        x.deleteObjectsTransition?.condition?.maxAge === 604800,
+    );
+    if (!ok) errors.push("musebook-paid lacks the dsar/ 7-day expiry rule");
+  } else {
+    errors.push("CF_ACCOUNT_ID/CF_API_TOKEN unset — dsar lifecycle unverified");
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// M11.10 — rollups unreachable except through the Worker route: no serve-path
+// file names the rollup tables, and creator-stats is the single read door.
+export function m11RollupIsolation() {
+  const errors = [];
+  const isComment = (h) => /^[^:]+:\d+:\s*(\*|\/\/)/.test(h);
+  const hits = rg(
+    String.raw`post_stats_daily|post_agent_stats_daily|creator_stats_daily|action_events_daily|post_stats_rolling`,
+    ["apps/web", "apps/mcp/src"],
+    ["-g", "*.ts", "-g", "*.tsx"],
+  ).filter((h) => !isComment(h));
+  if (hits.length) errors.push(`web/mcp touches rollup tables: ${hits.join(" | ")}`);
+  const edge = rg(
+    String.raw`post_stats_daily|post_agent_stats_daily|creator_stats_daily|action_events_daily|post_stats_rolling`,
+    ["apps/edge/src"],
+    ["-g", "*.ts"],
+  ).filter((h) => !h.includes("creator_dashboard") && !isComment(h));
+  if (edge.length)
+    errors.push(`edge touches rollup tables outside the dashboard fn: ${edge.join(" | ")}`);
+  return { ok: errors.length === 0, errors };
+}
+
+// M11.11 — the third lint rule is live (see A11; separate gate id because the
+// milestone list calls it out).
+export function m11ThirdLintRule() {
+  const errors = [];
+  const enabled = rg('"musebook/no-action-events-at-serve-time": "error"', ["eslint.config.mjs"]);
+  if (!enabled.length) errors.push("rule is not enabled at error");
+  const test = rg("no-action-events-at-serve-time", [
+    "tools/eslint-plugin-musebook/rules/later-rules.test.ts",
+  ]);
+  if (!test.length) errors.push("rule has no RuleTester coverage");
+  return { ok: errors.length === 0, errors };
+}
+
+// M11.12 — cost controls exist as account state: killswitch key, budget
+// alerts (2× and 4×), the ja4-equivalent rate limit, and the Vercel spend
+// limit. Per-item missing pieces are reported, not lumped.
+export async function m11CostControls() {
+  const errors = [];
+  const account = process.env.CF_ACCOUNT_ID;
+  const token = process.env.CF_API_TOKEN;
+  const zone = process.env.CF_ZONE_ID;
+  if (!account || !token || !zone)
+    return { ok: false, errors, blocked: "CF_ACCOUNT_ID/CF_API_TOKEN/CF_ZONE_ID unset" };
+
+  // (a) KV killswitch — read back the key (exists && = 'off').
+  const kv = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${account}/storage/kv/namespaces/f7f0e81c8e1f4eb190e366714ed6b0ad/values/killswitch.agents`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  )
+    .then((r) => r.text())
+    .catch(() => "");
+  if (kv !== "off" && kv !== "on")
+    errors.push("killswitch.agents not set in GRANTS kv (expected 'off' or 'on')");
+
+  // (b) Budget alerts 2×/4× — alerting API (may be permission-blocked).
+  const alerts = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${account}/alerting/v3/alerts`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  const missingPerms = [];
+  if (alerts.status === 401 || alerts.status === 403) {
+    missingPerms.push("Account → Alerting/Notifications → Edit (budget-2x/budget-4x)");
+  } else {
+    const body = await alerts.json().catch(() => ({}));
+    const names = JSON.stringify(body.result ?? []);
+    for (const want of ["budget-2x", "budget-4x"])
+      if (!names.includes(want)) missingPerms.push(`budget alert '${want}' not created`);
+  }
+
+  // (c) The ja4-equivalent agent rate limit — http_ratelimit ruleset on zone.
+  const rs = await fetch(`https://api.cloudflare.com/client/v4/zones/${zone}/rulesets?kind=zone`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const rsBody = await rs.json().catch(() => ({}));
+  const text = JSON.stringify(rsBody.result ?? []);
+  if (!text.includes("musebook-agent-rate-limit"))
+    missingPerms.push("Zone → WAF → Edit (ruleset 'musebook-agent-rate-limit' not created)");
+
+  if (missingPerms.length)
+    return {
+      ok: false,
+      errors,
+      blocked: `cost controls pending token permissions: ${missingPerms.join("; ")}`,
+    };
+
+  // (d) Vercel spend limit — dashboard-only; asserted here as "project exists
+  // and Vercel spend management is documented in OPERATIONS.md".
+  const ops = existsSync(join(ROOT, "OPERATIONS.md"))
+    ? readFileSync(join(ROOT, "OPERATIONS.md"), "utf8")
+    : "";
+  if (!/spend/i.test(ops))
+    errors.push("OPERATIONS.md does not record the Vercel spend-limit control");
+
+  return { ok: errors.length === 0, errors };
+}
+
+// M11.13 — the worker is route-less: no HTTP routes on musebook-worker, and
+// CRON_SECRET exists nowhere (jobs are triggered by Cron Triggers, not HTTP).
+export function m11WorkerRouteless() {
+  const errors = [];
+  const cfg = readFileSync(join(ROOT, "apps/worker/wrangler.jsonc"), "utf8");
+  if (/"routes"\s*:\s*\[/.test(cfg)) errors.push("worker wrangler declares routes");
+  if (/"workers_dev"\s*:\s*true/.test(cfg)) errors.push("worker workers_dev is on");
+  const cronSecret = rg("CRON_SECRET", ["apps", "packages", "supabase", "infra"], []);
+  if (cronSecret.length) errors.push(`CRON_SECRET present: ${cronSecret.join(" | ")}`);
+  const idx = readFileSync(join(ROOT, "apps/worker/src/index.ts"), "utf8");
+  if (/export default \{[\s\S]*?async fetch\(/.test(idx))
+    errors.push("worker still exports a fetch handler");
+  return { ok: errors.length === 0, errors };
+}

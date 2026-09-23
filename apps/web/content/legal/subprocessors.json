@@ -1,0 +1,42 @@
+{
+  "version": "v1",
+  "generated": "2026-09-23",
+  "subprocessors": [
+    {
+      "name": "Cloudflare, Inc.",
+      "purpose": "edge compute (Workers), queues, KV, R2 object storage, logpush",
+      "location": "US + global PoPs",
+      "data_classes": ["request metadata", "content bytes", "job payloads", "trace logs"]
+    },
+    {
+      "name": "Vercel, Inc.",
+      "purpose": "Next.js origin hosting",
+      "location": "US (iad1)",
+      "data_classes": ["page renders", "session cookies (pass-through)"]
+    },
+    {
+      "name": "Supabase, Inc.",
+      "purpose": "Postgres hosting (auth, app data)",
+      "location": "us-east-1",
+      "data_classes": ["identity", "content rows", "telemetry rows", "ledger"]
+    },
+    {
+      "name": "Postiz (self-hosted)",
+      "purpose": "social distribution sidecar on private networking",
+      "location": "co-located with worker",
+      "data_classes": ["distribution payloads", "platform tokens (encrypted)"]
+    },
+    {
+      "name": "Coinbase Developer Platform",
+      "purpose": "x402 payment facilitator",
+      "location": "US",
+      "data_classes": ["payment payloads", "wallet addresses"]
+    },
+    {
+      "name": "Upstream LLM provider",
+      "purpose": "classification, summaries, reformat variants",
+      "location": "US",
+      "data_classes": ["post bodies (no PII by policy)"]
+    }
+  ]
+}

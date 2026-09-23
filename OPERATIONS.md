@@ -103,3 +103,28 @@ If a future facilitator cut fails this evidence, flip prod's
 `apps/edge/wrangler.jsonc` `vars.X402_MODE` to `"shadow"` and update this
 record with the new date — the gate re-reads the pair and refuses a mode
 that is asserted but not evidenced.
+
+## Cost controls — production record (§16.6 M11)
+
+Four containment levers, kept as account state rather than code:
+
+- **KV killswitch** — `GRANTS` key `killswitch.agents` on the
+  `musebook-edge` KV namespace. Value `"on"` sheds unauthenticated agent
+  traffic (no cookie, non-browser UA, no signature/authorization headers)
+  with a 503 `agent_shed` before any other work; humans and signed agents
+  pass. Read every request with `cacheTtl: 300`. Set/reset:
+  `wrangler kv key put --binding GRANTS killswitch.agents '"on"'`
+- **Cloudflare budget alerts** — two account notifications
+  (`budget-2x`, `budget-4x`) at 2× and 4× the modelled monthly worker
+  spend. Creation needs `Account → Alerting/Notifications → Edit` on the
+  `devin` API token.
+- **Agent rate limit** — the `cf.bot_management.ja4` condition is
+  Enterprise-only (this zone is Free), so the equivalent is a zone
+  `http_ratelimit` ruleset `musebook-agent-rate-limit`: unsigned,
+  non-browser-UA traffic on agent surfaces is throttled instead. Needs
+  `Zone → WAF → Edit`.
+- **Vercel spend limit** — dashboard-only control on team `5dee-studios`
+  (Settings → Billing → Spend Management): a monthly spend cap that
+  pauses deployments when hit. Covers the `musebook-web` project's
+  build/function usage; no API exists to assert it, so this note is the
+  record.

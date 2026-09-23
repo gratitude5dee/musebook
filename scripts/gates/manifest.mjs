@@ -1361,6 +1361,89 @@ export const GATES = {
       run: checks.m10SidecarBucket,
     },
   ],
+
+  // §16.6 M11 — telemetry rollups, the ops plane, consent + DSAR, alerting,
+  // and cost controls.
+  M11: [
+    {
+      id: "M11.1",
+      kind: "fn",
+      desc: "all 22 §13.11 acceptance checks green",
+      run: checks.m11Acceptance,
+    },
+    {
+      id: "M11.2",
+      kind: "fn",
+      desc: "28 alert_rules seeded+enabled; evaluator fires on an injected fault",
+      run: checks.m11AlertRules,
+    },
+    {
+      id: "M11.3",
+      kind: "fn",
+      desc: "evaluators watch each other (edge-alert-pass ↔ evaluate-alerts)",
+      run: checks.m11CrossWatch,
+    },
+    {
+      id: "M11.4",
+      kind: "fn",
+      desc: "G-PLANE-JOIN: no serve path joins telemetry to identity",
+      run: checks.m11PlaneJoin,
+    },
+    {
+      id: "M11.5",
+      kind: "fn",
+      desc: "Logpush→musebook-logs/workers/{DATE}, logpush:true ×3, 30d lifecycle, no 'log drain'",
+      run: checks.m11Logpush,
+    },
+    {
+      id: "M11.6",
+      kind: "fn",
+      desc: "retention refuses to drop an unsummarized partition",
+      run: checks.m11RetentionRefusal,
+    },
+    {
+      id: "M11.7",
+      kind: "fn",
+      desc: "DLQ drill covers every producer -dlq queue",
+      run: checks.m11DlqCoverage,
+    },
+    {
+      id: "M11.8",
+      kind: "fn",
+      desc: "outbox drill: failed send → queued → sweeper drains",
+      run: checks.m11OutboxDrill,
+    },
+    {
+      id: "M11.9",
+      kind: "fn",
+      desc: "DSAR round-trip wired; dsar/ carries a 7-day expiry on musebook-paid",
+      run: checks.m11Dsar,
+    },
+    {
+      id: "M11.10",
+      kind: "fn",
+      desc: "rollup tables unreachable outside app.creator_dashboard",
+      run: checks.m11RollupIsolation,
+    },
+    {
+      id: "M11.11",
+      kind: "fn",
+      desc: "third lint rule (no-action-events-at-serve-time) live at error",
+      run: checks.m11ThirdLintRule,
+    },
+    {
+      id: "M11.12",
+      kind: "fn",
+      desc: "cost controls as account state (killswitch, budgets, rate limit, spend)",
+      run: checks.m11CostControls,
+    },
+    {
+      id: "M11.13",
+      kind: "fn",
+      desc: "worker route-less, cron triggers carry no shared-secret header",
+      run: checks.m11WorkerRouteless,
+    },
+  ],
 };
 
 export const MILESTONE_TITLES = {

@@ -1,0 +1,59 @@
+---
+title: Privacy Policy
+version: v1
+slug: privacy
+---
+
+> **DRAFT — NOT LEGALLY REVIEWED.** This document states the system's actual
+> data mechanics from the spec; it is not legal advice. Launch requires a
+> human to remove this banner (§15.27 item 1).
+
+# Privacy Policy
+
+## What we collect
+
+| Purpose                                     | Data                                                                    | Lawful basis (GDPR Art. 6)                                       |
+| ------------------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Serve the site, authenticate, prevent abuse | session, `ip_hash` (salted, rotated), `user_agent`, rate-limit counters | 6(1)(b) contract + 6(1)(f) legitimate interests                  |
+| Publish and distribute your content         | post body, profile, platform variants                                   | 6(1)(b) contract                                                 |
+| Rank your feed                              | `action_events_human`, `user_embeddings`                                | 6(1)(a) consent in banner regions; 6(1)(f) elsewhere             |
+| Creator analytics                           | `post_stats_daily` — aggregate only                                     | 6(1)(f); readers are not identified below `ANALYTICS_MIN_COHORT` |
+| Payments and payouts                        | wallet address, settlement rows, ledger legs                            | 6(1)(b) + 6(1)(c)                                                |
+| Agent access accounting                     | `agent_key_thumbprint`, `mcp_tool`, `bytes_served`                      | 6(1)(b) + 6(1)(f)                                                |
+| Error diagnostics                           | stack traces, `request_id`, scrubbed context                            | 6(1)(f)                                                          |
+| Moderation and legal response               | reports, takedowns, audit log                                           | 6(1)(c) + 6(1)(f)                                                |
+
+## What we never collect
+
+No third-party trackers or pixels. No raw IP — a salted `ip_hash` only, scrubbed
+after 7 days, salt destroyed after 2. No fingerprint. No cross-site identifier.
+The Analytics Engine volume store holds no subject identifier of any kind:
+no user id, no anon id, no session id, no IP, no wallet, no referrer.
+
+## Consent
+
+In banner regions (EEA, UK, Switzerland by default), personalised ranking runs
+only after an affirmative choice in the consent banner. Every consent state
+change — including withdrawal — is an append-only row in `consent_events`.
+`Do Not Track` and `Sec-GPC` are honoured unconditionally everywhere.
+
+## Retention (§15.12)
+
+| Class               | Retention                                                 |
+| ------------------- | --------------------------------------------------------- |
+| `ip_hash`           | 7 days, then nulled                                       |
+| `anon_id` on events | 30 days, then nulled                                      |
+| Agent action events | 90 days                                                   |
+| Human action events | 400 days, then dropped only after the day's rollup exists |
+| Posts               | until you delete; 30-day undo before hard delete          |
+| DSAR exports        | 7 days in R2, then destroyed by lifecycle rule            |
+| Ledger, settlements | indefinitely (legal obligation)                           |
+| `ops_events`        | 180 days                                                  |
+
+## Your rights
+
+Export, deletion, rectification, and objection are self-serve under
+`/api/me/*` — one request, one queue, one audit row, 30-day due date. Settings
+→ Privacy carries the same controls in UI form.
+
+Contact: privacy@musebook.dev.
