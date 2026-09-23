@@ -151,16 +151,19 @@ $$;
 -- §13.9.4 owns the export's contents: every action_events row of the subject,
 -- every citations row, and the identity tables. ONE jsonb document, so the
 -- consumer's R2 write is a snapshot, not a sequence of round trips.
+-- SECURITY DEFINER like its sibling erase_user_subject: the export reads the
+-- kernel-only identity tables (users, wallets) — a plane grant there would
+-- break the G-ROLE block-(e) invariant, so the privileged surface goes through
+-- the owner, never through a plane.
 create or replace function app.collect_dsar_export(p_user_id uuid)
 returns jsonb
 language plpgsql
-security invoker
+security definer
 set search_path = public, app, pg_temp
 as $$
 declare
   v_doc jsonb;
 begin
-  perform app.enter('musebook_jobs', p_user_id);
   select jsonb_build_object(
     'exported_at', now(),
     'user', (select to_jsonb(u) - 'created_at' from public.users u where u.id = p_user_id),

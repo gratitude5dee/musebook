@@ -39,7 +39,7 @@ create policy users_kernel_consent_update on public.users
 create or replace function public.erase_user_subject(p_user_id uuid)
 returns jsonb
 language plpgsql
-security invoker
+security definer
 set search_path = public, app, pg_temp
 as $$
 declare
@@ -49,7 +49,6 @@ declare
   v_n           bigint := 0;
   v_deleted     boolean := false;
 begin
-  perform app.enter('musebook_jobs', p_user_id);
   -- 1. Behavioural — Postgres: subject nulled in place, rows RETAINED (§4.9's
   -- rule). The ranking record stays; the identity does not.
   update public.action_events_human
@@ -93,15 +92,11 @@ revoke execute on function public.erase_user_subject(uuid) from public, anon, au
 grant  execute on function public.erase_user_subject(uuid) to musebook_kernel;
 grant  execute on function public.erase_user_subject(uuid) to musebook_jobs;
 
--- The erase + export writes run invoker on the jobs plane (a definer owned by
--- postgres would itself be blocked by FORCE RLS). Every grant names the plane
--- the function enters; sibling tables follow the same `for all … using(true)`
--- policy shape as dsar_kernel / consent_events_kernel.
+-- The dsar consumer fns (begin_dsar / collect_dsar_export / complete_dsar /
+-- fail_dsar) run invoker on the jobs plane and need row access on these two
+-- tables only. users/wallets/sessions stay kernel-only — erase_user_subject
+-- reaches them through its definer owner (§15.11), never through a plane.
 grant select, update on public.posts to musebook_jobs;
 grant select, update on public.dsar_requests to musebook_jobs;
-grant select, delete on public.users, public.wallets, public.sessions to musebook_jobs;
 create policy posts_jobs_all        on public.posts        for all to musebook_jobs using (true) with check (true);
 create policy dsar_jobs_all         on public.dsar_requests for all to musebook_jobs using (true) with check (true);
-create policy users_jobs_all        on public.users        for all to musebook_jobs using (true) with check (true);
-create policy wallets_jobs_all      on public.wallets      for all to musebook_jobs using (true) with check (true);
-create policy sessions_jobs_all     on public.sessions     for all to musebook_jobs using (true) with check (true);
