@@ -1,10 +1,9 @@
 {
   "milestone": "M11",
-  "commit": "b7d4f5ca",
+  "commit": "216bdb5c",
   "branch": "m11-telemetry",
-  "dirty": true,
-  "started": "2026-09-23T08:54:49.518Z",
-  "finished": "2026-09-23T08:54:49.518Z",
+  "started": "2026-09-23T09:02:13.892Z",
+  "finished": "2026-09-23T09:02:13.892Z",
   "seed_hash": "0a1e7156dacff948",
   "versions": {
     "node": "v24.21.0",
@@ -20,7 +19,7 @@
     {
       "id": "M11.1",
       "status": "pass",
-      "duration_s": 3.67,
+      "duration_s": 3.51,
       "exit_code": 0,
       "output": ""
     },
@@ -34,7 +33,7 @@
     {
       "id": "M11.3",
       "status": "pass",
-      "duration_s": 0.07,
+      "duration_s": 0.06,
       "exit_code": 0,
       "output": ""
     },
@@ -48,7 +47,7 @@
     {
       "id": "M11.5",
       "status": "block",
-      "duration_s": 0.35,
+      "duration_s": 0.45,
       "exit_code": 0,
       "output": "BLOCK M11.5  Logpush→musebook-logs/workers/{DATE}, logpush:true ×3, 30d lifecycle, no 'log drain' — CF_API_TOKEN cannot read logpush jobs (needs Account → Logs/Logpush → Edit; job 'musebook-worker-traces' not yet created)"
     },
@@ -76,7 +75,7 @@
     {
       "id": "M11.9",
       "status": "pass",
-      "duration_s": 0.92,
+      "duration_s": 0.99,
       "exit_code": 0,
       "output": ""
     },
@@ -97,7 +96,7 @@
     {
       "id": "M11.12",
       "status": "block",
-      "duration_s": 0.41,
+      "duration_s": 0.61,
       "exit_code": 0,
       "output": "BLOCK M11.12  cost controls as account state (killswitch, budgets, rate limit, spend) — cost controls pending token permissions: budget alert 'budget-2x' not created; budget alert 'budget-4x' not created; Zone → WAF → Edit (ruleset 'musebook-agent-rate-limit' not created)"
     },
@@ -111,14 +110,14 @@
     {
       "id": "G-BUILD",
       "status": "pass",
-      "duration_s": 5.95,
+      "duration_s": 5.64,
       "exit_code": 0,
-      "output": "packages/distributor build$ tsc --build --pretty\npackages/musebook-cli build$ tsc --build --pretty\npackages/schema build$ tsc --build --pretty\npackages/schema build: Done\npackages/classify build$ tsc --build --pretty\npackages/connectors build$ tsc --build --pretty\npackages/musebook-cli build: Done\npackages/content build$ tsc --build --pretty\npackages/distributor build: Done\npackages/media build$ tsc --build --pretty\npackages/connectors build: Done\npackages/muse-mixer build$ tsc --build --pretty\npackages/classify build: Done\npackages/content build: Done\npackages/telemetry build$ tsc --build --pretty\npackages/artifacts build$ tsc --build --pretty\npackages/media build: Done\npackages/kernel build$ tsc --build --pretty\npackages/muse-mixer build: Done\npackages/ui build$ tsc --build --pretty\npackages/artifacts build: Done\npackages/telemetry build: Done\npackages/kernel build: Done\npackages/x402 build$ tsc --build --pretty\npackages/x402 build: Done\napps/mcp build$ tsc --build --pretty\napps/worker build$ tsc --build --pretty\npackages/ui build: Done\napps/web build$ node scripts/check-legal-review.mjs && next build\napps/web build: check-legal-review: 7 DRAFT legal document(s) — preview/dev build continues\napps/mcp build: Done\napps/worker build: Done\napps/edge build$ tsc --build --pretty\napps/edge build: Done\napps/web build: ▲ Next.js 16.3.5 (Turbopack)\napps/web build: ✓ Running next.config.ts took 17ms\napps/web build: - Experiments (use with caution):\napps/web build:   · serverActions\napps/web build: \napps/web build:   Creating an optimized production build ...\napps/web build: ✓ Compiled successfully in 765ms\napps/web build:   Running TypeScript ...\napps/web build:   Finished TypeScript in 2.4s ...\napps/web build:   Collecting page data using 7 workers ...\napps/web build:   Generating static pages using 7 workers (0/20) ...\napps/web build:   Generating static pages using 7 workers (5/20) \napps/web build:   Generating static pages using 7 workers (10/20) \napps/web build:   Generating static pages using 7 workers (15/20) \napps/web build: ✓ Generating static pages using 7 workers (20/20) in 308ms\napps/web build:   Finalizing page optimization ...\napps/web build: \napps/web build: Route (app)\napps/web build: ┌ ƒ /\napps/web build: ├ ƒ /_not-found\napps/web build: ├ ƒ /agents\napps/web build: ├ ƒ /api/agent/delegations\napps/web build: ├ ƒ /api/agent/delegations/[id]\napps/web build: ├ ƒ /api/auth/login\napps/web build: ├ ƒ /api/auth/logout\napps/web build: ├ ƒ /api/auth/me\napps/web build: ├ ƒ /api/auth/payload\napps/web build: ├ ƒ /api/auth/supabase-token\napps/web build: ├ ƒ /compose\napps/web build: ├ ƒ /compose/[postId]\napps/web build: ├ ƒ /compose/[postId]/distribute\napps/web build: ├ ƒ /feed\napps/web build: ├ ƒ /legal/[slug]\napps/web build: ├ ƒ /legal/oss\napps/web build: ├ ƒ /p/[slug]\napps/web build: ├ ƒ /pay/[postId]\napps/web build: ├ ƒ /reels\napps/web build: ├ ƒ /settings/privacy\napps/web build: └ ƒ /studio\napps/web build: \napps/web build: \napps/web build: ƒ Proxy (Middleware)\napps/web build: \napps/web build: ƒ  (Dynamic)  server-rendered on demand\napps/web build: \napps/web build: Done"
+      "output": "packages/musebook-cli build$ tsc --build --pretty\npackages/distributor build$ tsc --build --pretty\npackages/schema build$ tsc --build --pretty\npackages/schema build: Done\npackages/classify build$ tsc --build --pretty\npackages/connectors build$ tsc --build --pretty\npackages/distributor build: Done\npackages/content build$ tsc --build --pretty\npackages/musebook-cli build: Done\npackages/media build$ tsc --build --pretty\npackages/classify build: Done\npackages/muse-mixer build$ tsc --build --pretty\npackages/content build: Done\npackages/telemetry build$ tsc --build --pretty\npackages/connectors build: Done\npackages/artifacts build$ tsc --build --pretty\npackages/media build: Done\npackages/kernel build$ tsc --build --pretty\npackages/muse-mixer build: Done\npackages/ui build$ tsc --build --pretty\npackages/telemetry build: Done\npackages/artifacts build: Done\npackages/kernel build: Done\npackages/x402 build$ tsc --build --pretty\npackages/ui build: Done\npackages/x402 build: Done\napps/mcp build$ tsc --build --pretty\napps/web build$ node scripts/check-legal-review.mjs && next build\napps/worker build$ tsc --build --pretty\napps/web build: check-legal-review: 7 DRAFT legal document(s) — preview/dev build continues\napps/mcp build: Done\napps/worker build: Done\napps/edge build$ tsc --build --pretty\napps/edge build: Done\napps/web build: ▲ Next.js 16.3.5 (Turbopack)\napps/web build: ✓ Running next.config.ts took 16ms\napps/web build: - Experiments (use with caution):\napps/web build:   · serverActions\napps/web build: \napps/web build:   Creating an optimized production build ...\napps/web build: ✓ Compiled successfully in 695ms\napps/web build:   Running TypeScript ...\napps/web build:   Finished TypeScript in 2.3s ...\napps/web build:   Collecting page data using 7 workers ...\napps/web build:   Generating static pages using 7 workers (0/20) ...\napps/web build:   Generating static pages using 7 workers (5/20) \napps/web build:   Generating static pages using 7 workers (10/20) \napps/web build:   Generating static pages using 7 workers (15/20) \napps/web build: ✓ Generating static pages using 7 workers (20/20) in 257ms\napps/web build:   Finalizing page optimization ...\napps/web build: \napps/web build: Route (app)\napps/web build: ┌ ƒ /\napps/web build: ├ ƒ /_not-found\napps/web build: ├ ƒ /agents\napps/web build: ├ ƒ /api/agent/delegations\napps/web build: ├ ƒ /api/agent/delegations/[id]\napps/web build: ├ ƒ /api/auth/login\napps/web build: ├ ƒ /api/auth/logout\napps/web build: ├ ƒ /api/auth/me\napps/web build: ├ ƒ /api/auth/payload\napps/web build: ├ ƒ /api/auth/supabase-token\napps/web build: ├ ƒ /compose\napps/web build: ├ ƒ /compose/[postId]\napps/web build: ├ ƒ /compose/[postId]/distribute\napps/web build: ├ ƒ /feed\napps/web build: ├ ƒ /legal/[slug]\napps/web build: ├ ƒ /legal/oss\napps/web build: ├ ƒ /p/[slug]\napps/web build: ├ ƒ /pay/[postId]\napps/web build: ├ ƒ /reels\napps/web build: ├ ƒ /settings/privacy\napps/web build: └ ƒ /studio\napps/web build: \napps/web build: \napps/web build: ƒ Proxy (Middleware)\napps/web build: \napps/web build: ƒ  (Dynamic)  server-rendered on demand\napps/web build: \napps/web build: Done"
     },
     {
       "id": "G-TYPES",
       "status": "pass",
-      "duration_s": 2.19,
+      "duration_s": 2.05,
       "exit_code": 0,
       "output": ""
     },
@@ -132,23 +131,23 @@
     {
       "id": "G-FMT",
       "status": "pass",
-      "duration_s": 3.56,
+      "duration_s": 3.45,
       "exit_code": 0,
       "output": "Checking formatting...\nAll matched files use Prettier code style!"
     },
     {
       "id": "G-TEST",
       "status": "pass",
-      "duration_s": 62.08,
+      "duration_s": 59.07,
       "exit_code": 0,
-      "output": "\n RUN  v4.1.11 /home/ubuntu/repos/musebook\n\n ✓ |classify| test/smoke.test.ts (1 test) 2ms\n ✓ |artifacts| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors| test/sign.test.ts (4 tests) 48ms\n ✓ |connectors| test/safety.test.ts (9 tests) 59ms\n ✓ |connectors| test/mcp-http.test.ts (13 tests) 38ms\n ✓ |connectors| test/crypto-audit.test.ts (10 tests) 13ms\n ✓ |connectors| test/egress.test.ts (9 tests) 30ms\n ✓ |connectors| test/adapters.test.ts (6 tests) 25ms\n ✓ |connectors| test/agent-scope.test.ts (14 tests) 11ms\n ✓ |connectors| test/registry.test.ts (6 tests) 6ms\n ✓ |connectors| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors| test/manifest.test.ts (8 tests) 7ms\n ✓ |connectors-workers| test/agent-scope.test.ts (14 tests) 7ms\n ✓ |connectors-workers| test/safety.test.ts (9 tests) 30ms\n ✓ |connectors-workers| test/sign.test.ts (4 tests) 10ms\n ✓ |connectors-workers| test/crypto-audit.test.ts (10 tests) 6ms\n ✓ |connectors-workers| test/egress.test.ts (9 tests) 5ms\n ✓ |connectors-workers| test/mcp-http.test.ts (13 tests) 11ms\n ✓ |connectors-workers| test/adapters.test.ts (6 tests) 7ms\n ✓ |content| test/hash-roundtrip.test.ts (5 tests) 67ms\n ✓ |connectors-workers| test/manifest.test.ts (8 tests) 5ms\n ✓ |connectors-workers| test/registry.test.ts (6 tests) 6ms\n ✓ |content| test/hash-sensitivity.test.ts (1 test) 31ms\n ✓ |content| test/hash-stability.test.ts (2 tests) 76ms\n ✓ |content| test/canonicalize.test.ts (11 tests) 4ms\n ✓ |content| test/coverage.test.ts (14 tests) 6ms\n ✓ |content| test/etag.test.ts (8 tests) 3ms\n ✓ |content| test/representations.test.ts (17 tests) 20ms\n ✓ |content| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |content-workers| test/hash-sensitivity.test.ts (1 test) 22ms\n ✓ |content-workers| test/hash-roundtrip.test.ts (5 tests) 43ms\n ✓ |content-workers| test/hash-stability.test.ts (2 tests) 60ms\n ✓ |content-workers| test/canonicalize.test.ts (11 tests) 4ms\n ✓ |content-workers| test/coverage.test.ts (14 tests) 5ms\n ✓ |content-workers| test/smoke.test.ts (1 test) 1ms\n ✓ |distributor| test/postiz.test.ts (4 tests) 20ms\n ✓ |distributor| test/count.test.ts (6 tests) 11ms\n ✓ |distributor| test/pipeline.test.ts (15 tests) 20ms\n ✓ |distributor| test/validate.test.ts (30 tests) 35ms\n ✓ |distributor| test/split.test.ts (6 tests) 10ms\n ✓ |distributor| test/plan.test.ts (2 tests) 3ms\n ✓ |content-workers| test/etag.test.ts (8 tests) 3ms\n ✓ |distributor| test/smoke.test.ts (1 test) 2ms\n ✓ |content-workers| test/representations.test.ts (17 tests) 8ms\n ✓ |distributor-workers| test/postiz.test.ts (4 tests) 6ms\n ✓ |distributor-workers| test/count.test.ts (6 tests) 8ms\n ✓ |distributor-workers| test/split.test.ts (6 tests) 9ms\n ✓ |distributor-workers| test/validate.test.ts (30 tests) 29ms\n ✓ |distributor-workers| test/plan.test.ts (2 tests) 3ms\nSourcemap for \"/home/ubuntu/repos/musebook/node_modules/.pnpm/@workflow+serde@4.1.0/node_modules/@workflow/serde/dist/index.js\" points to missing source files\n ✓ |distributor-workers| test/pipeline.test.ts (15 tests) 15ms\n ✓ |connectors| test/contract/all.test.ts (31 tests) 12065ms\n     ✓ mcp_http: a hang is cut at the adapter timeout  4021ms\n     ✓ a2a_card: a hang is cut at the adapter timeout  4002ms\n     ✓ http_openapi: a hang is cut at the adapter timeout  4011ms\n ✓ |edge| test/rdns.test.ts (7 tests) 7ms\n ✓ |edge| test/postiz-webhook.test.ts (3 tests) 5ms\n ✓ |distributor-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors-workers| test/contract/all.test.ts (31 tests) 12015ms\n     ✓ mcp_http: a hang is cut at the adapter timeout  4001ms\n     ✓ a2a_card: a hang is cut at the adapter timeout  4001ms\n     ✓ http_openapi: a hang is cut at the adapter timeout  4001ms\nSourcemap for \"/home/ubuntu/repos/musebook/node_modules/.pnpm/@workflow+serde@4.1.0/node_modules/@workflow/serde/dist/index.js\" points to missing source files\n ✓ |edge| test/smoke.test.ts (1 test) 2ms\n ✓ |edge| test/actor-paths.test.ts (14 tests) 42ms\n ✓ |edge| test/wba-directory.test.ts (10 tests) 43ms\n ✓ |edge| test/auth.test.ts (27 tests) 2125ms\n     ✓ the directory fetch has a 2 s "
+      "output": "\n RUN  v4.1.11 /home/ubuntu/repos/musebook\n\n ✓ |classify| test/smoke.test.ts (1 test) 2ms\n ✓ |artifacts| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors| test/sign.test.ts (4 tests) 50ms\n ✓ |connectors| test/safety.test.ts (9 tests) 44ms\n ✓ |connectors| test/mcp-http.test.ts (13 tests) 36ms\n ✓ |connectors| test/egress.test.ts (9 tests) 26ms\n ✓ |connectors| test/adapters.test.ts (6 tests) 26ms\n ✓ |connectors| test/registry.test.ts (6 tests) 8ms\n ✓ |connectors| test/agent-scope.test.ts (14 tests) 8ms\n ✓ |connectors| test/crypto-audit.test.ts (10 tests) 15ms\n ✓ |connectors| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors| test/manifest.test.ts (8 tests) 5ms\n ✓ |connectors-workers| test/agent-scope.test.ts (14 tests) 6ms\n ✓ |connectors-workers| test/sign.test.ts (4 tests) 11ms\n ✓ |connectors-workers| test/safety.test.ts (9 tests) 31ms\n ✓ |connectors-workers| test/crypto-audit.test.ts (10 tests) 6ms\n ✓ |connectors-workers| test/mcp-http.test.ts (13 tests) 11ms\n ✓ |connectors-workers| test/egress.test.ts (9 tests) 5ms\n ✓ |connectors-workers| test/manifest.test.ts (8 tests) 5ms\n ✓ |connectors-workers| test/adapters.test.ts (6 tests) 6ms\n ✓ |connectors-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |content| test/hash-roundtrip.test.ts (5 tests) 67ms\n ✓ |content| test/hash-sensitivity.test.ts (1 test) 23ms\n ✓ |content| test/hash-stability.test.ts (2 tests) 84ms\n ✓ |content| test/canonicalize.test.ts (11 tests) 3ms\n ✓ |content| test/coverage.test.ts (14 tests) 7ms\n ✓ |content| test/etag.test.ts (8 tests) 3ms\n ✓ |content| test/representations.test.ts (17 tests) 11ms\n ✓ |content| test/smoke.test.ts (1 test) 2ms\n ✓ |content-workers| test/hash-stability.test.ts (2 tests) 54ms\n ✓ |content-workers| test/hash-sensitivity.test.ts (1 test) 21ms\n ✓ |connectors-workers| test/registry.test.ts (6 tests) 5ms\n ✓ |content-workers| test/hash-roundtrip.test.ts (5 tests) 48ms\n ✓ |content-workers| test/canonicalize.test.ts (11 tests) 3ms\n ✓ |content-workers| test/coverage.test.ts (14 tests) 5ms\n ✓ |content-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |distributor| test/postiz.test.ts (4 tests) 20ms\n ✓ |distributor| test/validate.test.ts (30 tests) 34ms\n ✓ |distributor| test/count.test.ts (6 tests) 11ms\n ✓ |distributor| test/pipeline.test.ts (15 tests) 19ms\n ✓ |distributor| test/plan.test.ts (2 tests) 3ms\n ✓ |distributor| test/split.test.ts (6 tests) 12ms\n ✓ |distributor| test/smoke.test.ts (1 test) 2ms\n ✓ |content-workers| test/etag.test.ts (8 tests) 3ms\n ✓ |content-workers| test/representations.test.ts (17 tests) 8ms\n ✓ |distributor-workers| test/postiz.test.ts (4 tests) 6ms\n ✓ |distributor-workers| test/count.test.ts (6 tests) 8ms\n ✓ |distributor-workers| test/split.test.ts (6 tests) 9ms\n ✓ |distributor-workers| test/validate.test.ts (30 tests) 29ms\n ✓ |distributor-workers| test/plan.test.ts (2 tests) 3ms\nSourcemap for \"/home/ubuntu/repos/musebook/node_modules/.pnpm/@workflow+serde@4.1.0/node_modules/@workflow/serde/dist/index.js\" points to missing source files\n ✓ |distributor-workers| test/pipeline.test.ts (15 tests) 15ms\n ✓ |connectors| test/contract/all.test.ts (31 tests) 12064ms\n     ✓ mcp_http: a hang is cut at the adapter timeout  4017ms\n     ✓ a2a_card: a hang is cut at the adapter timeout  4000ms\n     ✓ http_openapi: a hang is cut at the adapter timeout  4010ms\n ✓ |edge| test/rdns.test.ts (7 tests) 7ms\n ✓ |edge| test/postiz-webhook.test.ts (3 tests) 5ms\n ✓ |distributor-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors-workers| test/contract/all.test.ts (31 tests) 12021ms\n     ✓ mcp_http: a hang is cut at the adapter timeout  4003ms\n     ✓ a2a_card: a hang is cut at the adapter timeout  4002ms\n     ✓ http_openapi: a hang is cut at the adapter timeout  4002ms\nSourcemap for \"/home/ubuntu/repos/musebook/node_modules/.pnpm/@workflow+serde@4.1.0/node_modules/@workflow/serde/dist/index.js\" points to missing source files\n ✓ |edge| test/smoke.test.ts (1 test) 2ms\n ✓ |edge| test/actor-paths.test.ts (14 tests) 38ms\n ✓ |edge| test/wba-directory.test.ts (10 tests) 44ms\n ✓ |edge| test/auth.test.ts (27 tests) 2137ms\n     ✓ the directory fetch has a 2 s t"
     },
     {
       "id": "G-CFTEST",
       "status": "pass",
       "duration_s": 45.06,
       "exit_code": 0,
-      "output": "\n RUN  v4.1.11 /home/ubuntu/repos/musebook\n\n ✓ |connectors-workers| test/crypto-audit.test.ts (10 tests) 6ms\n ✓ |connectors-workers| test/agent-scope.test.ts (14 tests) 7ms\n ✓ |connectors-workers| test/sign.test.ts (4 tests) 10ms\n ✓ |connectors-workers| test/safety.test.ts (9 tests) 28ms\n ✓ |connectors-workers| test/egress.test.ts (9 tests) 5ms\n ✓ |connectors-workers| test/mcp-http.test.ts (13 tests) 11ms\n ✓ |connectors-workers| test/registry.test.ts (6 tests) 6ms\n ✓ |connectors-workers| test/adapters.test.ts (6 tests) 7ms\n ✓ |content-workers| test/hash-stability.test.ts (2 tests) 55ms\n ✓ |connectors-workers| test/manifest.test.ts (8 tests) 5ms\n ✓ |connectors-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |content-workers| test/coverage.test.ts (14 tests) 6ms\n ✓ |content-workers| test/hash-roundtrip.test.ts (5 tests) 44ms\n ✓ |content-workers| test/canonicalize.test.ts (11 tests) 4ms\n ✓ |content-workers| test/hash-sensitivity.test.ts (1 test) 21ms\n ✓ |content-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |content-workers| test/etag.test.ts (8 tests) 3ms\n ✓ |content-workers| test/representations.test.ts (17 tests) 9ms\n ✓ |distributor-workers| test/plan.test.ts (2 tests) 3ms\n ✓ |distributor-workers| test/count.test.ts (6 tests) 9ms\n ✓ |distributor-workers| test/split.test.ts (6 tests) 10ms\n ✓ |distributor-workers| test/validate.test.ts (30 tests) 29ms\n ✓ |distributor-workers| test/postiz.test.ts (4 tests) 5ms\nSourcemap for \"/home/ubuntu/repos/musebook/node_modules/.pnpm/@workflow+serde@4.1.0/node_modules/@workflow/serde/dist/index.js\" points to missing source files\n ✓ |distributor-workers| test/pipeline.test.ts (15 tests) 15ms\n ✓ |edge| test/rdns.test.ts (7 tests) 6ms\n ✓ |edge| test/postiz-webhook.test.ts (3 tests) 6ms\n ✓ |distributor-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |kernel-workers| test/preview.test.ts (6 tests) 17ms\n ✓ |kernel-workers| test/registry.test.ts (2 tests) 11ms\n ✓ |kernel-workers| test/golden.test.ts (34 tests) 12ms\nSourcemap for \"/home/ubuntu/repos/musebook/node_modules/.pnpm/@workflow+serde@4.1.0/node_modules/@workflow/serde/dist/index.js\" points to missing source files\n ✓ |edge| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors-workers| test/contract/all.test.ts (31 tests) 12034ms\n     ✓ mcp_http: a hang is cut at the adapter timeout  4002ms\n     ✓ a2a_card: a hang is cut at the adapter timeout  4014ms\n     ✓ http_openapi: a hang is cut at the adapter timeout  4001ms\n ✓ |edge| test/actor-paths.test.ts (14 tests) 43ms\n ✓ |edge| test/wba-directory.test.ts (10 tests) 45ms\n ✓ |kernel-workers| test/access.test.ts (19 tests) 6ms\n ✓ |kernel-workers| test/cache.test.ts (3 tests) 9ms\n ✓ |edge| test/auth.test.ts (27 tests) 2260ms\n     ✓ the directory fetch has a 2 s timeout  2004ms\n ✓ |kernel-workers| test/headers.test.ts (7 tests) 4ms\n ✓ |kernel-workers| test/projections.test.ts (9 tests) 5ms\n ✓ |kernel-workers| test/branches.test.ts (23 tests) 8ms\n ✓ |kernel-workers| test/fail-closed.test.ts (2 tests) 3ms\n ✓ |kernel-workers| test/etag.test.ts (2 tests) 2ms\n ✓ |muse-mixer-workers| test/smoke.test.ts (1 test) 2ms\nstderr | test/acceptance.test.ts\nCIMD (Client ID Metadata Document) is disabled: add '\"compatibility_flags\": [\"global_fetch_strictly_public\"]' to your wrangler.jsonc to enable. See: https://developers.cloudflare.com/workers/configuration/compatibility-flags/#global-fetch-strictly-public\n\nstderr | test/smoke.test.ts\nCIMD (Client ID Metadata Document) is disabled: add '\"compatibility_flags\": [\"global_fetch_strictly_public\"]' to your wrangler.jsonc to enable. See: https://developers.cloudflare.com/workers/configuration/compatibility-flags/#global-fetch-strictly-public\n\n ✓ |kernel-workers| test/purity.test.ts (1 test) 3ms\n ✓ |x402-workers| test/cdp-jwt.test.ts (4 tests) 6ms\n ✓ |x402-workers| test/quotes.test.ts (16 tests) 5ms\n ✓ |x402-workers| test/ledger.test.ts (5 tests) 4ms\n ✓ |x402-workers| test/http.test.ts (9 tests) 6ms\n ✓ |x402-workers| test/facilitator.test.ts (10 tests) 10ms\n ✓ |x402-workers| test/settle.test.ts (23 tests) 12ms\n ✓ |x402-workers| test/smoke.test.ts (1 test) 5ms\n ✓ |mcp| test/smoke.tes"
+      "output": "\n RUN  v4.1.11 /home/ubuntu/repos/musebook\n\n ✓ |connectors-workers| test/crypto-audit.test.ts (10 tests) 6ms\n ✓ |connectors-workers| test/agent-scope.test.ts (14 tests) 7ms\n ✓ |connectors-workers| test/sign.test.ts (4 tests) 10ms\n ✓ |connectors-workers| test/safety.test.ts (9 tests) 31ms\n ✓ |connectors-workers| test/egress.test.ts (9 tests) 4ms\n ✓ |connectors-workers| test/mcp-http.test.ts (13 tests) 10ms\n ✓ |connectors-workers| test/manifest.test.ts (8 tests) 5ms\n ✓ |connectors-workers| test/adapters.test.ts (6 tests) 7ms\n ✓ |content-workers| test/hash-stability.test.ts (2 tests) 55ms\n ✓ |connectors-workers| test/registry.test.ts (6 tests) 5ms\n ✓ |connectors-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |content-workers| test/coverage.test.ts (14 tests) 6ms\n ✓ |content-workers| test/hash-roundtrip.test.ts (5 tests) 45ms\n ✓ |content-workers| test/canonicalize.test.ts (11 tests) 4ms\n ✓ |content-workers| test/hash-sensitivity.test.ts (1 test) 21ms\n ✓ |content-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |content-workers| test/etag.test.ts (8 tests) 2ms\n ✓ |content-workers| test/representations.test.ts (17 tests) 9ms\n ✓ |distributor-workers| test/plan.test.ts (2 tests) 3ms\n ✓ |distributor-workers| test/count.test.ts (6 tests) 9ms\n ✓ |distributor-workers| test/split.test.ts (6 tests) 9ms\n ✓ |distributor-workers| test/validate.test.ts (30 tests) 29ms\n ✓ |distributor-workers| test/postiz.test.ts (4 tests) 5ms\nSourcemap for \"/home/ubuntu/repos/musebook/node_modules/.pnpm/@workflow+serde@4.1.0/node_modules/@workflow/serde/dist/index.js\" points to missing source files\n ✓ |distributor-workers| test/pipeline.test.ts (15 tests) 16ms\n ✓ |edge| test/rdns.test.ts (7 tests) 6ms\n ✓ |edge| test/postiz-webhook.test.ts (3 tests) 5ms\n ✓ |distributor-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |kernel-workers| test/preview.test.ts (6 tests) 17ms\n ✓ |kernel-workers| test/branches.test.ts (23 tests) 10ms\n ✓ |kernel-workers| test/golden.test.ts (34 tests) 10ms\nSourcemap for \"/home/ubuntu/repos/musebook/node_modules/.pnpm/@workflow+serde@4.1.0/node_modules/@workflow/serde/dist/index.js\" points to missing source files\n ✓ |connectors-workers| test/contract/all.test.ts (31 tests) 12029ms\n     ✓ mcp_http: a hang is cut at the adapter timeout  4010ms\n     ✓ a2a_card: a hang is cut at the adapter timeout  4001ms\n     ✓ http_openapi: a hang is cut at the adapter timeout  4001ms\n ✓ |edge| test/smoke.test.ts (1 test) 2ms\n ✓ |edge| test/actor-paths.test.ts (14 tests) 38ms\n ✓ |edge| test/wba-directory.test.ts (10 tests) 43ms\n ✓ |kernel-workers| test/cache.test.ts (3 tests) 9ms\n ✓ |kernel-workers| test/registry.test.ts (2 tests) 16ms\n ✓ |edge| test/auth.test.ts (27 tests) 2096ms\n     ✓ the directory fetch has a 2 s timeout  2004ms\n ✓ |kernel-workers| test/etag.test.ts (2 tests) 2ms\n ✓ |kernel-workers| test/headers.test.ts (7 tests) 3ms\n ✓ |kernel-workers| test/access.test.ts (19 tests) 11ms\n ✓ |kernel-workers| test/projections.test.ts (9 tests) 6ms\n ✓ |kernel-workers| test/purity.test.ts (1 test) 3ms\n ✓ |kernel-workers| test/fail-closed.test.ts (2 tests) 4ms\n ✓ |muse-mixer-workers| test/smoke.test.ts (1 test) 2ms\nstderr | test/acceptance.test.ts\nCIMD (Client ID Metadata Document) is disabled: add '\"compatibility_flags\": [\"global_fetch_strictly_public\"]' to your wrangler.jsonc to enable. See: https://developers.cloudflare.com/workers/configuration/compatibility-flags/#global-fetch-strictly-public\n\nstderr | test/smoke.test.ts\nCIMD (Client ID Metadata Document) is disabled: add '\"compatibility_flags\": [\"global_fetch_strictly_public\"]' to your wrangler.jsonc to enable. See: https://developers.cloudflare.com/workers/configuration/compatibility-flags/#global-fetch-strictly-public\n\n ✓ |x402-workers| test/quotes.test.ts (16 tests) 6ms\n ✓ |x402-workers| test/cdp-jwt.test.ts (4 tests) 6ms\n ✓ |x402-workers| test/ledger.test.ts (5 tests) 4ms\n ✓ |x402-workers| test/http.test.ts (9 tests) 6ms\n ✓ |x402-workers| test/facilitator.test.ts (10 tests) 11ms\n ✓ |x402-workers| test/settle.test.ts (23 tests) 12ms\n ✓ |x402-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |mcp| test/smoke.te"
     },
     {
       "id": "G-ENV",
@@ -160,7 +159,7 @@
     {
       "id": "G-ZOD",
       "status": "pass",
-      "duration_s": 0.13,
+      "duration_s": 0.12,
       "exit_code": 0,
       "output": ""
     },
@@ -174,7 +173,7 @@
     {
       "id": "G-LINT",
       "status": "pass",
-      "duration_s": 2.64,
+      "duration_s": 2.69,
       "exit_code": 0,
       "output": ""
     },
@@ -188,49 +187,49 @@
     {
       "id": "G-VERCEL-DEAD",
       "status": "pass",
-      "duration_s": 0.08,
+      "duration_s": 0.09,
       "exit_code": 0,
       "output": ""
     },
     {
       "id": "G-SKIP",
       "status": "pass",
-      "duration_s": 0.04,
+      "duration_s": 0.05,
       "exit_code": 0,
       "output": ""
     },
     {
       "id": "G-CFDRY",
       "status": "pass",
-      "duration_s": 1.96,
+      "duration_s": 1.97,
       "exit_code": 0,
-      "output": "Scope: 4 of 19 workspace projects\napps/mcp cf:dry$ wrangler deploy --dry-run --outdir .wrangler/dry\napps/worker cf:dry$ wrangler deploy --dry-run --outdir .wrangler/dry\napps/mcp cf:dry: \napps/mcp cf:dry:  ⛅️ wrangler 4.136.1 (update available 4.136.3)\napps/mcp cf:dry: ───────────────────────────────────────────────\napps/mcp cf:dry: Using \"CF_API_TOKEN\" environment variable. This is deprecated. Please use \"CLOUDFLARE_API_TOKEN\", instead.\napps/worker cf:dry: \napps/worker cf:dry:  ⛅️ wrangler 4.136.1 (update available 4.136.3)\napps/worker cf:dry: ───────────────────────────────────────────────\napps/worker cf:dry: Using \"CF_API_TOKEN\" environment variable. This is deprecated. Please use \"CLOUDFLARE_API_TOKEN\", instead.\napps/mcp cf:dry: Total Upload: 1664.23 KiB / gzip: 304.32 KiB\napps/mcp cf:dry: Your Worker has access to the following bindings:\napps/mcp cf:dry: Binding                                                                              Resource                      \napps/mcp cf:dry: env.OAUTH_KV (7daede739ca44bb98df9429bcecffb8b)                                      KV Namespace                  \napps/mcp cf:dry: env.GRANTS (f7f0e81c8e1f4eb190e366714ed6b0ad)                                        KV Namespace                  \napps/mcp cf:dry: env.Q_CLASSIFY (musebook-classify)                                                   Queue                         \napps/mcp cf:dry: env.Q_MEDIA (musebook-media)                                                         Queue                         \napps/mcp cf:dry: env.Q_MEDIA_FINALIZE (musebook-media-finalize)                                       Queue                         \napps/mcp cf:dry: env.Q_AGENT_CANCEL (musebook-agent-cancel)                                           Queue                         \napps/mcp cf:dry: env.HYPERDRIVE_CACHED (48c4c1c7cc734a8cb4031bd546160eae)                             Hyperdrive Config             \napps/mcp cf:dry: env.HYPERDRIVE_FRESH (5288b46cce7340438e840e1d0daeb23d)                              Hyperdrive Config             \napps/mcp cf:dry: env.PUBLIC_MEDIA (musebook-public)                                                   R2 Bucket                     \napps/mcp cf:dry: env.PAID_MEDIA (musebook-paid)                                                       R2 Bucket                     \napps/mcp cf:dry: env.TELEMETRY (musebook_telemetry)                                                   Analytics Engine Dataset      \napps/mcp cf:dry: env.MUSEBOOK_LOG_LEVEL (\"info\")                                                      Environment Variable          \napps/mcp cf:dry: env.MCP_ISSUER_URL (\"https://mcp.musebook.dev\")                                      Environment Variable          \napps/mcp cf:dry: env.MCP_AUTH_SERVER_URL (\"https://mcp.musebook.dev\")                                 Environment Variable          \napps/mcp cf:dry: env.MCP_OAUTH_ACCESS_TOKEN_TTL_S (\"3600\")                                            Environment Variable          \napps/mcp cf:dry: env.MCP_OAUTH_AUTH_CODE_TTL_S (\"600\")                                                Environment Variable          \napps/mcp cf:dry: env.PREVIEW_CHARS (\"400\")                                                            Environment Variable          \napps/mcp cf:dry: env.MB_RELEASE_SHA (\"\")                                                              Environment Variable          \napps/mcp cf:dry: env.MOLTBOOK_MODE (\"production\")                                                     Environment Variable          \napps/mcp cf:dry: env.MOLTBOOK_ALLOW_MOCK (\"false\")                                                    Environment Variable          \napps/mcp cf:dry: env.X402_MODE (\"shadow\")                                                             Environment Variable          \napps/mcp cf:dry: env.X402_NETWORK (\"eip155:84532\")                                                    Environment Variable          \napps/mcp cf:dry: env.X402_CHAIN_ID (\"84532\")                                                          Environment Variable          \napps/mcp cf:dry: env.X402_ASSET_ADDRESS (\"0x036CbD"
+      "output": "Scope: 4 of 19 workspace projects\napps/worker cf:dry$ wrangler deploy --dry-run --outdir .wrangler/dry\napps/mcp cf:dry$ wrangler deploy --dry-run --outdir .wrangler/dry\napps/worker cf:dry: \napps/worker cf:dry:  ⛅️ wrangler 4.136.1 (update available 4.136.3)\napps/worker cf:dry: ───────────────────────────────────────────────\napps/worker cf:dry: Using \"CF_API_TOKEN\" environment variable. This is deprecated. Please use \"CLOUDFLARE_API_TOKEN\", instead.\napps/mcp cf:dry: \napps/mcp cf:dry:  ⛅️ wrangler 4.136.1 (update available 4.136.3)\napps/mcp cf:dry: ───────────────────────────────────────────────\napps/mcp cf:dry: Using \"CF_API_TOKEN\" environment variable. This is deprecated. Please use \"CLOUDFLARE_API_TOKEN\", instead.\napps/mcp cf:dry: Total Upload: 1664.23 KiB / gzip: 304.32 KiB\napps/mcp cf:dry: Your Worker has access to the following bindings:\napps/mcp cf:dry: Binding                                                                              Resource                      \napps/mcp cf:dry: env.OAUTH_KV (7daede739ca44bb98df9429bcecffb8b)                                      KV Namespace                  \napps/mcp cf:dry: env.GRANTS (f7f0e81c8e1f4eb190e366714ed6b0ad)                                        KV Namespace                  \napps/mcp cf:dry: env.Q_CLASSIFY (musebook-classify)                                                   Queue                         \napps/mcp cf:dry: env.Q_MEDIA (musebook-media)                                                         Queue                         \napps/mcp cf:dry: env.Q_MEDIA_FINALIZE (musebook-media-finalize)                                       Queue                         \napps/mcp cf:dry: env.Q_AGENT_CANCEL (musebook-agent-cancel)                                           Queue                         \napps/mcp cf:dry: env.HYPERDRIVE_CACHED (48c4c1c7cc734a8cb4031bd546160eae)                             Hyperdrive Config             \napps/mcp cf:dry: env.HYPERDRIVE_FRESH (5288b46cce7340438e840e1d0daeb23d)                              Hyperdrive Config             \napps/mcp cf:dry: env.PUBLIC_MEDIA (musebook-public)                                                   R2 Bucket                     \napps/mcp cf:dry: env.PAID_MEDIA (musebook-paid)                                                       R2 Bucket                     \napps/mcp cf:dry: env.TELEMETRY (musebook_telemetry)                                                   Analytics Engine Dataset      \napps/mcp cf:dry: env.MUSEBOOK_LOG_LEVEL (\"info\")                                                      Environment Variable          \napps/mcp cf:dry: env.MCP_ISSUER_URL (\"https://mcp.musebook.dev\")                                      Environment Variable          \napps/mcp cf:dry: env.MCP_AUTH_SERVER_URL (\"https://mcp.musebook.dev\")                                 Environment Variable          \napps/mcp cf:dry: env.MCP_OAUTH_ACCESS_TOKEN_TTL_S (\"3600\")                                            Environment Variable          \napps/mcp cf:dry: env.MCP_OAUTH_AUTH_CODE_TTL_S (\"600\")                                                Environment Variable          \napps/mcp cf:dry: env.PREVIEW_CHARS (\"400\")                                                            Environment Variable          \napps/mcp cf:dry: env.MB_RELEASE_SHA (\"\")                                                              Environment Variable          \napps/mcp cf:dry: env.MOLTBOOK_MODE (\"production\")                                                     Environment Variable          \napps/mcp cf:dry: env.MOLTBOOK_ALLOW_MOCK (\"false\")                                                    Environment Variable          \napps/mcp cf:dry: env.X402_MODE (\"shadow\")                                                             Environment Variable          \napps/mcp cf:dry: env.X402_NETWORK (\"eip155:84532\")                                                    Environment Variable          \napps/mcp cf:dry: env.X402_CHAIN_ID (\"84532\")                                                          Environment Variable          \napps/mcp cf:dry: env.X402_ASSET_ADDRESS (\"0x036CbD"
     },
     {
       "id": "G-SEED",
       "status": "pass",
-      "duration_s": 54.08,
+      "duration_s": 54.04,
       "exit_code": 0,
       "output": ""
     },
     {
       "id": "G-RLS",
       "status": "pass",
-      "duration_s": 1.35,
+      "duration_s": 1.34,
       "exit_code": 0,
-      "output": "/home/ubuntu/repos/musebook/supabase/tests/001_rls_matrix.test.sql .. ok\nAll tests successful.\nFiles=1, Tests=53,  0 wallclock secs ( 0.01 usr +  0.01 sys =  0.02 CPU)\nResult: PASS"
+      "output": "/home/ubuntu/repos/musebook/supabase/tests/001_rls_matrix.test.sql .. ok\nAll tests successful.\nFiles=1, Tests=53,  1 wallclock secs ( 0.01 usr +  0.00 sys =  0.01 CPU)\nResult: PASS"
     },
     {
       "id": "G-ROLE",
-      "status": "fail",
-      "duration_s": 0.2,
-      "exit_code": 1,
-      "output": "$ tsx scripts/db-assert-rls.ts\nFAIL assert-rls (six blocks): Non-kernel plane was granted on kernel-only table(s): users, users, wallets, wallets, sessions, sessions\n[ELIFECYCLE] Command failed with exit code 1.\n"
+      "status": "pass",
+      "duration_s": 0.27,
+      "exit_code": 0,
+      "output": ""
     },
     {
       "id": "G-DRIFT",
       "status": "pass",
-      "duration_s": 4.25,
+      "duration_s": 4.05,
       "exit_code": 0,
       "output": ""
     },
@@ -244,7 +243,7 @@
     {
       "id": "G-R2-SEAL",
       "status": "pass",
-      "duration_s": 6.36,
+      "duration_s": 10.37,
       "exit_code": 0,
       "output": "",
       "prereq": "H3"
@@ -252,14 +251,14 @@
     {
       "id": "G-COV",
       "status": "pass",
-      "duration_s": 79.1,
+      "duration_s": 79.09,
       "exit_code": 0,
-      "output": "\n RUN  v4.1.11 /home/ubuntu/repos/musebook\n      Coverage enabled with istanbul\n\npsql: error: connection to server on socket \"/run/postgresql/.s.PGSQL.5432\" failed: No such file or directory\n\tIs the server running locally and accepting connections on that socket?\n ✓ |classify| test/smoke.test.ts (1 test) 2ms\n ✓ |artifacts| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors| test/sign.test.ts (4 tests) 55ms\n ✓ |connectors| test/egress.test.ts (9 tests) 22ms\n ✓ |connectors| test/mcp-http.test.ts (13 tests) 45ms\n ✓ |connectors| test/safety.test.ts (9 tests) 82ms\n ✓ |connectors| test/crypto-audit.test.ts (10 tests) 10ms\n ✓ |connectors| test/agent-scope.test.ts (14 tests) 7ms\n ✓ |connectors| test/registry.test.ts (6 tests) 10ms\n ✓ |connectors| test/adapters.test.ts (6 tests) 29ms\n ✓ |connectors| test/manifest.test.ts (8 tests) 9ms\n ✓ |connectors| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors-workers| test/agent-scope.test.ts (14 tests) 9ms\n ✓ |connectors-workers| test/sign.test.ts (4 tests) 9ms\n ✓ |connectors-workers| test/safety.test.ts (9 tests) 30ms\n ✓ |connectors-workers| test/crypto-audit.test.ts (10 tests) 6ms\n ✓ |connectors-workers| test/egress.test.ts (9 tests) 5ms\n ✓ |connectors-workers| test/mcp-http.test.ts (13 tests) 11ms\n ✓ |connectors-workers| test/adapters.test.ts (6 tests) 7ms\n ✓ |content| test/hash-stability.test.ts (2 tests) 77ms\n ✓ |connectors-workers| test/registry.test.ts (6 tests) 5ms\n ✓ |content| test/hash-sensitivity.test.ts (1 test) 27ms\n ✓ |content| test/hash-roundtrip.test.ts (5 tests) 86ms\n ✓ |content| test/canonicalize.test.ts (11 tests) 4ms\n ✓ |content| test/coverage.test.ts (14 tests) 6ms\n ✓ |content| test/representations.test.ts (17 tests) 12ms\n ✓ |content| test/etag.test.ts (8 tests) 3ms\n ✓ |content| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors-workers| test/manifest.test.ts (8 tests) 10ms\n ✓ |connectors-workers| test/smoke.test.ts (1 test) 6ms\n ✓ |content-workers| test/hash-sensitivity.test.ts (1 test) 32ms\n ✓ |content-workers| test/hash-roundtrip.test.ts (5 tests) 74ms\n ✓ |content-workers| test/hash-stability.test.ts (2 tests) 81ms\n ✓ |content-workers| test/coverage.test.ts (14 tests) 6ms\n ✓ |content-workers| test/canonicalize.test.ts (11 tests) 3ms\n ✓ |distributor| test/postiz.test.ts (4 tests) 20ms\n ✓ |content-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |distributor| test/count.test.ts (6 tests) 11ms\n ✓ |distributor| test/split.test.ts (6 tests) 9ms\n ✓ |distributor| test/pipeline.test.ts (15 tests) 20ms\n ✓ |distributor| test/validate.test.ts (30 tests) 37ms\n ✓ |distributor| test/plan.test.ts (2 tests) 3ms\n ✓ |distributor| test/smoke.test.ts (1 test) 2ms\n ✓ |content-workers| test/etag.test.ts (8 tests) 3ms\n ✓ |content-workers| test/representations.test.ts (17 tests) 9ms\n ✓ |connectors| test/contract/all.test.ts (31 tests) 12074ms\n     ✓ mcp_http: a hang is cut at the adapter timeout  4021ms\n     ✓ a2a_card: a hang is cut at the adapter timeout  4007ms\n     ✓ http_openapi: a hang is cut at the adapter timeout  4011ms\n ✓ |distributor-workers| test/postiz.test.ts (4 tests) 6ms\n ✓ |distributor-workers| test/count.test.ts (6 tests) 8ms\n ✓ |distributor-workers| test/split.test.ts (6 tests) 10ms\n ✓ |distributor-workers| test/plan.test.ts (2 tests) 3ms\n ✓ |distributor-workers| test/validate.test.ts (30 tests) 33ms\n ✓ |edge| test/postiz-webhook.test.ts (3 tests) 5ms\nSourcemap for \"/home/ubuntu/repos/musebook/node_modules/.pnpm/@workflow+serde@4.1.0/node_modules/@workflow/serde/dist/index.js\" points to missing source files\n ✓ |distributor-workers| test/pipeline.test.ts (15 tests) 17ms\n ✓ |edge| test/rdns.test.ts (7 tests) 6ms\n ✓ |connectors-workers| test/contract/all.test.ts (31 tests) 12022ms\n     ✓ mcp_http: a hang is cut at the adapter timeout  4002ms\n     ✓ a2a_card: a hang is cut at the adapter timeout  4002ms\n     ✓ http_openapi: a hang is cut at the adapter timeout  4001ms\n ✓ |distributor-workers| test/smoke.test.ts (1 test) 2ms\nSourcemap for \"/home/ubuntu/repos/musebook/node_modules/.pnpm/@workflow+serde@4.1.0/node_modules/@workflow/serde/dist/index.js\" points to missing source files\n ✓ |edge|"
+      "output": "\n RUN  v4.1.11 /home/ubuntu/repos/musebook\n      Coverage enabled with istanbul\n\npsql: error: connection to server on socket \"/run/postgresql/.s.PGSQL.5432\" failed: No such file or directory\n\tIs the server running locally and accepting connections on that socket?\n ✓ |artifacts| test/smoke.test.ts (1 test) 2ms\n ✓ |classify| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors| test/sign.test.ts (4 tests) 44ms\n ✓ |connectors| test/egress.test.ts (9 tests) 30ms\n ✓ |connectors| test/mcp-http.test.ts (13 tests) 40ms\n ✓ |connectors| test/safety.test.ts (9 tests) 54ms\n ✓ |connectors| test/crypto-audit.test.ts (10 tests) 14ms\n ✓ |connectors| test/agent-scope.test.ts (14 tests) 7ms\n ✓ |connectors| test/registry.test.ts (6 tests) 12ms\n ✓ |connectors| test/adapters.test.ts (6 tests) 36ms\n ✓ |connectors| test/manifest.test.ts (8 tests) 7ms\n ✓ |connectors| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors-workers| test/agent-scope.test.ts (14 tests) 7ms\n ✓ |connectors-workers| test/sign.test.ts (4 tests) 9ms\n ✓ |connectors-workers| test/safety.test.ts (9 tests) 29ms\n ✓ |connectors-workers| test/crypto-audit.test.ts (10 tests) 6ms\n ✓ |connectors-workers| test/egress.test.ts (9 tests) 4ms\n ✓ |connectors-workers| test/mcp-http.test.ts (13 tests) 15ms\n ✓ |connectors-workers| test/adapters.test.ts (6 tests) 7ms\n ✓ |connectors-workers| test/manifest.test.ts (8 tests) 5ms\n ✓ |connectors-workers| test/registry.test.ts (6 tests) 6ms\n ✓ |content| test/hash-stability.test.ts (2 tests) 78ms\n ✓ |content| test/hash-sensitivity.test.ts (1 test) 27ms\n ✓ |content| test/hash-roundtrip.test.ts (5 tests) 93ms\n ✓ |content| test/canonicalize.test.ts (11 tests) 4ms\n ✓ |content| test/coverage.test.ts (14 tests) 6ms\n ✓ |content| test/etag.test.ts (8 tests) 3ms\n ✓ |content| test/representations.test.ts (17 tests) 11ms\n ✓ |content| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |content-workers| test/hash-sensitivity.test.ts (1 test) 33ms\n ✓ |content-workers| test/hash-roundtrip.test.ts (5 tests) 71ms\n ✓ |content-workers| test/hash-stability.test.ts (2 tests) 83ms\n ✓ |content-workers| test/canonicalize.test.ts (11 tests) 4ms\n ✓ |content-workers| test/coverage.test.ts (14 tests) 7ms\n ✓ |content-workers| test/smoke.test.ts (1 test) 2ms\n ✓ |distributor| test/postiz.test.ts (4 tests) 20ms\n ✓ |distributor| test/split.test.ts (6 tests) 9ms\n ✓ |distributor| test/count.test.ts (6 tests) 11ms\n ✓ |distributor| test/plan.test.ts (2 tests) 3ms\n ✓ |distributor| test/pipeline.test.ts (15 tests) 20ms\n ✓ |distributor| test/validate.test.ts (30 tests) 35ms\n ✓ |content-workers| test/etag.test.ts (8 tests) 3ms\n ✓ |content-workers| test/representations.test.ts (17 tests) 9ms\n ✓ |distributor| test/smoke.test.ts (1 test) 2ms\n ✓ |connectors| test/contract/all.test.ts (31 tests) 12073ms\n     ✓ mcp_http: a hang is cut at the adapter timeout  4021ms\n     ✓ a2a_card: a hang is cut at the adapter timeout  4007ms\n     ✓ http_openapi: a hang is cut at the adapter timeout  4010ms\n ✓ |distributor-workers| test/postiz.test.ts (4 tests) 6ms\n ✓ |distributor-workers| test/count.test.ts (6 tests) 8ms\n ✓ |distributor-workers| test/split.test.ts (6 tests) 10ms\n ✓ |distributor-workers| test/plan.test.ts (2 tests) 3ms\n ✓ |distributor-workers| test/validate.test.ts (30 tests) 30ms\n ✓ |edge| test/rdns.test.ts (7 tests) 6ms\nSourcemap for \"/home/ubuntu/repos/musebook/node_modules/.pnpm/@workflow+serde@4.1.0/node_modules/@workflow/serde/dist/index.js\" points to missing source files\n ✓ |distributor-workers| test/pipeline.test.ts (15 tests) 17ms\n ✓ |edge| test/postiz-webhook.test.ts (3 tests) 4ms\n ✓ |connectors-workers| test/contract/all.test.ts (31 tests) 12025ms\n     ✓ mcp_http: a hang is cut at the adapter timeout  4003ms\n     ✓ a2a_card: a hang is cut at the adapter timeout  4002ms\n     ✓ http_openapi: a hang is cut at the adapter timeout  4002ms\n ✓ |distributor-workers| test/smoke.test.ts (1 test) 2ms\nSourcemap for \"/home/ubuntu/repos/musebook/node_modules/.pnpm/@workflow+serde@4.1.0/node_modules/@workflow/serde/dist/index.js\" points to missing source files\n ✓ |edge| "
     },
     {
       "id": "G-GOLDEN",
       "status": "pass",
-      "duration_s": 0.1,
+      "duration_s": 0.11,
       "exit_code": 0,
       "output": ""
     },
@@ -273,7 +272,7 @@
     {
       "id": "G-PROXY",
       "status": "pass",
-      "duration_s": 0.03,
+      "duration_s": 0.02,
       "exit_code": 0,
       "output": ""
     },
@@ -287,7 +286,7 @@
     {
       "id": "G-AXE",
       "status": "pass",
-      "duration_s": 27.88,
+      "duration_s": 28.23,
       "exit_code": 0,
       "output": ""
     },
@@ -310,7 +309,7 @@
       "status": "fail",
       "duration_s": 0.01,
       "exit_code": 1,
-      "output": "supabase/migrations/20260922092104_alerting.sql: one statement touches both telemetry planes\nsupabase/migrations/20260922092003_telemetry_rollups.sql: one statement touches both telemetry planes\nsupabase/migrations/20260922091300_worker_role_and_rls_audit.sql: one statement touches both telemetry planes\npossible count(*) in an Analytics Engine query (use sum(_sample_interval)): apps/worker/src/cron/analytics.ts:64:          `select count(*)::text as n from public.platform_analytics\npossible count(*) in an Analytics Engine query (use sum(_sample_interval)): apps/worker/src/cron/ae-rollup.ts:22: *  SUM(_sample_interval), never count(*): Analytics Engine samples its own"
+      "output": "supabase/migrations/20260922092104_alerting.sql: one statement touches both telemetry planes\nsupabase/migrations/20260922092003_telemetry_rollups.sql: one statement touches both telemetry planes\nsupabase/migrations/20260922091300_worker_role_and_rls_audit.sql: one statement touches both telemetry planes\npossible count(*) in an Analytics Engine query (use sum(_sample_interval)): apps/worker/src/cron/ae-rollup.ts:22: *  SUM(_sample_interval), never count(*): Analytics Engine samples its own\npossible count(*) in an Analytics Engine query (use sum(_sample_interval)): apps/worker/src/cron/analytics.ts:64:          `select count(*)::text as n from public.platform_analytics"
     },
     {
       "id": "G-ISO",
