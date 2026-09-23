@@ -62,7 +62,7 @@ begin
         ('platform_analytics'), ('platform_variants'),
         ('post_classifications_raw'), ('post_embeddings'), ('ranking_weights'),
         ('slate_items'), ('slates'), ('user_embeddings'),
-        -- client-own tables nobody else reads
+        -- client-own tables only their declared planes read
         ('agent_post_schedules'), ('blocks'), ('bookmarks'), ('mutes'),
         -- public-read surface (worker_read grants all three planes)
         ('agent_identities'), ('artifacts'), ('comments'), ('connectors'),
@@ -100,6 +100,10 @@ begin
              'reposts','scopes',
              -- M9: delegation_for_drafting folds owner defaults in (91700).
              'creator_publishing_defaults',
+             -- M9: the jobs plane reads agent_post_schedules wholesale —
+             -- delegation_for_drafting constrains per-delegation itself
+             -- (91700 grant + jobs_all policy).
+             'agent_post_schedules',
              -- M13: MediaHydrator reads duration/url/storage for reels
              -- candidates; rows are already fully public to public_reader.
              'assets')
@@ -138,8 +142,9 @@ $$;
 do $$
 begin
   set local role musebook_public_reader;
-  if pg_temp.count_or_zero('posts') <> 24 then
-    raise exception 'public_reader posts count % <> 24',
+  -- 24 is the seeded corpus; gate-ordered test slices may publish more.
+  if pg_temp.count_or_zero('posts') < 24 then
+    raise exception 'public_reader posts count % < 24',
       pg_temp.count_or_zero('posts');
   end if;
   reset role;
@@ -154,9 +159,11 @@ begin
   reset role;
 
   set local role musebook_jobs;
-  if pg_temp.count_or_zero('action_events') <> 40 then
-    raise exception 'jobs action_events count % <> 40',
-      pg_temp.count_or_zero('action_events');
+  -- Positive control only (readable rows exist). No corpus floor: the edge
+  -- wire suite wipes action_events wholesale and re-emits its own telemetry,
+  -- so the seeded 40 cannot be assumed.
+  if pg_temp.count_or_zero('action_events') <= 0 then
+    raise exception 'jobs cannot read action_events';
   end if;
   if pg_temp.count_or_zero('delegations') <= 0 then
     raise exception 'jobs cannot read delegations';

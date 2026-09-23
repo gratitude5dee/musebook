@@ -1578,6 +1578,56 @@ export const GATES = {
       run: checks.m13PositionDiscipline,
     },
   ],
+  M14: [
+    {
+      id: "M14.1",
+      kind: "fn",
+      desc: "battery returns for every published seed post — non-null taxonomy_leaf, medium, audience_level, agent_value (live Jev; BLOCKs without TYPESAFE_API_KEY)",
+      run: checks.m14BatteryLive,
+    },
+    {
+      id: "M14.2",
+      kind: "fn",
+      desc: "a post publishes when Jev is down — job deferred, never skipped (ops_events provider_5xx + outbox retry)",
+      run: checks.m14PublishWhenJevDown,
+    },
+    {
+      id: "M14.3",
+      kind: "fn",
+      desc: "client constructed lazily — no module-scope new TypeSafeClient; only makeClient in client.ts",
+      run: checks.m14LazyClient,
+    },
+    {
+      id: "M14.4",
+      kind: "fn",
+      desc: "Jev classifies only, never generates — no 'typesafe' in media/distributor/web, @typesafe-ai/sdk only in packages/classify",
+      run: checks.m14JevOnlyClassifies,
+    },
+    {
+      id: "M14.5",
+      kind: "fn",
+      desc: "no q_ prefix survives — columns are audience_level and agent_value (verbatim grep)",
+      run: checks.m14NoQPrefix,
+    },
+    {
+      id: "M14.6",
+      kind: "fn",
+      desc: "version settings set, not defaulted — classify_versions row matches package constants; every typesafe_jev row carries both stamps",
+      run: checks.m14VersionsSet,
+    },
+    {
+      id: "M14.7",
+      kind: "fn",
+      desc: "token budget bites — over-budget defers w/ ops_events + degraded counter; A14 classify.degraded rule fires",
+      run: checks.m14TokenBudget,
+    },
+    {
+      id: "M14.8",
+      kind: "fn",
+      desc: "G-DRIFT + G-ROLE cover the new columns — replay from zero, RLS forced, Worker-plane grants, §8.7 columns exist",
+      run: checks.m14DriftRole,
+    },
+  ],
 };
 
 export const MILESTONE_TITLES = {
@@ -1595,10 +1645,10 @@ export const MILESTONE_TITLES = {
   M11: "Telemetry: AE write path + Postgres rollups",
   M12: "Launch hardening",
   M13: "muse-mixer isolation + replay",
-  M14: "Console + agent surface polish",
+  M14: "Classification with Jev",
   M15: "Learned ranker v1.1",
   M16: "Artifacts surface + sandbox",
-  M17: "Media pipeline deep",
-  M18: "Distribution breadth",
-  M19: "Ops hardening",
+  M17: "LLM reformat pass + remaining channels",
+  M18: "WebMCP + agent citations",
+  M19: "Media generation",
 };

@@ -181,3 +181,27 @@ Deployment order (proven by `.github/workflows/deploy.yml`, §3.6.2): Vercel
 `musebook-worker`, and `musebook-edge` **last** — after `pnpm gate --check
 r2-seal` re-verifies the sealed buckets. A failed earlier job never reaches
 edge, so a half-deploy never exposes an origin the edge isn't covering.
+
+## M14 classification — deploy steps
+
+Two manual steps before `musebook-classify` consumes anything real:
+
+1. `wrangler secret put TYPESAFE_API_KEY --name musebook-worker` — the SDK
+   throws in its constructor without it; the consumer catches that throw as
+   `auth_failed` and defers the batch 300s, so an unset key degrades rather
+   than crashes.
+2. Write the live question/taxonomy versions the backfill cron compares
+   against (§8.8's plan-named fallback for the impossible `current_setting`
+   GUC — Supabase grants no superuser). The values are sha256s of the
+   `POST_BATTERY`/`MUSEBOOK_TAXONOMY` constants in `packages/classify`, so
+   they rotate automatically with any battery edit — re-derive them with
+   `pnpm --filter @musebook/classify exec tsx -e "import {QUESTION_SET_VERSION,TAXONOMY_VERSION} from './src/index.ts'; console.log(QUESTION_SET_VERSION, TAXONOMY_VERSION)"`.
+
+```sql
+insert into public.classify_versions (singleton, question_set_version, taxonomy_version)
+values (true, 'd94eefc98e9d493e', '3301fee21e75b3db')
+on conflict (singleton) do update
+  set question_set_version = excluded.question_set_version,
+      taxonomy_version     = excluded.taxonomy_version,
+      updated_at           = now();
+```

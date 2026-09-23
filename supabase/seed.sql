@@ -800,7 +800,7 @@ insert into public.post_classifications
   (content_hash, provider, model, primary_topic, topics, language_code,
    quality, toxicity, spam, commercial_intent, is_nsfw, is_ai_generated,
    classified_at, latency_ms)
-select v.chash, 'seed', 'seed-static-v0', 'music', '{music,seed}'::text[], 'en',
+select v.chash, 'heuristic', 'seed-static-v0', 'music', '{music,seed}'::text[], 'en',
        0.70, 0.01, 0.0, 0.10, false, false, c.epoch, 0
 from (values
   (app.sha256_hex($$# Seed Note (Free)

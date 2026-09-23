@@ -3,6 +3,7 @@
 // is a no-op, then finishes it. Dead-letter handling is per queue below.
 import { claimJob, finishJob, pgFresh, retryDelaySeconds, type DbClient } from "../db.js";
 import { consumeEmbedBatch } from "./embed.js";
+import { classifyQueue } from "./classify.js";
 import { runSlateJob, type SlateRequest } from "../slate-builder.js";
 import { consumeDlq } from "./dlq.js";
 import { handleR2ObjectCreated } from "./r2-events.js";
@@ -85,32 +86,10 @@ async function consume(
   }
 }
 
-/**
- * M6's consume-now effects (§17.11.5): when the outbox payload carries a
- * `record` — a fully-shaped row for the effect table — the consumer writes it
- * through the app.* helper, which dedupes on content_hash/idempotency_key.
- * The real producers land at M7-M9; until then a payload without `record`
- * simply claims and finishes, keeping the dedupe contract honest.
- */
-async function recordRows(
-  db: DbClient,
-  fn: string,
-  payload: Record<string, unknown>,
-): Promise<void> {
-  if (payload.record === undefined) return;
-  await db.query(`select ${fn}($1::jsonb)`, [[payload.record] as never[]]);
-}
-
 /** batch.queue -> handler. `void batch` discipline: every message is acked or
  *  retried explicitly; nothing falls off the end of a batch. */
 export async function dispatch(batch: MessageBatch, env: Env): Promise<void> {
   const handlers: Record<string, (m: JobMessage) => Promise<void>> = {
-    "musebook-classify": (m) =>
-      consume(env, m, "classify", async (db, payload) => {
-        // M7: classifier call + posts.title/tags write. Consume-now so the
-        // outbox keeps its dedupe contract in the meantime.
-        await recordRows(db, "app.record_classifications", payload);
-      }),
     "musebook-distribute": (m) => {
       // A message with no job_id is the Postiz webhook's raw reconcile hint
       // (§12.2.6): no outbox row exists for it, so it cannot be claimed — and
@@ -173,6 +152,13 @@ export async function dispatch(batch: MessageBatch, env: Env): Promise<void> {
   // so it owns the whole MessageBatch and does its own ack/retry.
   if (batch.queue === "musebook-embed") {
     await consumeEmbedBatch(batch, env);
+    return;
+  }
+
+  // §8.9: classify is batch-shaped too — the circuit breaker and the
+  // per-message disposition (ack vs retry-vs-heuristic) own the whole batch.
+  if (batch.queue === "musebook-classify") {
+    await classifyQueue(batch, env);
     return;
   }
 

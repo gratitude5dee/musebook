@@ -427,18 +427,21 @@ class PgPosts implements PostsPort {
     >
   > {
     if (contentHashes.length === 0) return new Map();
-    // taxonomy_leaf / taxonomy_path / p_unsafe / q_agent_value / topic_probabilities
-    // arrive with M14's classification battery columns (§8.7); until then they
-    // project as null/empty.
     const { rows } = await this.cached.query<{
       content_hash: string;
       topics: string[];
       primary_topic: string | null;
+      taxonomy_leaf: string | null;
+      taxonomy_path: string[] | null;
       quality: number | null;
+      agent_value: number | null;
+      p_unsafe: number | null;
       toxicity: number | null;
       is_nsfw: boolean;
+      topic_probabilities: Record<string, number> | null;
     }>(
-      `select content_hash, topics, primary_topic, quality, toxicity, is_nsfw
+      `select content_hash, topics, primary_topic, taxonomy_leaf, taxonomy_path,
+              quality, agent_value, p_unsafe, toxicity, is_nsfw, topic_probabilities
          from public.post_classifications where content_hash = any($1::text[])`,
       [[...contentHashes]],
     );
@@ -448,14 +451,14 @@ class PgPosts implements PostsPort {
         {
           topics: r.topics,
           primaryTopic: r.primary_topic,
-          taxonomyLeaf: null,
-          taxonomyPath: [],
+          taxonomyLeaf: r.taxonomy_leaf,
+          taxonomyPath: r.taxonomy_path ?? [],
           quality: r.quality,
-          qAgentValue: null,
-          pUnsafe: null,
+          qAgentValue: r.agent_value,
+          pUnsafe: r.p_unsafe,
           toxicity: r.toxicity,
           isNsfw: r.is_nsfw,
-          topicProbabilities: {},
+          topicProbabilities: r.topic_probabilities ?? {},
         },
       ]),
     );
