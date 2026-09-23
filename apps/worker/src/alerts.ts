@@ -87,7 +87,7 @@ async function foldIntoOpsCounters(env: Env, rows: Array<Record<string, string>>
           outcome: r.outcome ?? "",
           gate: r.gate ?? "",
           mode: r.mode ?? "",
-          publish_mode: r.publish_mode ?? "",
+          paywall_mode: r.paywall_mode ?? "",
         };
         await db.query(
           `select public.bump_ops_counter('musebook.paywall.outcome', $1::jsonb, $2)`,
@@ -136,7 +136,7 @@ async function dlqMetrics(env: Env, name: string): Promise<QueueMetrics> {
     { headers: { authorization: `Bearer ${env.CF_API_TOKEN}` } },
   );
   if (!r.ok) throw new Error(`queue_metrics_${r.status}`);
-  const j = (await r.json()) as { result?: { metrics?: QueueMetrics } };
+  const j: { result?: { metrics?: QueueMetrics } } = await r.json();
   return j.result?.metrics ?? { backlogCount: 0 };
 }
 
@@ -200,7 +200,7 @@ async function costBurnRateCheck(env: Env): Promise<boolean> {
     }),
   });
   if (!res.ok) return false;
-  const j = (await res.json()) as {
+  const j: {
     data?: {
       viewer?: {
         accounts?: Array<{
@@ -211,7 +211,7 @@ async function costBurnRateCheck(env: Env): Promise<boolean> {
         }>;
       };
     };
-  };
+  } = await res.json();
   const series = j.data?.viewer?.accounts?.[0]?.workersInvocationsAdaptive ?? [];
   const hourly = series.map((p) => Number(p.sum?.requests ?? 0));
   if (hourly.length < 49) return false; // not enough trailing data to trust a median
@@ -229,7 +229,8 @@ async function ae(env: Env, query: string): Promise<Array<Record<string, string>
     { method: "POST", headers: { authorization: `Bearer ${env.CF_API_TOKEN}` }, body: query },
   );
   if (!r.ok) throw new Error(`ae_sql_${r.status}`);
-  return ((await r.json()) as { data: Array<Record<string, string>> }).data;
+  const payload: { data: Array<Record<string, string>> } = await r.json();
+  return payload.data;
 }
 
 export async function runAlertPass(env: Env, ctx: ExecutionContext): Promise<void> {
@@ -241,11 +242,11 @@ export async function runAlertPass(env: Env, ctx: ExecutionContext): Promise<voi
       env,
       `
       SELECT blob3 AS outcome, blob2 AS gate, blob8 AS mode, blob9 AS breaker,
-             index1 AS publish_mode,
+             index1 AS paywall_mode,
              SUM(_sample_interval) AS n
         FROM musebook_paywall
        WHERE timestamp > NOW() - INTERVAL '5' MINUTE
-       GROUP BY outcome, gate, mode, breaker, publish_mode`,
+       GROUP BY outcome, gate, mode, breaker, paywall_mode`,
     );
 
     const sum = (f: (r: Record<string, string>) => boolean): number =>
