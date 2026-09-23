@@ -27,5 +27,9 @@ declare global {
     ALERT_WEBHOOK_URL?: string;
     SYNTHETIC_GATED_SLUG?: string;
     CF_ACCOUNT_ID?: string;
+
+    /** §9.23/§11 — bearer for the Vercel AI Gateway (OpenAI-compatible
+     *  /v1/embeddings). Worker secret; M17 owns the generation calls. */
+    AI_GATEWAY_API_KEY?: string;
   }
 }

@@ -5,7 +5,7 @@
 // Adapted: distribute's effect table keys on idempotency_key (it has no
 // content_hash column); effect rows come from the job payload's `record`.
 import { env, createExecutionContext, waitOnExecutionContext } from "cloudflare:test";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import worker from "../src/index.js";
 import { withDb, resetSeed, seedOutboxJob } from "./helpers/db.js";
 
@@ -28,6 +28,24 @@ const deliver = async (queue: string, msgs: ReturnType<typeof message>[]) => {
 };
 
 beforeEach(resetSeed);
+
+// §9.23: the embed consumer is the real one now — it calls the AI Gateway's
+// /v1/embeddings over fetch. Stub the wire shape (one data entry per input,
+// 1536 dims) so the suite exercises the actual write path end to end.
+beforeEach(() => {
+  env.AI_GATEWAY_API_KEY = "test";
+  vi.stubGlobal("fetch", async (_input: unknown, init?: { body?: string }) => {
+    const texts =
+      (JSON.parse(init?.body ?? "{}") as { input?: string[] }).input ?? [];
+    return new Response(
+      JSON.stringify({
+        data: texts.map(() => ({ embedding: new Array(1536).fill(0.001) })),
+      }),
+      { status: 200 },
+    );
+  });
+});
+afterAll(() => vi.unstubAllGlobals());
 
 describe("every consumer is idempotent under at-least-once delivery", () => {
   // One row per queue whose M6 consumer writes a real effect row (§17.11.5).

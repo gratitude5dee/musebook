@@ -40,6 +40,15 @@ export interface ClaimedJob {
   attempts: number;
 }
 
+const BACKOFF_BASE_SECONDS = 5;
+const BACKOFF_CEILING_SECONDS = 86_400; // the platform retry ceiling
+
+/** Queues has no built-in backoff: retry() delay is ours. Exponential on the
+ *  delivery's attempt count, capped at the platform's 24 h retry bound. */
+export function retryDelaySeconds(attempts: number): number {
+  return Math.min(BACKOFF_CEILING_SECONDS, BACKOFF_BASE_SECONDS * 2 ** Math.max(0, attempts - 1));
+}
+
 /** The plane roles are NOINHERIT: musebook_worker holds memberships but no
  *  privileges until a statement runs under `set local role`. app.enter() does
  *  that — but only for the CURRENT transaction, and a bare statement's implicit

@@ -17,6 +17,7 @@ import { distributeReconcile } from "./cron/distribute-reconcile.js";
 import { collectPlatformAnalytics } from "./cron/analytics.js";
 import { refreshChannelConstraints } from "./cron/refresh-channel-constraints.js";
 import { runAeRollup } from "./cron/ae-rollup.js";
+import { backfillPostEmbeddings, recomputeUserEmbeddings } from "./cron/embed.js";
 import { runAlertPass, writeHeartbeat } from "./alerts.js";
 import { dispatch } from "./consumers/index.js";
 import { SlateBuilder } from "./slate-builder.js";
@@ -56,6 +57,12 @@ export default {
         await runAlertPass(env, ctx);
         return noop();
       case "0 * * * *": {
+        // §9.23: embeddings land before the slate rebuild in the same tick so
+        //  a viewer's fresh embedding feeds the slate built seconds later.
+        await backfillPostEmbeddings(env);
+        beat("embed-backfill");
+        await recomputeUserEmbeddings(env);
+        beat("user-embed");
         await rebuildAnonSlates(env, ctx); // §9.19 + §13 rollups hang off this one
         beat("slates-build");
         // §13.7.4: the AE rollup needs the 15-minute CPU budget that only an
