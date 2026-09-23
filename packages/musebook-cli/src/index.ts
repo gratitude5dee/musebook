@@ -166,8 +166,7 @@ export async function main(): Promise<void> {
 // Run only when invoked directly (`node dist/index.js`); bin/musebook.mjs
 // calls main() itself — argv[1] there is the wrapper, never this module.
 const invoked =
-  process.argv[1] !== undefined &&
-  import.meta.url === pathToFileURL(process.argv[1]).href;
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (invoked) {
   main().catch((e: unknown) => {
     console.error(e instanceof Error ? e.message : String(e));
