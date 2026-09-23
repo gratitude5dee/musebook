@@ -171,3 +171,7 @@ D1–D108 still holds as written, except as individually marked inside its row
 Hyperdrive ids landed). The M8/M9 and M10/M11 tables carried duplicated rows
 and two spliced reason cells (D107, D108) from mid-session writes — repaired
 in place, contents unchanged. New entries: D109–D122.
+
+### D123 — ssl ordering timestamp inversion is an idempotent re-apply (M12)
+
+`M0.3` asserts `ssl.mode` `modified_on` predates the apex record `created_on`. The check is `supersededBy: M12`, but a standalone `pnpm gate M0` (wrong frame) surfaces the inversion: `modified_on` `2026-09-22T06:20Z` > apex `created_on` `2026-09-22T03:46Z`. Cause: `configure-cf.ts` drift enforcement re-issued the same `ssl.mode=strict` PATCH during M11 cost-controls work — Cloudflare bumps `modified_on` on any PATCH, same value or not. The value was `strict` continuously; the ordering fact held in the M0 window. No remediation: the check only runs as-of M0..M11.
