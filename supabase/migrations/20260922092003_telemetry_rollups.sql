@@ -722,6 +722,45 @@ $$;
 -- agent leaves 90 days, human leaves 400 days (§13.6.2). A leaf is dropped ONLY
 -- when that day's action_events_daily rows exist — a missing rollup refuses
 -- the drop and alerts instead (gate check 6 / §13.11 check 14).
+-- The per-leaf decision: inside the window keep; outside it, drop only when the
+-- day's rollup row exists — a missing rollup refuses and alerts (gate check 6 /
+-- §13.11 check 14). Returns 1 on a drop, 0 otherwise.
+create or replace function app.telemetry_retention_leaf(
+  p_leaf text, p_nsp text, p_day date, p_plane text, p_window interval
+)
+returns bigint
+language plpgsql
+security definer
+set search_path = public, app, pg_temp
+as $$
+declare
+  v_has_rollup boolean;
+begin
+  if p_day >= current_date - p_window then
+    return 0;                                          -- inside the window: keep
+  end if;
+
+  select exists (
+    select 1 from public.action_events_daily d
+     where d.day = p_day and d.actor_plane::text = p_plane
+  ) into v_has_rollup;
+
+  if not v_has_rollup then
+    insert into public.ops_events (component, event_name, level, outcome, metadata)
+    values ('telemetry', 'retention_refused', 'error', 'blocked',
+            jsonb_build_object('leaf', p_leaf, 'day', p_day,
+                               'reason', 'action_events_daily rows missing'));
+    return 0;                                          -- NEVER drop unsummarized data
+  end if;
+
+  execute format('drop table %s.%s', p_nsp, p_leaf);
+  insert into public.ops_events (component, event_name, level, outcome, metadata)
+  values ('telemetry', 'retention_drop', 'info', 'ok',
+          jsonb_build_object('leaf', p_leaf, 'day', p_day));
+  return 1;
+end;
+$$;
+
 create or replace function app.telemetry_retention()
 returns bigint
 language plpgsql
@@ -731,44 +770,36 @@ as $$
 declare
   r        record;
   v_dropped bigint := 0;
-  v_window  interval;
-  v_has_rollup boolean;
 begin
+  -- One enumeration per plane: a single statement naming both telemetry
+  -- partitions is exactly what G-PLANE-JOIN exists to forbid, even in catalog
+  -- metadata. Human leaves keep 400 days (§13.6.2).
   for r in
     select c.relname as leaf, n.nspname as nsp,
-           substring(c.relname from 'action_events_(human|agent)_(\d{8})') as plane,
            to_date(substring(c.relname from '(\d{8})$'), 'YYYYMMDD') as day
       from pg_class c
       join pg_namespace n on n.oid = c.relnamespace
       join pg_inherits i on i.inhrelid = c.oid
       join pg_class p on p.oid = i.inhparent
-     where p.relname in ('action_events_human', 'action_events_agent')
+     where p.relname = 'action_events_human'
        and c.relispartition
   loop
-    v_window := case r.plane when 'agent' then interval '90 days'
-                             else interval '400 days' end;
-    if r.day >= current_date - v_window then
-      continue;                                        -- inside the window: keep
-    end if;
+    v_dropped := v_dropped + app.telemetry_retention_leaf(
+      r.leaf, r.nsp, r.day, 'human', interval '400 days');
+  end loop;
 
-    select exists (
-      select 1 from public.action_events_daily d
-       where d.day = r.day and d.actor_plane::text = r.plane
-    ) into v_has_rollup;
-
-    if not v_has_rollup then
-      insert into public.ops_events (component, event_name, level, outcome, metadata)
-      values ('telemetry', 'retention_refused', 'error', 'blocked',
-              jsonb_build_object('leaf', r.leaf, 'day', r.day,
-                                 'reason', 'action_events_daily rows missing'));
-      continue;                                        -- NEVER drop unsummarized data
-    end if;
-
-    execute format('drop table %s.%s', r.nsp, r.leaf);
-    v_dropped := v_dropped + 1;
-    insert into public.ops_events (component, event_name, level, outcome, metadata)
-    values ('telemetry', 'retention_drop', 'info', 'ok',
-            jsonb_build_object('leaf', r.leaf, 'day', r.day));
+  for r in
+    select c.relname as leaf, n.nspname as nsp,
+           to_date(substring(c.relname from '(\d{8})$'), 'YYYYMMDD') as day
+      from pg_class c
+      join pg_namespace n on n.oid = c.relnamespace
+      join pg_inherits i on i.inhrelid = c.oid
+      join pg_class p on p.oid = i.inhparent
+     where p.relname = 'action_events_agent'
+       and c.relispartition
+  loop
+    v_dropped := v_dropped + app.telemetry_retention_leaf(
+      r.leaf, r.nsp, r.day, 'agent', interval '90 days');
   end loop;
   return v_dropped;
 end;
