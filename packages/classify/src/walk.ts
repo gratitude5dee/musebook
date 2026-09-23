@@ -60,7 +60,7 @@ export async function walkTaxonomy(
   let frontier: Beam[] = [
     {
       path: [rootLabel],
-      node: MUSEBOOK_TAXONOMY[rootLabel]!.children ?? {},
+      node: MUSEBOOK_TAXONOMY[rootLabel].children ?? {},
       logProb: Math.log(Math.max(rootProbability, MIN_EDGE_PROB)),
       decisions: 1,
     },

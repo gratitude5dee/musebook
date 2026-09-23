@@ -66,6 +66,8 @@ export function isQuestionSetError(err: unknown): boolean {
   if (!Array.isArray(detail)) return false;
   return detail.some((d) => {
     const loc = (d as { loc?: unknown })?.loc;
-    return Array.isArray(loc) ? loc.includes("questions") : String(loc ?? "").includes("questions");
+    return Array.isArray(loc)
+      ? loc.includes("questions")
+      : typeof loc === "string" && loc.includes("questions");
   });
 }

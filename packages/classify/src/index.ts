@@ -57,22 +57,22 @@ async function batteryResult(
 ): Promise<{ answers: BatteryAnswers; model: string }> {
   try {
     const { data, requestId } = await client
-      .systemOne({ state: state as never, questions: questions as never })
+      .systemOne({ state: state, questions: questions as never })
       .withResponse();
     record.inputTokens += data.usage.input_tokens;
     record.requestIds.push(requestId);
-    return { answers: data.answers as BatteryAnswers, model: data.model };
+    return { answers: data.answers, model: data.model };
   } catch (err) {
     if (!isQuestionSetError(err)) throw err;
     // §8.4 question-count fallback: same 28 answers, two smaller requests.
     const [labels, tags] = await Promise.all([
-      client.systemOne({ state: state as never, questions: POST_BATTERY_LABELS }).withResponse(),
-      client.systemOne({ state: state as never, questions: POST_BATTERY_TAGS }).withResponse(),
+      client.systemOne({ state: state, questions: POST_BATTERY_LABELS }).withResponse(),
+      client.systemOne({ state: state, questions: POST_BATTERY_TAGS }).withResponse(),
     ]);
     record.inputTokens += labels.data.usage.input_tokens + tags.data.usage.input_tokens;
     record.requestIds.push(labels.requestId, tags.requestId);
     return {
-      answers: { ...labels.data.answers, ...tags.data.answers } as BatteryAnswers,
+      answers: { ...labels.data.answers, ...tags.data.answers },
       model: labels.data.model,
     };
   }
