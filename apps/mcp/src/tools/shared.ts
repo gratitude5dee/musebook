@@ -70,14 +70,13 @@ export function toolResultFrom(
   resource: Resource,
 ): ToolResult {
   if (!decision.allow) {
-    const structured = (rendered.structured ?? { error: decision.reason }) as Record<
-      string,
-      unknown
-    >;
+    // For as:'mcp', rendered.structured IS the CallToolResult renderMcp built —
+    // isError + content[0].text = JSON.stringify(structuredContent) +
+    // structuredContent = PaymentRequired (§6.6). Passing it through keeps the
+    // check-5 contract exact; wrapping it double-nests the 402 body.
     return {
-      isError: true,
-      structuredContent: structured,
-      content: [{ type: "text", text: JSON.stringify(structured) }],
+      ...(rendered.structured as ToolResult),
+      ...(rendered.mcpMeta !== null ? { _meta: rendered.mcpMeta } : {}),
     };
   }
   const structured = (rendered.structured ?? {}) as Record<string, unknown>;

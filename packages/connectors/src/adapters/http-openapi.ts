@@ -20,9 +20,7 @@ const HandshakeResultZ = z.object({
   agentDisplayName: z.string().max(120),
   agentAvatarUrl: z.url().optional(),
   grantedCapabilities: z.array(z.string()).default([]),
-  declined: z
-    .array(z.object({ capability: z.string(), reason: z.string().max(400) }))
-    .default([]),
+  declined: z.array(z.object({ capability: z.string(), reason: z.string().max(400) })).default([]),
   remoteProtocolVersion: z.string().max(32).optional(),
   models: z.array(z.string().max(80)).max(40).optional(),
 });
@@ -43,8 +41,7 @@ const DraftResultZ = z.object({
 
 function baseUrlOf(init: AdapterInit): string {
   const t = init.transport;
-  if (t.kind !== "http_openapi")
-    throw new Error(`http_openapi_adapter_wrong_transport:${t.kind}`);
+  if (t.kind !== "http_openapi") throw new Error(`http_openapi_adapter_wrong_transport:${t.kind}`);
   return t.baseUrl.replace(/\/$/, "");
 }
 

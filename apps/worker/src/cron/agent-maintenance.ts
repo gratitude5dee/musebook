@@ -70,9 +70,7 @@ export async function refreshConnectorTokens(env: Env): Promise<void> {
       key_id: string;
       expires_at: Date | string;
       manifest: ConnectorManifest;
-    }>("select * from app.list_expiring_credentials($1::interval)", [
-      TOKEN_REFRESH_WITHIN,
-    ]);
+    }>("select * from app.list_expiring_credentials($1::interval)", [TOKEN_REFRESH_WITHIN]);
 
     for (const row of rows) {
       if (row.kind !== "oauth_refresh") continue;
@@ -108,10 +106,7 @@ export async function refreshConnectorTokens(env: Env): Promise<void> {
           target_id: row.id,
         });
       } catch (e) {
-        console.warn(
-          "connector_token_refresh_failed",
-          e instanceof Error ? e.message : String(e),
-        );
+        console.warn("connector_token_refresh_failed", e instanceof Error ? e.message : String(e));
       }
     }
   } finally {
@@ -156,9 +151,7 @@ async function exchangeRefreshToken(
   return {
     accessToken: body.access_token,
     expiresAt:
-      typeof body.expires_in === "number"
-        ? new Date(Date.now() + body.expires_in * 1000)
-        : null,
+      typeof body.expires_in === "number" ? new Date(Date.now() + body.expires_in * 1000) : null,
   };
 }
 

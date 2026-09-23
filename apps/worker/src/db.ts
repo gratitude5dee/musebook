@@ -18,14 +18,18 @@ export async function pgFresh(env: Env): Promise<DbClient> {
   // Bindings are optional in the generated Env on some apps that share this
   // module (apps/edge's `?` declarations) — a missing one means the deploy is
   // misconfigured, so fail loud at the use site.
-  const client = new pg.Client({ connectionString: env.HYPERDRIVE_FRESH!.connectionString });
+  const { HYPERDRIVE_FRESH: hd } = env as { HYPERDRIVE_FRESH?: Hyperdrive };
+  if (hd === undefined) throw new Error("HYPERDRIVE_FRESH binding missing");
+  const client = new pg.Client({ connectionString: hd.connectionString });
   await client.connect();
   return client;
 }
 
 /** HYPERDRIVE_CACHED — read-mostly catalog paths (rare here). */
 export async function pgCached(env: Env): Promise<DbClient> {
-  const client = new pg.Client({ connectionString: env.HYPERDRIVE_CACHED!.connectionString });
+  const { HYPERDRIVE_CACHED: hd } = env as { HYPERDRIVE_CACHED?: Hyperdrive };
+  if (hd === undefined) throw new Error("HYPERDRIVE_CACHED binding missing");
+  const client = new pg.Client({ connectionString: hd.connectionString });
   await client.connect();
   return client;
 }

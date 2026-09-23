@@ -54,9 +54,10 @@ export function registerGetFeed(server: McpServer, env: Env, ctx: ExecutionConte
         let after = 0;
         if (args.cursor !== undefined) {
           try {
-            const c = JSON.parse(
-              atob(args.cursor.replace(/-/g, "+").replace(/_/g, "/")),
-            ) as { s?: unknown; p?: unknown };
+            const c = JSON.parse(atob(args.cursor.replace(/-/g, "+").replace(/_/g, "/"))) as {
+              s?: unknown;
+              p?: unknown;
+            };
             slateId = typeof c.s === "string" ? c.s : null;
             after = typeof c.p === "number" ? c.p : 0;
           } catch {
@@ -64,8 +65,11 @@ export function registerGetFeed(server: McpServer, env: Env, ctx: ExecutionConte
           }
         }
         const surface =
-          args.surface === "topic" ? `topic:${args.topic ?? ""}` :
-          args.surface === "author" ? `author:${args.author ?? ""}` : "mcp_feed";
+          args.surface === "topic"
+            ? `topic:${args.topic ?? ""}`
+            : args.surface === "author"
+              ? `author:${args.author ?? ""}`
+              : "mcp_feed";
         const rows = (await sql.unsafe(
           `select app.read_slate($1::uuid, $2::uuid, $3::text, $4::uuid, $5::int, $6::int) as r`,
           [

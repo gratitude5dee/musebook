@@ -20,10 +20,7 @@ export interface AgentCancelPayload {
 
 /** Idempotent: a redelivered message re-runs revoke() on the same reservation,
  *  which adapters define as a no-op. */
-export async function runAgentCancel(
-  env: Env,
-  payload: Record<string, unknown>,
-): Promise<void> {
+export async function runAgentCancel(env: Env, payload: Record<string, unknown>): Promise<void> {
   const p = payload as AgentCancelPayload;
   if (!p.reservation_id) return;
 
@@ -47,8 +44,7 @@ export async function runAgentCancel(
     if (!ctx) return; // reservation vanished — nothing to cancel
 
     const transport =
-      ctx.manifest.transports.find((t) => t.kind === ctx.transport)
-      ?? ctx.manifest.transports[0];
+      ctx.manifest.transports.find((t) => t.kind === ctx.transport) ?? ctx.manifest.transports[0];
     if (!transport) return;
 
     const adapter = resolveAdapter({

@@ -40,17 +40,14 @@ export function manifestCanDraft(m: ConnectorManifest): boolean {
 }
 
 export type ManifestParseResult =
-  | { ok: true; manifest: ConnectorManifest; canonical: string }
-  | { ok: false; issues: string[] };
+  { ok: true; manifest: ConnectorManifest; canonical: string } | { ok: false; issues: string[] };
 
 export function parseManifest(input: unknown): ManifestParseResult {
   const parsed = ConnectorManifestZ.safeParse(input);
   if (!parsed.success) {
     return {
       ok: false,
-      issues: parsed.error.issues.map(
-        (i) => `${i.path.map(String).join(".")}: ${i.message}`,
-      ),
+      issues: parsed.error.issues.map((i) => `${i.path.map(String).join(".")}: ${i.message}`),
     };
   }
   return { ok: true, manifest: parsed.data, canonical: canonicalize(parsed.data) };

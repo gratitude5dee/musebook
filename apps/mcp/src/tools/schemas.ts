@@ -177,9 +177,11 @@ export const submitPostInput = z.object({
   publish: z
     .boolean()
     .default(false)
-    .describe("false creates a draft (post:write). true attempts to publish and needs post:publish."),
-  // Named `access`, never `publish_mode`: the handler maps it with the kernel's
-  // accessToPublishMode() (section 6.3), so apps/mcp stays clean under section 3.4's lint rule.
+    .describe(
+      "false creates a draft (post:write). true attempts to publish and needs post:publish.",
+    ),
+  // The wire name is `access`; the handler maps it onto a publish mode with
+  // the kernel's accessToPublishMode() (section 6.3) — apps/mcp reads none.
   access: z
     .enum(["open", "toll", "gated"])
     .default("open")

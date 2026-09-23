@@ -1193,6 +1193,96 @@ export const GATES = {
       run: checks.m8MainnetModeRecorded,
     },
   ],
+  // §16.5 M9 — musebook-mcp: remote MCP Worker (MCP 2026-07-28), OAuth 2.1 +
+  // RFC 9728 PRM, x402-over-MCP, connector registry, scheduled drafting, the
+  // Q_AGENT_CANCEL pipeline, musebook.dev/mcp routing, and the musebook CLI.
+  // JWKS is superseded by plan line 8356 — PRM only (deviation logged).
+  M9: [
+    {
+      id: "M9.1",
+      kind: "fn",
+      desc: "§7.20 owned checks as test files: discover envelope, deterministic ≤11 tools, resultType, spec-exact 402, _meta carrier, robots Content-Usage, feeds leak nothing, stored license on the deny, WebMCP no-op spec",
+      run: checks.m9WireChecks,
+    },
+    {
+      id: "M9.2",
+      kind: "fn",
+      desc: "RFC 9728 protected-resource metadata served by the OAuthProvider (JWKS superseded — plan line 8356, deviation logged)",
+      run: checks.m9ProtectedResource,
+    },
+    {
+      id: "M9.3",
+      kind: "fn",
+      desc: "Host/Origin validated: foreign Origin + bad Host rejected on the wire, allowedHostnames in source",
+      run: checks.m9HostOrigin,
+    },
+    {
+      id: "M9.4",
+      kind: "fn",
+      desc: "forbidden packages stay forbidden; no durable_objects/migrations in apps/mcp/wrangler.jsonc; no compatibility_flags in any wrangler",
+      run: checks.m9Forbidden,
+    },
+    {
+      id: "M9.5",
+      kind: "fn",
+      desc: "zod split survives dual install: musebook-mcp direct 4.6.5, a 3.x line coexists via @x402/core",
+      run: checks.m9ZodSplit,
+    },
+    {
+      id: "M9.6",
+      kind: "fn",
+      desc: "manual schedule → 1 pending_approval post + 1 settled reservation (drainDueSchedules)",
+      run: checks.m9AgentDraft,
+    },
+    {
+      id: "M9.7",
+      kind: "fn",
+      desc: "two-phase hold is real: stale hold swept, cap restored, re-settle reports reservation_settled without double-commit",
+      run: checks.m9TwoPhaseHold,
+    },
+    {
+      id: "M9.8",
+      kind: "fn",
+      desc: "all 4 transports pass packages/connectors/test/contract/all.test.ts",
+      run: checks.m9ConnectorContract,
+    },
+    {
+      id: "M9.9",
+      kind: "fn",
+      desc: "Q_AGENT_CANCEL exists/bound/consumed: revoked delegation → 1 outbox intent → consumer drains it",
+      run: checks.m9CancelQueue,
+    },
+    {
+      id: "M9.10",
+      kind: "fn",
+      desc: "scope enforcement + audit trail: feed:read on submit_post names post:write; revoke appends exactly 1 audit row",
+      run: checks.m9ScopeAudit,
+    },
+    {
+      id: "M9.11",
+      kind: "fn",
+      desc: "no token/api_key/secret columns on delegations or connector_credentials",
+      run: checks.m9NoSecretColumns,
+    },
+    {
+      id: "M9.12",
+      kind: "fn",
+      desc: "G-ENV covers the third Worker: MCP secret names in the manifest, absent from wrangler vars",
+      run: checks.m9EnvManifest,
+    },
+    {
+      id: "M9.13",
+      kind: "fn",
+      desc: "§7.20 static greps 17/19/20/26: no navigator.modelContext, no publish-mode reads outside kernel, one x402 impl + maxTimeoutSeconds=60, no presigned URLs outside upload",
+      run: checks.m9StaticChecks,
+    },
+    {
+      id: "M9.14",
+      kind: "fn",
+      desc: "startup budget: wrangler check startup < 400ms (hyperdrive bindings stripped for local profiling)",
+      run: checks.m9StartupBudget,
+    },
+  ],
 };
 
 export const MILESTONE_TITLES = {

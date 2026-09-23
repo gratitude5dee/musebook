@@ -13,21 +13,23 @@ import type {
 } from "../connector.js";
 import type { AdapterInit } from "./index.js";
 
-export const AgentCardZ = z.object({
-  name: z.string().max(120),
-  description: z.string().max(2000).optional(),
-  url: z.url({ protocol: /^https$/ }),
-  version: z.string().max(32).optional(),
-  provider: z
-    .object({ organization: z.string().max(120).optional() })
-    .loose()
-    .optional(),
-  capabilities: z.record(z.string(), z.unknown()).optional(),
-  skills: z
-    .array(z.object({ id: z.string(), name: z.string() }).loose())
-    .max(200)
-    .optional(),
-}).loose();
+export const AgentCardZ = z
+  .object({
+    name: z.string().max(120),
+    description: z.string().max(2000).optional(),
+    url: z.url({ protocol: /^https$/ }),
+    version: z.string().max(32).optional(),
+    provider: z
+      .object({ organization: z.string().max(120).optional() })
+      .loose()
+      .optional(),
+    capabilities: z.record(z.string(), z.unknown()).optional(),
+    skills: z
+      .array(z.object({ id: z.string(), name: z.string() }).loose())
+      .max(200)
+      .optional(),
+  })
+  .loose();
 
 export type AgentCard = z.infer<typeof AgentCardZ>;
 

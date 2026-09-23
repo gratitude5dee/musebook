@@ -72,7 +72,12 @@ export interface DelegationForDrafting {
 }
 
 export type DrainOutcome =
-  | { scheduleId: string; outcome: "published" | "pending_approval"; postId: string; reservationId: string }
+  | {
+      scheduleId: string;
+      outcome: "published" | "pending_approval";
+      postId: string;
+      reservationId: string;
+    }
   | { scheduleId: string; outcome: "submitted"; taskId: string; reservationId: string }
   | { scheduleId: string; outcome: "skipped"; reason: string };
 
@@ -100,10 +105,9 @@ export async function drainDueSchedules(env: Env, ctx: ExecutionContext): Promis
 async function claimDueSchedules(env: Env, limit: number): Promise<ScheduleRow[]> {
   const db = await pgFresh(env);
   try {
-    const { rows } = await db.query<ScheduleRow>(
-      "select * from app.claim_due_schedules($1::int)",
-      [limit],
-    );
+    const { rows } = await db.query<ScheduleRow>("select * from app.claim_due_schedules($1::int)", [
+      limit,
+    ]);
     return rows;
   } finally {
     await db.end();
@@ -238,12 +242,15 @@ export async function drainSchedule(env: Env, s: ScheduleRow): Promise<DrainOutc
 /** completeDraft is the ONE function both paths share — the synchronous tick
  *  calls it inline; apps/edge's bridge result route calls it with the same
  *  arguments loaded from the reservation (10.6.6). */
-export async function completeDraft(env: Env, a: {
-  schedule: ScheduleRow;
-  delegation: DelegationForDrafting;
-  reservationId: string;
-  draft: DraftResult;
-}): Promise<DrainOutcome> {
+export async function completeDraft(
+  env: Env,
+  a: {
+    schedule: ScheduleRow;
+    delegation: DelegationForDrafting;
+    reservationId: string;
+    draft: DraftResult;
+  },
+): Promise<DrainOutcome> {
   const { schedule: s, delegation: d, reservationId, draft } = a;
 
   // (3) The draft is UNTRUSTED text (10.9.1). Sanitize BEFORE the hash so the
@@ -317,7 +324,9 @@ export async function completeDraft(env: Env, a: {
   //     outbox row is durable and the * * * * * sweeper sends it within ~60 s.
   if (jobId) {
     try {
-      await env.Q_DISTRIBUTE!.send({ job_id: jobId });
+      const { Q_DISTRIBUTE: q } = env as { Q_DISTRIBUTE?: Queue };
+      if (q === undefined) throw new Error("Q_DISTRIBUTE binding missing");
+      await q.send({ job_id: jobId });
     } catch (e) {
       console.error("enqueue_deferred", String(e));
     }
@@ -413,8 +422,8 @@ export async function minMaxCharsFor(env: Env, platforms: string[]): Promise<num
 /** Credential for one delegation — decrypted app-side, single-use, never
  *  stored decoded (10.8.1). auth.kind 'none' and bridge tokens return null. */
 async function adapterInitFor(env: Env, d: DelegationForDrafting): Promise<AdapterInit> {
-  const transport = d.manifest.transports.find((t) => t.kind === d.transport)
-    ?? d.manifest.transports[0];
+  const transport =
+    d.manifest.transports.find((t) => t.kind === d.transport) ?? d.manifest.transports[0];
   if (!transport) throw new Error(`connector_no_transport:${d.connector_slug}`);
   let credential: string | null = null;
   if (d.auth_kind === "bearer" || d.auth_kind === "oauth2") {

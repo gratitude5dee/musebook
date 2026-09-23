@@ -139,7 +139,8 @@ function harnessFor(
         manifest: m,
         connectorRowId: "crow-contract-1",
         transport: m.transports.find((t) => t.kind === kind) as typeof transport,
-        credential: m.auth.kind === "none" || m.auth.kind === "bridge_token" ? null : SEED_CREDENTIAL,
+        credential:
+          m.auth.kind === "none" || m.auth.kind === "bridge_token" ? null : SEED_CREDENTIAL,
       });
     },
     ctx: () => ctxFor(manifest),

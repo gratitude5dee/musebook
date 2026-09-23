@@ -52,7 +52,7 @@ describe("wrapUntrusted", () => {
     });
     expect(out).toContain("<untrusted-content");
     expect(out).toContain('source="mcp"');
-    expect(out).toContain("connector=\"evil&#34;onload=&#34;x\"");
+    expect(out).toContain('connector="evil&#34;onload=&#34;x"');
     expect(out).toContain("agent <b>content</b>");
     expect(out).toContain("</untrusted-content>");
   });
@@ -62,7 +62,12 @@ describe("seal/open credential", () => {
   const KEK = new Uint8Array(32).fill(7);
 
   it("round-trips and refuses tampering", async () => {
-    const { ciphertext, keyId } = await sealCredential(KEK, "k1", "del-1", "SEED_CONNECTOR_CREDENTIAL");
+    const { ciphertext, keyId } = await sealCredential(
+      KEK,
+      "k1",
+      "del-1",
+      "SEED_CONNECTOR_CREDENTIAL",
+    );
     expect(ciphertext.byteLength).toBeGreaterThan(29);
     expect(keyId).toBe("k1");
     expect(await openCredential(KEK, "del-1", ciphertext)).toBe("SEED_CONNECTOR_CREDENTIAL");

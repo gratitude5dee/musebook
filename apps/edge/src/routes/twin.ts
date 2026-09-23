@@ -1,7 +1,7 @@
 // apps/edge/src/routes/twin.ts — §7.11, verbatim. One handler serves all three
 // twins: load a parsed Resource (never a raw row), let the kernel decide and
 // render, add nothing the kernel did not already attach.
-import { createKernel, etagFor, loadResource } from "@musebook/kernel";
+import { createKernel, etagFor, loadResource, usageHeadersFor } from "@musebook/kernel";
 import { representationSchema, type Actor } from "@musebook/schema";
 import { paymentRequiredHttp, withSettlement } from "@musebook/x402"; // the HTTP half lives ONLY in this Worker
 import { loadPostBySlug } from "../db/posts.js";
@@ -53,7 +53,13 @@ export async function twin(
     if (!decision.allow && decision.challenge !== null) {
       // x402 v2 over HTTP: 402 + PAYMENT-REQUIRED header (base64 PaymentRequired),
       // behind §6.12.8's deny headers — no-store on all three layers, Vary: *.
-      return applyCacheHeaders(paymentRequiredHttp(decision), decision, env);
+      // The stored license rides the deny too: a paid post's Content-Usage is
+      // declared on the preview, not only after payment (§7.20 check 21).
+      const denied = paymentRequiredHttp(decision);
+      for (const [k, v] of Object.entries(usageHeadersFor(resource))) {
+        denied.headers.set(k, v);
+      }
+      return applyCacheHeaders(denied, decision, env);
     }
 
     const rendered = await kernel.renderResource(resource, as.data, decision);

@@ -4,12 +4,12 @@
 // absent ⇒ the MRTR path is disabled outright; there is never an unsealed
 // requestState.
 export type RequestState = {
-  jti: string;            // ULID, single-use
-  principal: string;      // delegation id, or 'anon:' + sha256(client fingerprint)
+  jti: string; // ULID, single-use
+  principal: string; // delegation id, or 'anon:' + sha256(client fingerprint)
   postId: string;
   contentHash: string;
-  argsDigest: string;     // sha256 of canonical JSON of params.arguments
-  exp: number;            // epoch seconds, now + 600
+  argsDigest: string; // sha256 of canonical JSON of params.arguments
+  exp: number; // epoch seconds, now + 600
 };
 
 const enc = new TextEncoder();
@@ -32,7 +32,10 @@ export async function seal(state: RequestState, secret: string): Promise<string>
   const buf = new Uint8Array(iv.length + ct.length);
   buf.set(iv, 0);
   buf.set(ct, iv.length);
-  return `v1.${btoa(String.fromCharCode(...buf)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")}`;
+  return `v1.${btoa(String.fromCharCode(...buf))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "")}`;
 }
 
 export async function open(token: string, secret: string): Promise<RequestState | null> {

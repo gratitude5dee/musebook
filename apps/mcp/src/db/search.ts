@@ -38,8 +38,7 @@ export interface SearchArgs {
 const b64uEncode = (s: string): string =>
   btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
-const b64uDecode = (s: string): string =>
-  atob(s.replace(/-/g, "+").replace(/_/g, "/"));
+const b64uDecode = (s: string): string => atob(s.replace(/-/g, "+").replace(/_/g, "/"));
 
 function parseCursor(cursor: string | undefined): { publishedAt: string; postId: string } | null {
   if (cursor === undefined) return null;
@@ -73,7 +72,11 @@ function table(rows: SearchHit[], cols: [keyof SearchHit, string][]): string {
   const body = rows.map(
     (r) =>
       `| ${cols
-        .map(([k]) => String(r[k] ?? "").replaceAll("|", "\\|").replaceAll("\n", " "))
+        .map(([k]) =>
+          String(r[k] ?? "")
+            .replaceAll("|", "\\|")
+            .replaceAll("\n", " "),
+        )
         .join(" | ")} |`,
   );
   return [head, rule, ...body].join("\n");
@@ -134,18 +137,27 @@ export async function listAuthors(sql: Sql, args: ListAuthorsArgs) {
   const offset = Number(args.cursor ?? "0") || 0;
   const rows = (await sql.unsafe(
     `select * from app.list_authors($1::text, $2::text, $3::boolean, $4::int, $5::int)`,
-    [args.query ?? null, args.sort ?? "recent", args.accepts_agent_payment ?? null, args.limit ?? 50, offset],
+    [
+      args.query ?? null,
+      args.sort ?? "recent",
+      args.accepts_agent_payment ?? null,
+      args.limit ?? 50,
+      offset,
+    ],
   )) as AuthorRow[];
   const nextCursor = rows.length === (args.limit ?? 50) ? String(offset + rows.length) : null;
   return {
     results: rows,
     nextCursor,
-    markdownTable: table(rows as unknown as SearchHit[], [
-      ["handle", "handle"],
-      ["display_name", "name"],
-      ["post_count", "posts"],
-      ["follower_count", "followers"],
-      ["has_paid_posts", "paid_posts"],
-    ] as unknown as [keyof SearchHit, string][]),
+    markdownTable: table(
+      rows as unknown as SearchHit[],
+      [
+        ["handle", "handle"],
+        ["display_name", "name"],
+        ["post_count", "posts"],
+        ["follower_count", "followers"],
+        ["has_paid_posts", "paid_posts"],
+      ] as unknown as [keyof SearchHit, string][],
+    ),
   };
 }

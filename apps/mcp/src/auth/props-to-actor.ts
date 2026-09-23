@@ -32,10 +32,9 @@ export interface DelegationRow {
  *  come from the ROW, never from props.scp — §5.8.1 verbatim. */
 export async function checkGrant(fresh: Sql, props: GrantProps): Promise<DelegationRow | null> {
   if (typeof props.dlg !== "string" || typeof props.sub !== "string") return null;
-  const rows = (await fresh.unsafe(
-    `select * from app.actor_delegation($1::uuid)`,
-    [props.dlg],
-  )) as DelegationRow[];
+  const rows = (await fresh.unsafe(`select * from app.actor_delegation($1::uuid)`, [
+    props.dlg,
+  ])) as DelegationRow[];
   const d = rows[0];
   if (!d || d.state !== "active") return null;
   if (d.expires_at !== null && new Date(d.expires_at).getTime() <= Date.now()) return null;

@@ -13,14 +13,10 @@ export interface GuardOptions {
 
 export function makeGuardedFetch(opts: GuardOptions) {
   const allow = new Set(opts.allowHosts.map((h) => h.toLowerCase()));
-  return async function guardedFetch(
-    url: string,
-    init: RequestInit = {},
-  ): Promise<Response> {
+  return async function guardedFetch(url: string, init: RequestInit = {}): Promise<Response> {
     const u = new URL(url);
     if (u.protocol !== "https:") throw new Error("egress_https_only");
-    if (!allow.has(u.hostname.toLowerCase()))
-      throw new Error("egress_host_not_allowed");
+    if (!allow.has(u.hostname.toLowerCase())) throw new Error("egress_host_not_allowed");
     if (u.username || u.password) throw new Error("egress_credentials_in_url");
     if (opts.resolveAndCheck) await opts.resolveAndCheck(u.hostname);
 
@@ -39,11 +35,9 @@ export function makeGuardedFetch(opts: GuardOptions) {
           "user-agent": "Musebook/1.0 (+https://musebook.dev)",
         },
       });
-      if (res.status >= 300 && res.status < 400)
-        throw new Error("egress_redirect_refused");
+      if (res.status >= 300 && res.status < 400) throw new Error("egress_redirect_refused");
       const len = Number(res.headers.get("content-length") ?? "0");
-      if (len > (opts.maxBytes ?? 8 * 1024 * 1024))
-        throw new Error("egress_body_too_large");
+      if (len > (opts.maxBytes ?? 8 * 1024 * 1024)) throw new Error("egress_body_too_large");
       return res;
     } finally {
       clearTimeout(timer);

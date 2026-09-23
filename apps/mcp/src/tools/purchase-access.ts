@@ -5,7 +5,13 @@
 // never double-charges, and max_amount_atomic refused BEFORE the payment is
 // even presented.
 import type { McpServer } from "@modelcontextprotocol/server";
-import { configureKernel, loadResource, renderResource, resolveAccess, mintsDurableGrant } from "@musebook/kernel";
+import {
+  configureKernel,
+  loadResource,
+  renderResource,
+  resolveAccess,
+  mintsDurableGrant,
+} from "@musebook/kernel";
 import { asDb, cached, fresh, release } from "../db/client.js";
 import { loadPostByPostId, loadPostBySlug } from "../db/posts.js";
 import { portsFor } from "../kernel/configure.js";
@@ -38,9 +44,7 @@ export function registerPurchaseAccess(server: McpServer, env: Env, ctx: Executi
         // written after success only — a failed settle must be retryable.
         const principal = actor.userId ?? actor.payerAddress ?? "anonymous";
         const prior = await rw.begin(async (tx) => {
-          await tx.unsafe("select app.enter('musebook_jobs', $1::uuid)", [
-            actor.userId,
-          ]);
+          await tx.unsafe("select app.enter('musebook_jobs', $1::uuid)", [actor.userId]);
           return (await tx.unsafe(
             `select response_body from public.idempotency_keys
               where endpoint = 'mcp:purchase_access' and idempotency_key = $1
@@ -101,7 +105,10 @@ export function registerPurchaseAccess(server: McpServer, env: Env, ctx: Executi
           post_id: resource.postId,
           slug: resource.slug,
           content_hash: resource.contentHash,
-          grant: decision.grantId !== null ? { grant_id: decision.grantId, expires_at: null, scope: "post:read" } : null,
+          grant:
+            decision.grantId !== null
+              ? { grant_id: decision.grantId, expires_at: null, scope: "post:read" }
+              : null,
           settlement_id: decision.settlementId,
           reason: decision.reason,
         };
@@ -118,9 +125,7 @@ export function registerPurchaseAccess(server: McpServer, env: Env, ctx: Executi
           (async () => {
             try {
               await rw.begin(async (tx) => {
-                await tx.unsafe("select app.enter('musebook_jobs', $1::uuid)", [
-                  actor.userId,
-                ]);
+                await tx.unsafe("select app.enter('musebook_jobs', $1::uuid)", [actor.userId]);
                 await tx.unsafe(
                   `insert into public.idempotency_keys
                      (endpoint, idempotency_key, actor, state, response_status, response_body)

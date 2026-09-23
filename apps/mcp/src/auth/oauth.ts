@@ -9,26 +9,9 @@
 // resolve it on FRESH, and store {dlg, sub, aid, scp} on the grant's props —
 // never the token itself, and authority stays with the row (§7.6.4).
 import type { OAuthHelpers } from "@cloudflare/workers-oauth-provider";
-import { ALL_SCOPES } from "@musebook/schema";
 import { fresh } from "../db/client.js";
 
-const PRM = {
-  resource: "https://mcp.musebook.dev/mcp",
-  authorization_servers: ["https://mcp.musebook.dev"],
-  bearer_methods_supported: ["header"],
-  scopes_supported: [...ALL_SCOPES],
-  resource_documentation: "https://musebook.dev/llms.txt",
-};
-
-const CORS = {
-  "access-control-allow-origin": "*",
-  "access-control-allow-headers": "authorization, content-type, mcp-protocol-version",
-  "access-control-allow-methods": "GET, OPTIONS",
-  "cache-control": "public, max-age=3600",
-};
-
-const CSP =
-  "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'";
+const CSP = "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'";
 
 function esc(s: string): string {
   return s
@@ -69,11 +52,9 @@ export const ConsentHandler = {
     void ctx;
     const url = new URL(req.url);
 
-    if (url.pathname === "/.well-known/oauth-protected-resource/mcp") {
-      if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
-      return Response.json(PRM, { headers: CORS });
-    }
-
+    // RFC 9728 PRM is served by the provider itself (resourceMetadata on
+    // OAuthProvider) — it intercepts /.well-known/oauth-protected-resource*
+    // before requests reach this handler.
     if (url.pathname === "/healthz") {
       return new Response("ok", { status: 200 });
     }
@@ -130,7 +111,9 @@ inherits the delegation's scopes and dies when the delegation is revoked.</p>
       }
       const decision = fstr(form, "decision") || "deny";
       const authReq = await oauth.parseAuthRequest(
-        new Request(`${url.origin}/authorize${authQuery}`, { headers: { accept: "application/json" } }),
+        new Request(`${url.origin}/authorize${authQuery}`, {
+          headers: { accept: "application/json" },
+        }),
       );
       if (decision !== "approve") {
         const dest = new URL(authReq.redirectUri);
@@ -139,19 +122,21 @@ inherits the delegation's scopes and dies when the delegation is revoked.</p>
         return Response.redirect(dest.toString(), 302);
       }
       const token = fstr(form, "delegation").trim();
-      if (!token.startsWith("mb_dlg_")) return new Response("delegation_token_required", { status: 400 });
+      if (!token.startsWith("mb_dlg_"))
+        return new Response("delegation_token_required", { status: 400 });
       const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
-      const hash = [...new Uint8Array(digest)]
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
+      const hash = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
       const sql = fresh(env);
       try {
-        const rows = await sql.unsafe(
-          "select * from app.resolve_delegation($1::text)",
-          [hash],
-        ) as {
-          id: string; owner_user_id: string; agent_identity_id: string;
-          connector_slug: string; scopes: string[]; state: string;
+        const rows = (await sql.unsafe("select * from app.resolve_delegation($1::text)", [
+          hash,
+        ])) as {
+          id: string;
+          owner_user_id: string;
+          agent_identity_id: string;
+          connector_slug: string;
+          scopes: string[];
+          state: string;
           expires_at: string | null;
         }[];
         const d = rows[0];

@@ -15,8 +15,7 @@ export interface ReserveArgs {
 }
 
 export type ReserveResult =
-  | { ok: true; reservationId: string; remainingAtomic: bigint }
-  | { ok: false; reason: string };
+  { ok: true; reservationId: string; remainingAtomic: bigint } | { ok: false; reason: string };
 
 export async function reserveSpend(env: Env, args: ReserveArgs): Promise<ReserveResult> {
   const db = await pgFresh(env);
@@ -72,11 +71,7 @@ export async function settleSpend(
   }
 }
 
-export async function releaseSpend(
-  env: Env,
-  reservationId: string,
-  reason: string,
-): Promise<void> {
+export async function releaseSpend(env: Env, reservationId: string, reason: string): Promise<void> {
   const db = await pgFresh(env);
   try {
     await db.query(

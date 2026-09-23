@@ -77,11 +77,7 @@ export async function mcpCall(
   return { ...result, resultType: result.resultType ?? "complete" };
 }
 
-export async function discover(
-  ctx: ConnectorContext,
-  endpoint: string,
-  cred: string | null,
-) {
+export async function discover(ctx: ConnectorContext, endpoint: string, cred: string | null) {
   try {
     return await mcpCall(ctx, endpoint, cred, "server/discover", {});
   } catch (e) {
@@ -140,9 +136,7 @@ export function makeMcpHttpConnector(init: AdapterInit): AgentConnector {
       const sc = (discovered.structuredContent ?? {}) as Record<string, unknown>;
       const tools = Array.isArray(sc.tools) ? (sc.tools as { name?: string }[]) : [];
       const canDraft = tools.some((t) => typeof t.name === "string" && /draft/i.test(t.name));
-      const granted = req.requestedCapabilities.filter(
-        (c) => c !== "post.draft" || canDraft,
-      );
+      const granted = req.requestedCapabilities.filter((c) => c !== "post.draft" || canDraft);
       const declined = req.requestedCapabilities
         .filter((c) => !granted.includes(c))
         .map((capability) => ({ capability, reason: "not_advertised" }));
@@ -153,9 +147,7 @@ export function makeMcpHttpConnector(init: AdapterInit): AgentConnector {
             ? sc.agentInstanceId
             : `${init.manifest.connectorId}:${ctx.delegationId.slice(0, 8)}`,
         agentDisplayName:
-          typeof sc.agentDisplayName === "string"
-            ? sc.agentDisplayName
-            : init.manifest.displayName,
+          typeof sc.agentDisplayName === "string" ? sc.agentDisplayName : init.manifest.displayName,
         grantedCapabilities: granted,
         declined,
         remoteProtocolVersion:
@@ -174,7 +166,12 @@ export function makeMcpHttpConnector(init: AdapterInit): AgentConnector {
             "mcp-protocol-version": MCP_REVISION,
             "mcp-method": "server/ping",
           },
-          body: JSON.stringify({ jsonrpc: "2.0", id: `mb-${ctx.requestId}`, method: "server/ping", params: {} }),
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: `mb-${ctx.requestId}`,
+            method: "server/ping",
+            params: {},
+          }),
           signal: ctx.signal,
         });
         return { ok: res.ok, latencyMs: Date.now() - started };

@@ -109,7 +109,13 @@ async function main(): Promise<void> {
   try {
     if (cmd === "tools") {
       const r = await client.listTools();
-      console.log(JSON.stringify(r.tools.map((t) => t.name), null, 2));
+      console.log(
+        JSON.stringify(
+          r.tools.map((t) => t.name),
+          null,
+          2,
+        ),
+      );
       return;
     }
 

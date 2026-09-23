@@ -40,9 +40,7 @@ async function resolveBridge(
     return json({ error: "bridge_token_required" }, 401);
   }
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
-  const hash = [...new Uint8Array(digest)]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  const hash = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 
   const db = fresh(env);
   try {
@@ -50,10 +48,7 @@ async function resolveBridge(
       id: string;
       state: string;
       expires_at: Date | string | null;
-    }>(
-      "select d.id, d.state, d.expires_at from app.resolve_delegation($1::text) d",
-      [hash],
-    );
+    }>("select d.id, d.state, d.expires_at from app.resolve_delegation($1::text) d", [hash]);
     const d = rows[0];
     if (!d) return json({ error: "bridge_token_invalid" }, 401);
     return {
@@ -73,10 +68,7 @@ interface BridgeTaskContext {
   task_id: string;
 }
 
-async function taskContext(
-  db: DbClient,
-  reservationId: string,
-): Promise<BridgeTaskContext | null> {
+async function taskContext(db: DbClient, reservationId: string): Promise<BridgeTaskContext | null> {
   const { rows } = await db.query<BridgeTaskContext>(
     "select * from app.bridge_task_context($1::uuid)",
     [reservationId],
@@ -292,10 +284,11 @@ async function recordOnce(
   taskId: string,
   response: Record<string, unknown>,
 ): Promise<void> {
-  await db.query(
-    "select * from app.bridge_result_once($1::text, $2::uuid, $3::jsonb)",
-    [taskId, delegationId, JSON.stringify(response)],
-  );
+  await db.query("select * from app.bridge_result_once($1::text, $2::uuid, $3::jsonb)", [
+    taskId,
+    delegationId,
+    JSON.stringify(response),
+  ]);
 }
 
 async function auditBridge(
@@ -306,19 +299,16 @@ async function auditBridge(
 ): Promise<void> {
   const db = fresh(env);
   try {
-    await db.query(
-      `select app.audit_log_insert($1::jsonb)`,
-      [
-        {
-          actor: "owner_agent",
-          delegation_id: delegationId,
-          action: (meta.action as string | undefined) ?? "bridge.task_submitted",
-          target_kind: "reservation",
-          target_id: reservationId,
-          after_state: meta,
-        },
-      ],
-    );
+    await db.query(`select app.audit_log_insert($1::jsonb)`, [
+      {
+        actor: "owner_agent",
+        delegation_id: delegationId,
+        action: (meta.action as string | undefined) ?? "bridge.task_submitted",
+        target_kind: "reservation",
+        target_id: reservationId,
+        after_state: meta,
+      },
+    ]);
   } catch {
     // audit is fail-open (5.7.7)
   } finally {

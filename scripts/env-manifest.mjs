@@ -279,7 +279,7 @@ export const GROUPS = [
         kind: "var",
         local: "https://api.cdp.coinbase.com/platform/v2/x402",
       },
-      { name: "X402_IDEMPOTENT_WINDOW_SECONDS", scope: ["E", "L"], kind: "var", local: "120" },
+      { name: "X402_IDEMPOTENT_WINDOW_SECONDS", scope: ["E", "M", "L"], kind: "var", local: "120" },
       {
         name: "X402_TEST_PAYER_KEY",
         scope: ["L", "CI"],
@@ -473,13 +473,6 @@ export const GROUPS = [
         comment:
           "Ed25519 PKCS#8 PEM, base64. See the UNVERIFIED note in §3.6.1 — may be dead once workers-oauth-provider is confirmed to self-sign.",
       },
-      { name: "MCP_JWT_KID", scope: ["M"], kind: "var" },
-      {
-        name: "MCP_JWT_PUBLIC_JWKS",
-        scope: ["M"],
-        kind: "var",
-        comment: "Public JWKS JSON — never mark it secret.",
-      },
       { name: "MCP_OAUTH_ACCESS_TOKEN_TTL_S", scope: ["M"], kind: "var", local: "3600" },
       { name: "MCP_OAUTH_AUTH_CODE_TTL_S", scope: ["M"], kind: "var", local: "600" },
       {
@@ -488,6 +481,19 @@ export const GROUPS = [
         kind: "secret",
         comment:
           "32 random bytes base64 — seals MRTR requestState. Absent ⇒ MRTR disabled outright.",
+      },
+      {
+        name: "MUSEBOOK_MCP_URL",
+        scope: ["L", "CI"],
+        kind: "var",
+        local: "https://mcp.musebook.dev/mcp",
+        comment: "musebook CLI — remote MCP endpoint. Not a Worker binding.",
+      },
+      {
+        name: "MUSEBOOK_TOKEN",
+        scope: ["L", "CI"],
+        kind: "secret",
+        comment: "musebook CLI — OAuth access token for the remote MCP.",
       },
       {
         name: "NEXT_PUBLIC_WEBMCP_OT_TOKEN",
@@ -534,8 +540,8 @@ export const GROUPS = [
         comment: "base64, 32 bytes. KEK for connector_credentials.",
       },
       { name: "CONNECTOR_CRED_KEY_ID", scope: ["J"], kind: "var", local: "kek-2026-09" },
-      { name: "CONNECTOR_EGRESS_TIMEOUT_MS", scope: ["J"], kind: "var", local: "60000" },
-      { name: "CONNECTOR_EGRESS_MAX_BYTES", scope: ["J"], kind: "var", local: "8388608" },
+      { name: "CONNECTOR_EGRESS_TIMEOUT_MS", scope: ["E", "J"], kind: "var", local: "60000" },
+      { name: "CONNECTOR_EGRESS_MAX_BYTES", scope: ["E", "J"], kind: "var", local: "8388608" },
       { name: "CONNECTOR_CODEX_AGENTS_API_ENABLED", scope: ["J"], kind: "var", local: "false" },
       { name: "MUSEBOOK_BRIDGE_POLL_MAX_MS", scope: ["E"], kind: "var", local: "25000" },
       { name: "MUSEBOOK_BRIDGE_MIN_VERSION", scope: ["E"], kind: "var", local: "1.0.0" },

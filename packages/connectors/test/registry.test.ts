@@ -61,20 +61,16 @@ describe("registry state machine", () => {
 
 describe("hostsOf", () => {
   it("collects every manifest host guardedFetch may reach", () => {
-    const m = manifestFor(
-      { kind: "mcp_http", url: "https://mcp.example/mcp" },
-      ["feed.read"],
-    );
+    const m = manifestFor({ kind: "mcp_http", url: "https://mcp.example/mcp" }, ["feed.read"]);
     const hosts = hostsOf(m);
     expect(hosts).toContain("mcp.example");
     expect(hosts).toContain("musebook.example");
   });
 
   it("skips non-url strings and bridge transports without a URL", () => {
-    const m = manifestFor(
-      { kind: "bridge_token", runtime: "generic", minBridgeVersion: "1.0.0" },
-      ["post.draft"],
-    );
+    const m = manifestFor({ kind: "bridge_token", runtime: "generic", minBridgeVersion: "1.0.0" }, [
+      "post.draft",
+    ]);
     const hosts = hostsOf(m);
     expect(hosts).toEqual(["musebook.example"]);
   });

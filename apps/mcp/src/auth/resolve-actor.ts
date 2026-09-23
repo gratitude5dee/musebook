@@ -13,9 +13,8 @@ import { fresh, release } from "../db/client.js";
 /** The signed EIP-3009 authorization's `from`, or null. Payer-provenance lives
  *  inside the payload; there is no shape check here — settleOnce verifies. */
 function payerFromPayment(p: PaymentPayload | null): `0x${string}` | null {
-  const from = (
-    p?.payload as { authorization?: { from?: string } } | undefined
-  )?.authorization?.from;
+  const from = (p?.payload as { authorization?: { from?: string } } | undefined)?.authorization
+    ?.from;
   return typeof from === "string" && /^0x[0-9a-fA-F]{40}$/.test(from)
     ? (from as `0x${string}`)
     : null;
@@ -25,7 +24,10 @@ function evidenceFor(kind: "mcp_oauth_token" | "none"): Actor["evidence"] {
   return [
     {
       kind,
-      detail: kind === "mcp_oauth_token" ? "workers-oauth-provider grant, delegation re-read" : "no OAuth grant",
+      detail:
+        kind === "mcp_oauth_token"
+          ? "workers-oauth-provider grant, delegation re-read"
+          : "no OAuth grant",
       verifiedAt: new Date().toISOString(),
     },
   ];
@@ -38,7 +40,7 @@ function evidenceFor(kind: "mcp_oauth_token" | "none"): Actor["evidence"] {
  * fallback for callers whose context is not a ServerContext.
  */
 function paymentFrom(toolCtx: ServerContext | undefined): PaymentPayload | null {
-  const meta = (toolCtx?.mcpReq._meta ?? currentMcpRequest()?.meta);
+  const meta = toolCtx?.mcpReq._meta ?? currentMcpRequest()?.meta;
   const p = meta?.["x402/payment"];
   return p && typeof p === "object" ? (p as PaymentPayload) : null;
 }

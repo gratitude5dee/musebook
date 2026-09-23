@@ -8,9 +8,7 @@ const u8 = (a: Uint8Array): Uint8Array<ArrayBuffer> => new Uint8Array(a);
 
 async function deriveKey(kek: Uint8Array, delegationId: string): Promise<CryptoKey> {
   // Per-delegation subkey: one stolen ciphertext does not decrypt another delegation's.
-  const ikm = await crypto.subtle.importKey("raw", u8(kek), "HKDF", false, [
-    "deriveKey",
-  ]);
+  const ikm = await crypto.subtle.importKey("raw", u8(kek), "HKDF", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(
     { name: "HKDF", hash: "SHA-256", salt: u8(te.encode(delegationId)), info: u8(te.encode(INFO)) },
     ikm,

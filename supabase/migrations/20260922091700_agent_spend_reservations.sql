@@ -234,7 +234,7 @@ begin
   insert into public.audit_log
     (actor, actor_user_id, delegation_id, action, target_kind, target_id, after_state)
   values
-    (case when p_actor_user_id is null then 'owner_agent' else 'human_creator' end,
+    (case when p_actor_user_id is null then 'owner_agent'::actor_class else 'human_creator'::actor_class end,
      p_actor_user_id, p_delegation_id, 'delegation.revoke', 'delegation', p_delegation_id,
      jsonb_build_object('reason', p_reason, 'at', p_now, 'cancel_jobs', v_jobs));
 
@@ -260,7 +260,7 @@ grant execute on function public.reserve_agent_spend(uuid, numeric, text, text, 
 grant execute on function public.settle_agent_spend(uuid, numeric, timestamptz)
   to musebook_worker, service_role;
 grant execute on function public.release_agent_spend(uuid, text, timestamptz)
-  to musebook_worker, service_role;
+  to musebook_worker, service_role, musebook_jobs;
 grant execute on function public.revoke_delegation(uuid, text, uuid, timestamptz)
   to musebook_worker, service_role;
 
@@ -269,6 +269,9 @@ grant execute on function public.revoke_delegation(uuid, text, uuid, timestamptz
 -- explicit transaction — Hyperdrive pools in transaction mode and a held
 -- transaction pins a pooled connection, §4.13). §7.4's submit_post writes the
 -- same shape; publish_post is its sibling for an existing draft.
+drop function if exists public.insert_draft_post(uuid,uuid,uuid,text,text,text[],publish_mode,boolean,uuid,uuid,text[],text,text,text);
+drop function if exists public.insert_draft_post(uuid,uuid,uuid,text,text,text[],text,boolean,uuid,uuid,text[],text,text,text);
+
 create or replace function public.insert_draft_post(
   p_owner_user_id      uuid,
   p_agent_identity_id  uuid,
@@ -641,7 +644,7 @@ begin
         insert into public.audit_log
           (actor, delegation_id, action, target_kind, target_id, after_state)
         values
-          ('owner_agent', r.delegation_id, 'agent.draft_failed', 'reservation', r.id,
+          ('owner_agent'::actor_class, r.delegation_id, 'agent.draft_failed', 'reservation', r.id,
            jsonb_build_object('reason', p_audit_reason));
       end if;
     end if;
@@ -1000,7 +1003,7 @@ begin
   perform app.enter('musebook_jobs', null);
   return query
     select d.id, d.owner_user_id, d.agent_identity_id, c.slug, d.scopes,
-           d.requires_approval, d.state, d.expires_at, d.quarantined_until
+           d.requires_approval, d.state::text, d.expires_at, d.quarantined_until
       from public.delegations d
       join public.connectors c on c.id = d.connector_id and c.is_enabled
      where d.id = p_delegation_id;
@@ -1274,7 +1277,7 @@ begin
       (actor, actor_user_id, actor_agent_id, delegation_id, action,
        target_kind, target_id, after_state)
     values
-      ('owner_agent', p_owner_user_id, p_agent_identity_id, p_delegation_id, 'follow',
+      ('owner_agent'::actor_class, p_owner_user_id, p_agent_identity_id, p_delegation_id, 'follow',
        'user', v_target,
        jsonb_build_object('author', p_author_handle, 'notify', p_notify));
   else
@@ -1285,7 +1288,7 @@ begin
       (actor, actor_user_id, actor_agent_id, delegation_id, action,
        target_kind, target_id, after_state)
     values
-      ('owner_agent', p_owner_user_id, p_agent_identity_id, p_delegation_id, 'unfollow',
+      ('owner_agent'::actor_class, p_owner_user_id, p_agent_identity_id, p_delegation_id, 'unfollow',
        'user', v_target,
        jsonb_build_object('author', p_author_handle));
   end if;
@@ -1334,3 +1337,29 @@ revoke all on function app.analytics_for_owner(uuid, uuid, date, date, text[])
   from public, anon, authenticated;
 grant execute on function app.analytics_for_owner(uuid, uuid, date, date, text[])
   to musebook_worker;
+
+-- ------------------------------------------------- M9 privilege wiring
+-- Tables the M9 helpers touch that migration 91300's matrix had not yet
+-- granted to the planes the helpers enter. Same one-policy-per-role shape.
+grant select, update on public.agent_post_schedules to musebook_jobs;
+create policy agent_post_schedules_jobs_all on public.agent_post_schedules
+  for all to musebook_jobs using (true) with check (true);
+
+-- delegation_for_drafting folds the owner's defaults into one row; the helper
+-- already constrains to the schedule's own delegation, so the jobs plane reads
+-- the table wholesale (defaults are not secret material — license, price,
+-- opt-outs are also what the pricing endpoints publish).
+grant select on public.creator_publishing_defaults to musebook_jobs;
+create policy creator_publishing_defaults_jobs_read
+  on public.creator_publishing_defaults for select to musebook_jobs using (true);
+
+-- get_pricing's author arm and the asset/artifact readers publish these
+-- columns; the public_reader plane needs the rows the tools are allowed to
+-- return.
+grant select on public.creator_publishing_defaults to musebook_public_reader;
+create policy creator_publishing_defaults_public_reader_read
+  on public.creator_publishing_defaults for select to musebook_public_reader using (true);
+
+grant select on public.assets to musebook_public_reader;
+create policy assets_public_reader_read on public.assets
+  for select to musebook_public_reader using (true);

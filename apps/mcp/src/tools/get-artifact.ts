@@ -37,10 +37,10 @@ export function registerGetArtifact(server: McpServer, env: Env, ctx: ExecutionC
       const actor = await resolveActorFromMcp(toolCtx, env, ctx);
       const sql = cached(env);
       try {
-        const rows = (await sql.unsafe(
-          `select * from app.artifact_for_read($1::uuid, $2::text)`,
-          [args.artifact_id ?? null, args.post_slug ?? null],
-        )) as ArtifactRow[];
+        const rows = (await sql.unsafe(`select * from app.artifact_for_read($1::uuid, $2::text)`, [
+          args.artifact_id ?? null,
+          args.post_slug ?? null,
+        ])) as ArtifactRow[];
         const a = rows[0];
         if (a === undefined || !a.parent_published) return notFound("artifact");
 
@@ -61,10 +61,9 @@ export function registerGetArtifact(server: McpServer, env: Env, ctx: ExecutionC
         ];
 
         if (args.include_source && a.source_asset_id !== null) {
-          const assets = (await sql.unsafe(
-            `select * from app.asset_for_download($1::uuid)`,
-            [a.source_asset_id],
-          )) as {
+          const assets = (await sql.unsafe(`select * from app.asset_for_download($1::uuid)`, [
+            a.source_asset_id,
+          ])) as {
             asset_id: string;
             url: string;
             storage: string;

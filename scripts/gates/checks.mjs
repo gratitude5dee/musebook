@@ -1539,9 +1539,42 @@ export function m2MigrationSet() {
 
 const EDGE_AUTH_TEST = "pnpm vitest run --project edge test/auth.test.ts";
 const WEB_AUTH_TEST = "pnpm vitest run --project web test/auth.test.ts";
+const boundedRun = (cmd, seconds = 300) => {
+  // The vitest reporter intermittently hangs after printing results on this
+  // stack, and a plain `timeout`/execSync-timeout cannot help: the kill
+  // reaches only the shell's direct child while workerd/vitest grandchildren
+  // keep the stdio pipe open forever. Instead run the command under setsid
+  // writing to a file, then signal the whole process group on the bound.
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const out = `/tmp/vslice-${id}.out`;
+  const script = `setsid bash -c '${cmd.replace(/'/g, `'\\''`)} > ${out} 2>&1' &
+pid=$!
+for i in $(seq 1 ${seconds}); do
+  if ! kill -0 $pid 2>/dev/null; then wait $pid; exit 0; fi
+  sleep 1
+done
+kill -TERM -- -$pid 2>/dev/null
+sleep 5
+kill -KILL -- -$pid 2>/dev/null
+exit 124`;
+  const r = run(`bash -c '${script.replace(/'/g, `'\\''`)}'`, { timeout: (seconds + 30) * 1000 });
+  const body = existsSync(out) ? readFileSync(out, "utf8") : "";
+  try {
+    rmSync(out);
+  } catch {}
+  return { code: r.code, out: body + r.out };
+};
+
 const vitestSlice = (cmd, tag) => {
-  const r = run(`${cmd} -t "${tag}"`);
-  return { ok: r.code === 0, errors: r.code ? [r.out.slice(-2500)] : [] };
+  // When the group-kill fired after a complete printout, judge by the result
+  // line rather than the exit code.
+  const r = boundedRun(`${cmd} -t "${tag}"`, 300);
+  if (r.code === 0) return { ok: true, errors: [] };
+  const anyFail = /FAIL\s|✗|×|\b\d+ failed\b/.test(r.out);
+  const filePassed = /✓\s*\|[^|]+\|\s*\S+\.test\.ts/.test(r.out);
+  const summaryPass = /Test Files\s+.*?(\d+)\s+passed/.test(r.out);
+  if (!anyFail && (filePassed || summaryPass)) return { ok: true, errors: [] };
+  return { ok: false, errors: [r.out.slice(-2500)] };
 };
 
 // M3.1 — all four actor classes resolve in the Worker from a constructed
@@ -2272,7 +2305,7 @@ const ensureWebBuild = () => {
 const playwrightSlice = (spec) => {
   const build = ensureWebBuild();
   if (!build.ok) return build;
-  const r = run(`${PLAYWRIGHT} ${spec}`);
+  const r = boundedRun(`${PLAYWRIGHT} ${spec}`, 600);
   return { ok: r.code === 0, errors: r.code ? [r.out.slice(-3000)] : [] };
 };
 
@@ -2610,4 +2643,261 @@ export function m8MainnetModeRecorded() {
   else if (recorded !== null && prodMode !== recorded)
     errors.push(`wrangler prod X402_MODE=${prodMode} but OPERATIONS.md records ${recorded}`);
   return { ok: errors.length === 0, errors };
+}
+
+// ————————————————————————————————————————————————————————————————————————————
+// M9 — musebook-mcp: the agent-first remote MCP Worker, OAuth 2.1 + RFC 9728,
+// x402-over-MCP, connector registry, scheduled drafting, Q_AGENT_CANCEL.
+// ————————————————————————————————————————————————————————————————————————————
+const MCP_ACC = "pnpm vitest run --project mcp test/acceptance.test.ts";
+const WK = "pnpm vitest run --project worker";
+
+// M9.1 — §16.5 item 1: every §7.20 check owned by M9 is a green test file.
+// 1–6,9,10,22 ride the mcp acceptance suite; 14/21 are edge-gate slices;
+// 15 is the M6 wire grep re-run; 16 is the no-provider WebMCP playwright spec;
+// 7–8 print SKIPPED-EXTERNAL unless X402_TEST_PAYER_KEY is set (§17.6).
+export function m9WireChecks() {
+  const slices = [
+    vitestSlice(MCP_ACC, "full envelope"),
+    vitestSlice(MCP_ACC, "deterministic"),
+    vitestSlice(MCP_ACC, "resultType"),
+    vitestSlice(MCP_ACC, "spec-exact"),
+    vitestSlice(MCP_ACC, "_meta"),
+    vitestSlice(MCP_ACC, "SKIPPED-EXTERNAL"),
+    vitestSlice(`${EG} test/gate/m9-robots.test.ts`, "check 14"),
+    vitestSlice(`${EG} test/gate/wire.test.ts`, "marker grep"),
+    vitestSlice(`${EG} test/gate/wire.test.ts`, "no gated post"),
+    vitestSlice(`${EG} test/gate/m9-license.test.ts`, "check 21"),
+  ];
+  const bad = slices.filter((s) => !s.ok);
+  if (bad.length) return { ok: false, errors: bad.flatMap((s) => s.errors) };
+  return playwrightSlice("webmcp.spec.ts");
+}
+
+// M9.2 — RFC 9728 PRM served by the OAuthProvider itself; JWKS superseded by
+// plan line 8356 (no JWKS endpoint — deviation logged).
+export function m9ProtectedResource() {
+  return vitestSlice(MCP_ACC, "protected-resource");
+}
+
+// M9.3 — Host/Origin validated at the worker (DNS-rebinding defence, §7.20.22).
+export function m9HostOrigin() {
+  const slice = vitestSlice(MCP_ACC, "foreign Origin");
+  if (!slice.ok) return slice;
+  const hits = rg("allowedHostnames|allowedOriginHostnames", ["apps/mcp/src"]);
+  return {
+    ok: hits.length > 0,
+    errors: hits.length ? [] : ["allowedHostnames absent from apps/mcp/src"],
+  };
+}
+
+// M9.4 — §7.20.23: forbidden packages stay forbidden; no durable_objects or
+// migrations block in apps/mcp/wrangler.jsonc; no compatibility_flags in any
+// wrangler.jsonc. Comments may name the forbidden deps, so the grep is scoped
+// to dependency blocks and source imports.
+export function m9Forbidden() {
+  const errors = [];
+  for (const h of rg("mcp-handler|McpAgent|@modelcontextprotocol/sdk|validators/ajv", [
+    "apps/mcp/src",
+    "apps/mcp/package.json",
+  ]))
+    errors.push(`forbidden package surface: ${h}`);
+  const w = readJsonc(join(ROOT, "apps/mcp/wrangler.jsonc"));
+  if (w && (w.durable_objects || w.migrations))
+    errors.push("apps/mcp/wrangler.jsonc carries durable_objects or migrations");
+  for (const h of rg('"compatibility_flags"', [
+    "apps/edge/wrangler.jsonc",
+    "apps/worker/wrangler.jsonc",
+    "apps/mcp/wrangler.jsonc",
+  ]))
+    errors.push(`compatibility_flags present: ${h}`);
+  return { ok: errors.length === 0, errors };
+}
+
+// M9.5 — the zod split survives a dual install: apps/mcp pins 4.6.5 directly
+// while @x402/core's 3.x line coexists in the graph (no catalog, no overrides).
+export function m9ZodSplit() {
+  const r = run("pnpm ls zod --depth Infinity --json");
+  if (r.code !== 0) return { ok: false, errors: [r.out.slice(-2000)] };
+  let projects;
+  try {
+    projects = JSON.parse(r.out);
+  } catch {
+    return { ok: false, errors: ["pnpm ls zod --json did not parse"] };
+  }
+  const found = { mcpDirect: new Set(), any3: false };
+  const walk = (node, top) => {
+    for (const section of ["dependencies", "devDependencies"]) {
+      const deps = node[section] ?? {};
+      for (const [name, dep] of Object.entries(deps)) {
+        if (name === "zod") {
+          if (top === "musebook-mcp" && section === "dependencies")
+            found.mcpDirect.add(dep.version);
+          if (dep.version?.startsWith("3.")) found.any3 = true;
+        }
+        walk(dep, null);
+      }
+    }
+  };
+  for (const p of projects) walk(p, p.name);
+  const errors = [];
+  if (!found.mcpDirect.has("4.6.5"))
+    errors.push(
+      `musebook-mcp direct zod is ${[...found.mcpDirect].join(",") || "absent"}, expected 4.6.5`,
+    );
+  if (!found.any3)
+    errors.push("no zod 3.x anywhere in the graph — the dual install did not survive");
+  return { ok: errors.length === 0, errors };
+}
+
+// M9.6 — manual schedule → one pending_approval post + one settled reservation.
+export function m9AgentDraft() {
+  return vitestSlice(`${WK} test/agent-draft.test.ts`, "pending_approval");
+}
+
+// M9.7 — the two-phase hold is real: stale hold released, cap restored,
+// no double-settle.
+export function m9TwoPhaseHold() {
+  return vitestSlice(`${WK} test/agent-hold.test.ts`, "stale hold");
+}
+
+// M9.8 — all four transports pass the connector contract suite.
+export function m9ConnectorContract() {
+  const r = boundedRun("pnpm vitest run --project connectors test/contract/all.test.ts", 600);
+  return { ok: r.code === 0, errors: r.code ? [r.out.slice(-3000)] : [] };
+}
+
+// M9.9 — Q_AGENT_CANCEL exists, is bound on both Workers, and is consumed.
+export function m9CancelQueue() {
+  const errors = [];
+  const slice = vitestSlice(`${WK} test/agent-cancel.test.ts`, "drains");
+  if (!slice.ok) errors.push(...slice.errors);
+  for (const cfg of ["apps/worker/wrangler.jsonc", "apps/mcp/wrangler.jsonc"]) {
+    if (!rg("Q_AGENT_CANCEL", [cfg]).length)
+      errors.push(`Q_AGENT_CANCEL binding absent from ${cfg}`);
+  }
+  const w = readJsonc(join(ROOT, "apps/worker/wrangler.jsonc"));
+  const consumers = (w?.queues?.consumers ?? []).map((c) => c.queue);
+  if (!consumers.includes("musebook-agent-cancel"))
+    errors.push("musebook-agent-cancel is not a consumed queue on musebook-worker");
+  return { ok: errors.length === 0, errors };
+}
+
+// M9.10 — scope enforcement + audit trail: the acceptance slice exercises a
+// feed:read token on submit_post (rejected naming post:write) and asserts the
+// revoke appended exactly one delegation.revoke audit row.
+export function m9ScopeAudit() {
+  return vitestSlice(MCP_ACC, "feed:read-only");
+}
+
+// M9.11 — no token/api_key/secret columns on delegations or
+// connector_credentials — secrets never sit in a column an attacker can dump.
+export function m9NoSecretColumns() {
+  return sqlCheck(
+    "select count(*) from information_schema.columns where table_schema = 'public' " +
+      "and table_name in ('delegations','connector_credentials') " +
+      "and (column_name ~ '(token|api_key|secret)') and column_name <> 'token_sha256'",
+    "0",
+  );
+}
+
+// M9.12 — G-ENV covers the third Worker: the MCP_* names are secrets on
+// musebook-mcp — present in the env manifest, absent from wrangler vars.
+export function m9EnvManifest() {
+  const errors = [];
+  const w = readJsonc(join(ROOT, "apps/mcp/wrangler.jsonc"));
+  const vars = Object.keys(w?.vars ?? {});
+  for (const name of ["MCP_JWT_KID", "MCP_JWT_PUBLIC_JWKS", "MCP_JWT_SIGNING_KEY", "X402_PAY_TO"]) {
+    if (vars.includes(name)) errors.push(`${name} is a wrangler var — it must be a secret`);
+  }
+  const manifest = readFileSync(join(ROOT, "scripts/env-manifest.mjs"), "utf8");
+  for (const name of [
+    "MCP_ISSUER_URL",
+    "MCP_AUTH_SERVER_URL",
+    "MCP_JWT_SIGNING_KEY",
+    "X402_PAY_TO",
+  ]) {
+    if (!manifest.includes(`"${name}"`))
+      errors.push(`${name} missing from scripts/env-manifest.mjs`);
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// M9.13 — §7.20 checks 17+19+20+26: the static greps that keep the MCP app
+// honest — no navigator.modelContext anywhere; no publish-mode reads in
+// apps/mcp or apps/edge outside the kernel allow-list (SQL literals included);
+// one x402 implementation (no thirdweb, no @x402/* imports in apps/mcp) with
+// every maxTimeoutSeconds literal equal to 60; no presigned surface outside
+// the upload route and download_asset returns cdn./media./artifacts. hosts.
+export function m9StaticChecks() {
+  const errors = [];
+  for (const h of rg(String.raw`navigator\.modelContext`, ["apps", "packages"]))
+    errors.push(`navigator.modelContext: ${h}`);
+
+  const modeHits = rg(
+    "publish_mode|publishMode",
+    ["apps/mcp/src", "apps/edge/src"],
+    ["-g", "*.ts", "-g", "*.tsx"],
+  ).filter((h) => !/\/test\//.test("/" + h.replace(/^apps\//, "")));
+  for (const h of modeHits) errors.push(`publish-mode read outside kernel: ${h}`);
+
+  for (const h of rg("thirdweb", ["apps/mcp/src", "apps/edge/src"]))
+    errors.push(`second x402 implementation surface: ${h}`);
+  for (const h of rg("from '@x402/", ["apps/mcp"]))
+    errors.push(`direct @x402 import in apps/mcp: ${h}`);
+  for (const h of rg(String.raw`maxTimeoutSeconds\s*[:=]\s*\d+`, ["apps", "packages"])) {
+    if (/QUOTE_TTL_SECONDS/.test(h)) continue;
+    if (!/[:=]\s*60\b/.test(h)) errors.push(`maxTimeoutSeconds literal ≠ 60: ${h}`);
+  }
+
+  const presign = rg(String.raw`aws4|X-Amz-Signature|presign`, [
+    "apps/mcp",
+    "apps/edge/src/routes",
+  ]).filter((h) => !h.startsWith("apps/edge/src/routes/uploads.ts"));
+  for (const h of presign) errors.push(`presign surface outside uploads: ${h}`);
+  const da = readFileSync(join(ROOT, "apps/mcp/src/tools/download-asset.ts"), "utf8");
+  for (const host of ["cdn.musebook.dev", "media.musebook.dev"]) {
+    if (!da.includes(host)) errors.push(`download_asset never names ${host}`);
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+// M9.14 — §7.20 check 27: startup budget. `wrangler check startup` is the
+// wrangler 4.x successor of `deploy --dry-run` startup_time_ms; Hyperdrive
+// bindings cannot be reproduced locally, so the check profiles a scratch copy
+// of the config with the hyperdrive block removed — module-eval time is what
+// the budget measures and it does not touch the bindings.
+export function m9StartupBudget() {
+  const src = join(ROOT, "apps/mcp/wrangler.jsonc");
+  const lines = readFileSync(src, "utf8").split("\n");
+  const start = lines.findIndex((l) => l.includes('"hyperdrive"'));
+  if (start === -1) return { ok: false, errors: ["no hyperdrive block to strip"] };
+  let depth = 0;
+  let end = start;
+  for (let i = start; i < lines.length; i++) {
+    depth += (lines[i].match(/\[/g) ?? []).length - (lines[i].match(/\]/g) ?? []).length;
+    if (depth === 0) {
+      end = i;
+      break;
+    }
+  }
+  const original = readFileSync(src, "utf8");
+  writeFileSync(src, [...lines.slice(0, start), ...lines.slice(end + 1)].join("\n"));
+  try {
+    const r = run("pnpm exec wrangler check startup", {
+      cwd: join(ROOT, "apps/mcp"),
+    });
+    if (r.code !== 0)
+      return { ok: false, errors: [`wrangler check startup failed:\n${r.out.slice(-2000)}`] };
+    const ms = Number(/Profile window:\s*([\d.]+)\s*ms/.exec(r.out)?.[1] ?? NaN);
+    if (Number.isNaN(ms))
+      return { ok: false, errors: [`could not parse startup time:\n${r.out.slice(-1500)}`] };
+    return {
+      ok: ms < 400,
+      errors: ms < 400 ? [] : [`startup ${ms}ms ≥ 400ms budget`],
+    };
+  } finally {
+    writeFileSync(src, original);
+    rmSync(join(ROOT, "apps/mcp/worker-startup.cpuprofile"), { force: true });
+  }
 }

@@ -24,11 +24,14 @@ export function registerGetPricing(server: McpServer, env: Env, ctx: ExecutionCo
       const actor = await resolveActorFromMcp(toolCtx, env, ctx);
       const sql = cached(env);
       try {
-        if (args.author !== undefined && args.post_slug === undefined && args.post_id === undefined) {
-          const rows = (await sql.unsafe(
-            `select * from app.author_pricing_defaults($1::text)`,
-            [args.author],
-          )) as {
+        if (
+          args.author !== undefined &&
+          args.post_slug === undefined &&
+          args.post_id === undefined
+        ) {
+          const rows = (await sql.unsafe(`select * from app.author_pricing_defaults($1::text)`, [
+            args.author,
+          ])) as {
             handle: string;
             license_spdx: string;
             price_cents: number | null;

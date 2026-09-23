@@ -18,7 +18,9 @@ export function recordAgentEvent(env: Env, ctx: ExecutionContext, e: AgentEvent)
   void ctx;
   try {
     env.TELEMETRY.writeDataPoint({
-      indexes: [e.actor.plane === "agent" ? (e.actor.agentIdentityId ?? "anonymous-mcp") : "anonymous-mcp"],
+      indexes: [
+        e.actor.plane === "agent" ? (e.actor.agentIdentityId ?? "anonymous-mcp") : "anonymous-mcp",
+      ],
       blobs: [e.tool, e.outcome, e.surface ?? "mcp", e.contentHash ?? "", e.postId ?? ""],
       doubles: [e.n ?? 1, e.position ?? 0, 1 /* sample_rate */],
     });

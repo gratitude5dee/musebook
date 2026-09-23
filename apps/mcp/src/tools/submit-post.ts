@@ -34,7 +34,8 @@ export function registerSubmitPost(server: McpServer, env: Env, ctx: ExecutionCo
       const actor = await resolveActorFromMcp(toolCtx, env, ctx);
       const denied = requireScope(actor, "post:write");
       if (denied !== null) return denied;
-      if (actor.class !== "owner_agent") return errorResult("unauthenticated", "A delegation is required.");
+      if (actor.class !== "owner_agent")
+        return errorResult("unauthenticated", "A delegation is required.");
 
       const wantsPaid = args.access !== "open";
       if (wantsPaid || args.publish) {
@@ -76,7 +77,8 @@ export function registerSubmitPost(server: McpServer, env: Env, ctx: ExecutionCo
           ],
         )) as SubmitResult[];
         const r = rows[0];
-        if (r === undefined) return errorResult("submit_failed", "insert_draft_post returned nothing.");
+        if (r === undefined)
+          return errorResult("submit_failed", "insert_draft_post returned nothing.");
 
         recordAgentEvent(env, ctx, {
           actor,
@@ -92,7 +94,8 @@ export function registerSubmitPost(server: McpServer, env: Env, ctx: ExecutionCo
           job_id: r.job_id,
           content_hash: hash,
           intent: wantsPaid,
-          bridge_url: r.approval_id !== null ? `https://musebook.dev/bridge/${r.approval_id}` : null,
+          bridge_url:
+            r.approval_id !== null ? `https://musebook.dev/bridge/${r.approval_id}` : null,
         };
         return {
           content: [{ type: "text" as const, text: JSON.stringify(body) }],

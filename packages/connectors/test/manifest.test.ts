@@ -4,10 +4,7 @@ import { ConnectorManifestZ, canonicalize } from "../src/manifest.js";
 import { manifestCanDraft, parseManifest } from "../src/registry.js";
 import { manifestFor } from "./contract/harnesses.js";
 
-const BASE = manifestFor(
-  { kind: "mcp_http", url: "https://mcp.example/mcp" },
-  ["feed.read"],
-);
+const BASE = manifestFor({ kind: "mcp_http", url: "https://mcp.example/mcp" }, ["feed.read"]);
 
 describe("ConnectorManifestZ", () => {
   it("rejects an unknown top-level key (check 1)", () => {
@@ -46,10 +43,10 @@ describe("ConnectorManifestZ", () => {
 
 describe("manifestCanDraft (10.4.4 check 7)", () => {
   it("rejects post.draft on an a2a_card-only manifest", () => {
-    const m = manifestFor(
-      { kind: "a2a_card", agentCardUrl: "https://a2a.example/card.json" },
-      ["post.draft", "feed.read"],
-    );
+    const m = manifestFor({ kind: "a2a_card", agentCardUrl: "https://a2a.example/card.json" }, [
+      "post.draft",
+      "feed.read",
+    ]);
     expect(manifestCanDraft(m)).toBe(false);
   });
 
@@ -65,10 +62,9 @@ describe("manifestCanDraft (10.4.4 check 7)", () => {
   });
 
   it("allows a read-only a2a manifest", () => {
-    const m = manifestFor(
-      { kind: "a2a_card", agentCardUrl: "https://a2a.example/card.json" },
-      ["feed.read"],
-    );
+    const m = manifestFor({ kind: "a2a_card", agentCardUrl: "https://a2a.example/card.json" }, [
+      "feed.read",
+    ]);
     expect(manifestCanDraft(m)).toBe(true);
   });
 });

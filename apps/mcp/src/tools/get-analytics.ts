@@ -39,7 +39,8 @@ export function registerGetAnalytics(server: McpServer, env: Env, ctx: Execution
       const actor = await resolveActorFromMcp(toolCtx, env, ctx);
       const denied = requireScope(actor, "analytics:read");
       if (denied !== null) return denied;
-      if (actor.class !== "owner_agent") return errorResult("unauthenticated", "A delegation is required.");
+      if (actor.class !== "owner_agent")
+        return errorResult("unauthenticated", "A delegation is required.");
 
       const wanted = args.metrics ?? ALL_METRICS;
       const unmapped = wanted.filter((m) => !(m in METRIC_TO_ACTION));

@@ -22,16 +22,12 @@ export const TransportZ = z.discriminatedUnion("kind", [
   }),
   z.object({
     kind: z.literal("bridge_token"),
-    runtime: z.enum([
-      "openclaw",
-      "hermes",
-      "codex-cli",
-      "claude-code",
-      "acp",
-      "generic",
-    ]),
+    runtime: z.enum(["openclaw", "hermes", "codex-cli", "claude-code", "acp", "generic"]),
     /** Minimum @musebook/bridge version this runtime adapter needs. */
-    minBridgeVersion: z.string().regex(/^\d+\.\d+\.\d+$/).default("1.0.0"),
+    minBridgeVersion: z
+      .string()
+      .regex(/^\d+\.\d+\.\d+$/)
+      .default("1.0.0"),
   }),
 ]);
 
@@ -40,11 +36,17 @@ export const AuthZ = z.discriminatedUnion("kind", [
     kind: z.literal("oauth2"),
     resource: z.url({ protocol: /^https$/ }),
     scopes: z.array(z.string().max(64)).max(32),
-    authorizationServers: z.array(z.url({ protocol: /^https$/ })).max(4).optional(),
+    authorizationServers: z
+      .array(z.url({ protocol: /^https$/ }))
+      .max(4)
+      .optional(),
   }),
   z.object({
     kind: z.literal("bearer"),
-    header: z.string().regex(/^[A-Za-z][A-Za-z0-9-]{0,40}$/).default("Authorization"),
+    header: z
+      .string()
+      .regex(/^[A-Za-z][A-Za-z0-9-]{0,40}$/)
+      .default("Authorization"),
     valuePrefix: z.string().max(16).default("Bearer "),
   }),
   z.object({ kind: z.literal("bridge_token") }),
@@ -74,8 +76,14 @@ export const ConnectorManifestZ = z.strictObject({
   }),
   /** Suggested defaults for the mint UI, in USDC atomic units (6 decimals). */
   spendDefaults: z.object({
-    perActionCapAtomic: z.string().regex(/^[0-9]{1,30}$/).default("500000"),
-    windowCapAtomic: z.string().regex(/^[0-9]{1,30}$/).default("5000000"),
+    perActionCapAtomic: z
+      .string()
+      .regex(/^[0-9]{1,30}$/)
+      .default("500000"),
+    windowCapAtomic: z
+      .string()
+      .regex(/^[0-9]{1,30}$/)
+      .default("5000000"),
     windowHours: z.int().min(1).max(720).default(24),
   }),
   attribution: z.object({
@@ -100,8 +108,7 @@ export type ConnectorManifest = z.infer<typeof ConnectorManifestZ>;
 
 /** Deterministic bytes for signing and for the manifest hash. Keys sorted, no spaces. */
 export function canonicalize(value: unknown): string {
-  if (value === null || typeof value !== "object")
-    return JSON.stringify(value) ?? "null";
+  if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "null";
   if (Array.isArray(value)) return `[${value.map(canonicalize).join(",")}]`;
   const entries = Object.entries(value as Record<string, unknown>)
     .filter(([, v]) => v !== undefined)

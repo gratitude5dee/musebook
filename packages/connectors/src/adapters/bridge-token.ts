@@ -29,11 +29,7 @@ export type BridgeOp =
   | { kind: "revoke"; reason: string };
 
 export type BridgeErrorCode =
-  | "runtime_not_found"
-  | "runtime_timeout"
-  | "runtime_error"
-  | "unsupported_op"
-  | "output_too_large";
+  "runtime_not_found" | "runtime_timeout" | "runtime_error" | "unsupported_op" | "output_too_large";
 
 /** 10.6.6: a submitted bridge draft has 30 minutes before the reaper releases it. */
 export const BRIDGE_TASK_EXPECTED_MS = 30 * 60 * 1000;

@@ -7,11 +7,11 @@ import postgres from "postgres";
 export type Sql = ReturnType<typeof postgres>;
 
 export function fresh(env: Env): Sql {
-  return postgres(env.HYPERDRIVE_FRESH.connectionString, { max: 5, fetch_types: false });
+  return postgres(env.HYPERDRIVE_FRESH.connectionString, { max: 5 });
 }
 
 export function cached(env: Env): Sql {
-  return postgres(env.HYPERDRIVE_CACHED.connectionString, { max: 5, fetch_types: false });
+  return postgres(env.HYPERDRIVE_CACHED.connectionString, { max: 5 });
 }
 
 export function release(ctx: ExecutionContext, ...clients: Sql[]): void {
@@ -34,8 +34,12 @@ export interface DbClient {
 
 export function asDb(sql: Sql): DbClient {
   return {
-    query: <T = Record<string, unknown>>(text: string, params?: readonly unknown[]) =>
-      sql.unsafe(text, [...(params ?? [])] as never[]) as unknown as Promise<{ rows: T[] }>,
+    query: async <T = Record<string, unknown>>(text: string, params?: readonly unknown[]) => {
+      // postgres.js resolves to the row array itself; pg resolves to {rows}.
+      // The shared DbClient contract is pg-shaped, so wrap here.
+      const rows = (await sql.unsafe(text, [...(params ?? [])] as never[])) as unknown as T[];
+      return { rows };
+    },
     end: () => sql.end().then(() => undefined),
   };
 }

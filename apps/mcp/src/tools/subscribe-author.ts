@@ -23,7 +23,8 @@ export function registerSubscribeAuthor(server: McpServer, env: Env, ctx: Execut
       const actor = await resolveActorFromMcp(toolCtx, env, ctx);
       const denied = requireScope(actor, "graph:write");
       if (denied !== null) return denied;
-      if (actor.class !== "owner_agent") return errorResult("unauthenticated", "A delegation is required.");
+      if (actor.class !== "owner_agent")
+        return errorResult("unauthenticated", "A delegation is required.");
 
       const sql = fresh(env);
       try {
@@ -40,7 +41,10 @@ export function registerSubscribeAuthor(server: McpServer, env: Env, ctx: Execut
         )) as { r: { ok: boolean; error?: string } }[];
         const r = rows[0]?.r;
         if (r === undefined || !r.ok) {
-          return errorResult(r?.error ?? "follow_failed", `Could not ${args.action}: ${r?.error ?? "unknown"}.`);
+          return errorResult(
+            r?.error ?? "follow_failed",
+            `Could not ${args.action}: ${r?.error ?? "unknown"}.`,
+          );
         }
         recordAgentEvent(env, ctx, {
           actor,

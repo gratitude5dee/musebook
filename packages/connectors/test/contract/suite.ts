@@ -88,7 +88,9 @@ export function runConnectorContract(h: ContractHarness): void {
       const c = h.make(hostile);
       const r = await c.health(h.ctx());
       expect(r.ok).toBe(false);
-      expect(r.detail).toMatch(/^egress_(https_only|host_not_allowed|private_address|credentials_in_url)$/);
+      expect(r.detail).toMatch(
+        /^egress_(https_only|host_not_allowed|private_address|credentials_in_url)$/,
+      );
       expect(h.requestCount()).toBe(0);
     });
   } else {
@@ -123,10 +125,7 @@ export function runConnectorContract(h: ContractHarness): void {
 
   it(`${h.name}: the credential never appears in any returned value`, async () => {
     const c = h.make();
-    const out = [
-      await c.handshake(h.ctx(), h.handshakeRequest()),
-      await c.health(h.ctx()),
-    ];
+    const out = [await c.handshake(h.ctx(), h.handshakeRequest()), await c.health(h.ctx())];
     expect(JSON.stringify(out)).not.toContain("SEED_CONNECTOR_CREDENTIAL");
   });
 }
