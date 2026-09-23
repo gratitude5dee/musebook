@@ -3931,7 +3931,40 @@ export async function m12FacilitatorSupported() {
   const network = process.env.X402_NETWORK;
   if (!url || !network)
     return { ok: false, errors, blocked: "X402_FACILITATOR_URL/X402_NETWORK unset (H10)" };
+  const headers = {};
+  if (url.includes("cdp.coinbase.com")) {
+    const kid = process.env.CDP_API_KEY_ID;
+    const secret = process.env.CDP_API_KEY_SECRET;
+    if (!kid || !secret)
+      return {
+        ok: false,
+        errors,
+        blocked: "CDP facilitator configured but CDP_API_KEY_ID/CDP_API_KEY_SECRET unset (H10)",
+      };
+    const mod = await import(
+      new URL("../../packages/x402/src/cdp-jwt.ts", import.meta.url).href
+    ).catch(() =>
+      import(new URL("../../packages/x402/dist/cdp-jwt.js", import.meta.url).href).catch(
+        () => null,
+      ),
+    );
+    if (!mod)
+      return {
+        ok: false,
+        errors,
+        blocked: "cannot load @musebook/x402 cdp-jwt (src ts or dist build)",
+      };
+    const auth = await mod
+      .makeCdpAuthHeaders(
+        kid,
+        secret,
+      )("supported")
+      .catch((e) => ({ __err: e.message }));
+    if (auth.__err) return { ok: false, errors, blocked: `CDP JWT signing failed: ${auth.__err}` };
+    Object.assign(headers, auth);
+  }
   const res = await fetch(`${url.replace(/\/$/, "")}/supported`, {
+    headers,
     signal: AbortSignal.timeout(10000),
   }).catch((e) => e);
   if (res instanceof Error || !res.ok)
