@@ -3931,19 +3931,27 @@ export function m12AllGatesGreen() {
 // landed yet.
 export function m12MainnetSettlement() {
   const errors = [];
-  if (!process.env.SUPABASE_DB_URL)
-    return { ok: false, errors, blocked: "SUPABASE_DB_URL unset (prod probe)" };
-  if (/127\.0\.0\.1|localhost/.test(process.env.SUPABASE_DB_URL))
+  // Same scoped-prod pattern as m0PgCron: the suite's SUPABASE_DB_URL stays
+  // loopback; the prod probe reads SUPABASE_PROD_DB_URL when present.
+  const url = process.env.SUPABASE_PROD_DB_URL ?? process.env.SUPABASE_DB_URL;
+  if (!url)
     return {
       ok: false,
       errors,
-      blocked: "SUPABASE_DB_URL is loopback — point it at the prod project for this check",
+      blocked: "SUPABASE_PROD_DB_URL/SUPABASE_DB_URL unset (prod probe)",
+    };
+  if (/127\.0\.0\.1|localhost/.test(url))
+    return {
+      ok: false,
+      errors,
+      blocked: "SUPABASE_PROD_DB_URL/SUPABASE_DB_URL is loopback — point it at the prod project for this check",
     };
   const { r, cmd, blocked } = psqlCmd(
     `select transaction is not null and transaction <> '' and ` +
       `revenue_share_version is not null and facilitator_url is not null ` +
       `from public.x402_settlements where network='eip155:8453' ` +
       `order by created_at desc limit 1`,
+    url,
   );
   if (blocked) return { ok: false, errors, blocked };
   const res = run(cmd);
