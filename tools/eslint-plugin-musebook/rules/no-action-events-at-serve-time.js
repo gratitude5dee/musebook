@@ -2,8 +2,14 @@
 // A serve path (apps/web, apps/edge, apps/mcp) that names the table is a
 // telemetry write on the request path — telemetry goes through TELEMETRY
 // (Analytics Engine), never through a synchronous SQL write at serve time.
+// The one sanctioned exception is the §13.4.4 ingest RPC itself:
+// `app.ingest_action_events` is the Postgres-side envelope that applies the
+// purity/drop rules before appending — calling it is not a raw table access.
 const NEEDLE = "action_events";
+const INGEST_RPC = "ingest_action_events";
 const SERVE_SCOPES = ["apps/web/", "apps/edge/", "apps/mcp/"];
+
+const mentionsTable = (text) => text.replaceAll(INGEST_RPC, "").includes(NEEDLE);
 
 /** @type {import("eslint").Rule.RuleModule} */
 export default {
@@ -29,10 +35,10 @@ export default {
         if (node.name === NEEDLE) report(node);
       },
       Literal(node) {
-        if (typeof node.value === "string" && node.value.includes(NEEDLE)) report(node);
+        if (typeof node.value === "string" && mentionsTable(node.value)) report(node);
       },
       TemplateElement(node) {
-        if (node.value.raw.includes(NEEDLE)) report(node);
+        if (mentionsTable(node.value.raw)) report(node);
       },
     };
   },

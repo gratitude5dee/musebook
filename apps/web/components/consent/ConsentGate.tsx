@@ -4,6 +4,7 @@
 // declining degrades the product to recency ordering, never breaks it.
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { setTelemetryEnabled } from "@/lib/telemetry/collector";
 
@@ -52,9 +53,9 @@ export function ConsentGate({ initiallyRequired }: { initiallyRequired: boolean 
         <button onClick={() => void choose(false)} className="rounded border px-3 py-1.5 text-sm">
           Decline
         </button>
-        <a href="/legal/privacy" className="self-center text-sm underline">
+        <Link href="/legal/privacy" className="self-center text-sm underline">
           Privacy policy
-        </a>
+        </Link>
       </div>
     </div>
   );

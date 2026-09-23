@@ -260,7 +260,7 @@ export default tseslint.config(
     // Gate fixtures deliberately import modules that do not exist — they are
     // lint fixtures, not typechecked code. Root *.mjs configs sit outside
     // every tsconfig, so the project service cannot type-check them either.
-    files: ["**/test/fixtures/**", "apps/*/postcss.config.mjs"],
+    files: ["**/test/fixtures/**", "apps/*/postcss.config.mjs", "apps/*/scripts/*.mjs"],
     ...tseslint.configs.disableTypeChecked,
   },
 

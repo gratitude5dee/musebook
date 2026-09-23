@@ -28,6 +28,10 @@ tester.run("no-action-events-at-serve-time", noActionEventsAtServeTime, {
       filename: "packages/muse-mixer/src/scorers/s.ts",
       code: `const w = 1.0;`,
     },
+    {
+      filename: "apps/edge/src/telemetry/ingest.ts",
+      code: `await db.query("select app.ingest_action_events($1::jsonb)", [rows]);`,
+    },
   ],
   invalid: [
     {
