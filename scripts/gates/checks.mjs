@@ -3944,7 +3944,8 @@ export function m12MainnetSettlement() {
     return {
       ok: false,
       errors,
-      blocked: "SUPABASE_PROD_DB_URL/SUPABASE_DB_URL is loopback — point it at the prod project for this check",
+      blocked:
+        "SUPABASE_PROD_DB_URL/SUPABASE_DB_URL is loopback — point it at the prod project for this check",
     };
   const { r, cmd, blocked } = psqlCmd(
     `select transaction is not null and transaction <> '' and ` +
