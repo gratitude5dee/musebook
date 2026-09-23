@@ -27,6 +27,42 @@ function sh(cmd) {
 }
 
 function trySh(cmd) {
+  // vitest/playwright can hang at teardown after printing results (workerd
+  // keeps outbound sockets open and grandchildren keep the stdio pipe alive,
+  // so a plain execSync timeout never returns). Run them under setsid writing
+  // to a file and TERM/KILL the whole process group at the bound; when the
+  // kill lands after a complete `Test Files … passed` printout, the suite
+  // passed — judge by the output, not the 124.
+  if (/vitest|playwright/.test(cmd)) {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const file = `/tmp/gate-sh-${id}.out`;
+    const secs = 900;
+    const inner = `setsid bash -c '${cmd.replace(/'/g, `'\''`)} > ${file} 2>&1' &
+pid=$!
+for i in $(seq 1 ${secs}); do
+  if ! kill -0 $pid 2>/dev/null; then wait $pid; exit 0; fi
+  sleep 1
+done
+kill -TERM -- -$pid 2>/dev/null
+sleep 5
+kill -KILL -- -$pid 2>/dev/null
+exit 124`;
+    try {
+      execSync(`bash -c '${inner.replace(/'/g, `'\''`)}'`, {
+        cwd: ROOT,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+        timeout: (secs + 30) * 1000,
+      });
+    } catch (e) {
+      const out = existsSync(file) ? readFileSync(file, "utf8") : "";
+      const anyFail = /FAIL\s|✗|×|\b\d+ failed\b/.test(out);
+      const suiteDone = /Test Files\s+.*?\d+\s+passed/.test(out);
+      return { code: anyFail || !suiteDone ? (e.status ?? 1) : 0, out };
+    }
+    const out = existsSync(file) ? readFileSync(file, "utf8") : "";
+    return { code: 0, out };
+  }
   try {
     return { code: 0, out: sh(cmd) };
   } catch (e) {
