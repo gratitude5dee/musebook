@@ -1,7 +1,15 @@
 // scripts/gates/checks.mjs — shared check implementations behind manifest.mjs.
 // Each returns { ok, errors[] }; the runner prints and exits (§17.12.1).
 import { execFileSync, execSync } from "node:child_process";
-import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
+import {
+  existsSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+  mkdirSync,
+  rmSync,
+  statSync,
+} from "node:fs";
 import { join } from "node:path";
 
 const ROOT = new URL("../../", import.meta.url).pathname;
@@ -510,17 +518,27 @@ export function m2ResetTwice() {
 // packages/schema/src/database.types.ts (generated, not written by hand).
 export function m2TypesGen() {
   const url = process.env.SUPABASE_DB_URL ?? "";
-  const target = /127\.0\.0\.1|localhost|^$/.test(url) ? "--local" : "--linked";
+  const dbUrl = /127\.0\.0\.1|localhost|^$/.test(url)
+    ? url || "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+    : url;
+  // --db-url goes straight to postgres; --local routes through the long-lived
+  // pg-meta container, whose baked-in password can be stale after a db reset.
   const attempt = () =>
     run(
-      `pnpm exec supabase gen types typescript ${target} > /tmp/mb-t.ts && diff -q /tmp/mb-t.ts packages/schema/src/database.types.ts`,
+      `env -u SUPABASE_DB_PASSWORD pnpm exec supabase gen types typescript --db-url "${dbUrl}" > /tmp/mb-t.ts && grep -q "access_grants" /tmp/mb-t.ts && diff -q /tmp/mb-t.ts packages/schema/src/database.types.ts`,
       { timeout: 300000 },
     );
   let r = attempt();
-  // gen types connects while a nested gate's db reset may still be restarting
-  // postgres — retry through the restart window on the transient auth failure.
-  for (let i = 0; i < 5 && r.code !== 0 && /password authentication failed/.test(r.out); i++) {
-    run("sleep 25");
+  // A concurrent `supabase db reset` scram-fails auth and emits partial/empty
+  // type output — retry through the window rather than failing on the race.
+  for (
+    let i = 0;
+    i < 15 &&
+    r.code !== 0 &&
+    /password authentication failed|role "postgres" does not exist|_ in never/.test(r.out);
+    i++
+  ) {
+    run("sleep 20");
     r = attempt();
   }
   return {
@@ -3834,8 +3852,20 @@ async function prodIsUp() {
 export function m12AllGatesGreen() {
   const errors = [];
   const notGreen = [];
+  // Opt-in: GATE_NESTED_FRESH_MS accepts a milestone's own .gate report as its
+  // run when it is all-pass (or superseded-skip) and fresh within the window.
+  // Default 0 = strict: every nested gate re-runs (CI and nightly keep that).
+  const freshMs = Number(process.env.GATE_NESTED_FRESH_MS ?? 0) || 0;
   for (let m = 0; m <= 11; m++) {
     const tag = `M${m}`;
+    if (freshMs > 0) {
+      const rp = join(ROOT, ".gate", `${tag}.json`);
+      if (existsSync(rp) && Date.now() - statSync(rp).mtimeMs <= freshMs) {
+        const rep = JSON.parse(readFileSync(rp, "utf8"));
+        const bad = (rep.checks ?? []).filter((c) => c.status !== "pass" && c.status !== "skip");
+        if (!bad.length) continue;
+      }
+    }
     const r = run(`GATE_AS_OF=M12 pnpm gate ${tag} --allow-dirty`, { timeout: 900000 });
     if (r.code !== 0) {
       const line = r.out

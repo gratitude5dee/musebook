@@ -158,6 +158,9 @@ entry names the section it departs from, the deviation, and the reason. Per
 
 ---
 
+| D119 | §16.6 M12.1 (nested re-run) | `m12AllGatesGreen` gained an opt-in `GATE_NESTED_FRESH_MS` window: a milestone whose `.gate/M<n>.json` is all-pass and fresh within the window stands as its run instead of re-executing (a not-green milestone still re-runs so the block is re-reported live). Default stays 0 — strict re-run — which is what CI and the nightly suite use. | Fixing a nested-gate bug mid-launch re-ran ~45min of suites to re-prove what the last hour already proved on identical code; a bounded freshness window is the same evidence without the wall-clock. |
+| D120 | §16.6 M2 nested re-run | M2.13 (`gen types` vs committed file) moved from `--local` to an explicit `--db-url` against the loopback instance. `--local` routes through the long-lived pg-meta container, whose baked-in DB password goes stale across `supabase db reset` — and the .env `SUPABASE_DB_PASSWORD` (the prod password) leaks into the CLI's connection env, so it is scrubbed for the attempt. Empty `[_ in never]` output is treated as mid-reset evidence, not drift. | The check was authored against the CLI flag; the flag's container path is the flake surface — the direct URL asserts the same thing (committed types == live schema) deterministically. |
+
 ## M12 review stamp
 
 Reviewed end to end on 2026-09-23 (M12, launch hardening): every dated entry
@@ -165,4 +168,4 @@ D1–D108 still holds as written, except as individually marked inside its row
 (D3 resolved at M10 by the pinned-FROM Dockerfile; D5 resolved at M2 when the
 Hyperdrive ids landed). The M8/M9 and M10/M11 tables carried duplicated rows
 and two spliced reason cells (D107, D108) from mid-session writes — repaired
-in place, contents unchanged. New entries: D109–D118.
+in place, contents unchanged. New entries: D109–D120.
