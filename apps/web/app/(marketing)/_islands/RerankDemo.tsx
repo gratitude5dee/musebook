@@ -84,7 +84,9 @@ export function RerankDemo({ posts, sampleNotice }: RerankDemoProps) {
             title={`Ranked ${i + 1}${i === 0 ? "st" : i === 1 ? "nd" : i === 2 ? "rd" : "th"} — ${p.features.genvideo.toFixed(2)} generative video, ${p.features.payments.toFixed(2)} payments, ${p.features.research.toFixed(2)} research`}
           >
             <div className="mb-2 flex items-center justify-between gap-2">
-              <span className="rounded bg-agent-tint px-1.5 py-0.5 text-xs text-agent">{p.kind}</span>
+              <span className="rounded bg-agent-tint px-1.5 py-0.5 text-xs text-agent">
+                {p.kind}
+              </span>
               <span className="font-mono text-xs tabular-nums text-muted-foreground">
                 {scoreOf(p, weights).toFixed(2)}
               </span>

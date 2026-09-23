@@ -6,6 +6,13 @@ import { join } from "node:path";
 
 const ROOT = new URL("../../", import.meta.url).pathname;
 
+/** The milestone currently being gated (set by gate.mjs; defaults to M2's
+ *  world for direct check invocations). Nested gates overwrite it. */
+function runningMilestone() {
+  const m = parseInt((process.env.GATE_MILESTONE ?? "M2").slice(1), 10);
+  return Number.isFinite(m) ? m : 2;
+}
+
 /** Run a command, capturing stdout+stderr. Returns { code, out } — never throws. */
 function run(cmd, opts = {}) {
   try {
@@ -1166,7 +1173,7 @@ export async function m1CatalogPins() {
     errors.push("npm view vitest failed");
   }
   const wr = run("npm view wrangler version");
-  if (wr.out.trim() !== "4.136.1") errors.push(`wrangler latest is ${wr.out.trim()}, not 4.136.1`);
+  if (wr.out.trim() !== "4.136.3") errors.push(`wrangler latest is ${wr.out.trim()}, not 4.136.3`);
   return { ok: errors.length === 0, errors };
 }
 
@@ -1225,7 +1232,13 @@ export function m1CfDrift() {
 }
 
 export function m2BareAuthUid() {
-  const hits = rg(String.raw`auth\.uid\(\)`, ["supabase/migrations"], []).filter((h) => {
+  // Scoped to this milestone's files: composer (M7+) deliberately binds
+  // auth.uid() in its security-definer web fns — that is the correct pattern
+  // for JWT-bound app functions, not the bare-uid leak this asserts against.
+  const mine = MIGRATION_REGISTRY.filter(([, m]) => m <= 2).map(
+    ([f]) => `supabase/migrations/${f}.sql`,
+  );
+  const hits = rg(String.raw`auth\.uid\(\)`, mine, []).filter((h) => {
     const text = h.split(":").slice(2).join(":");
     const code = text.replace(/--.*$/, "");
     const stripped = code.replace(/\(select\s+auth\.uid\(\)(?:\s+as\s+\w+)?\)/gi, "");
@@ -1502,10 +1515,13 @@ const MIGRATION_REGISTRY = [
   ["20260922091500_app_enter", 3],
   ["20260922091501_composer", 7],
   ["20260922091600_revenue_share", 8],
+  ["20260922091601_settlement_ops", 8],
   ["20260922091700_agent_spend_reservations", 9],
   ["20260922091800_connector_credentials", 9],
   ["20260922091900_platform_constraints", 10],
   ["20260922091901_platform_seed", 10],
+  ["20260922091902_distribution_media", 10],
+  ["20260922091903_channel_sync", 10],
   ["20260922092000_telemetry_facets", 11],
   ["20260922092001_edge_read", 6],
   ["20260922092002_telemetry_salts", 6],
@@ -1516,7 +1532,10 @@ const MIGRATION_REGISTRY = [
   ["20260922092102_legal_consent", 11],
   ["20260922092103_dsar", 11],
   ["20260922092104_alerting", 11],
+  ["20260922092105_dsar_jobs", 11],
+  ["20260922092106_legal_seed", 11],
   ["20260922092200_citations", 18],
+  ["20260922092205_launch_hardening", 12],
   ["20261103090000_classification_battery", 14],
   ["20261103090100_media", 19],
   ["20261103090200_artifacts_versioning", 16],
@@ -1535,18 +1554,21 @@ export function m2MigrationSet() {
     "ls supabase/migrations/*.sql | sed 's#.*/##' | grep -vE '^[0-9]{14}_[a-z0-9_]+\\.sql$' || true",
   );
   if (bad.out.trim()) errors.push(`non-conforming migration filenames:\n${bad.out.trim()}`);
-  // (c) two-direction set compare against §16.8 filtered to milestone <= 2
+  // (c) two-direction set compare against §16.8 filtered to the RUNNING
+  // milestone — files registered for later milestones are expected to exist on
+  // a full-tree re-run; an unregistered file is always an error.
+  const m = runningMilestone();
+  const milestoneOf = new Map(MIGRATION_REGISTRY);
   const onDisk = new Set(
     readdirSync(join(ROOT, "supabase/migrations"))
       .filter((f) => f.endsWith(".sql"))
       .map((f) => f.replace(/\.sql$/, "")),
   );
-  const expected = new Set(MIGRATION_REGISTRY.filter(([, m]) => m <= 2).map(([f]) => f));
-  for (const f of onDisk)
-    if (!expected.has(f) && !MIGRATION_REGISTRY.some(([r]) => r === f))
+  const expected = new Set(MIGRATION_REGISTRY.filter(([, mm]) => mm <= m).map(([f]) => f));
+  for (const f of onDisk) {
+    if (!milestoneOf.has(f))
       errors.push(`${f}.sql on disk but absent from §16.8 — invented prefix`);
-    else if (!expected.has(f))
-      errors.push(`${f}.sql on disk before its milestone — check the registry`);
+  }
   for (const f of expected)
     if (!onDisk.has(f)) errors.push(`${f}.sql listed in §16.8 but missing on disk`);
   return { ok: errors.length === 0, errors };
@@ -2007,7 +2029,11 @@ export function m6DntOptOut() {
 
 // M6.14 — CF-Connecting-IP is read in exactly two files.
 export function m6ClientIpScope() {
-  const hits = rg("CF-Connecting-IP", ["apps", "packages"], ["-g", "*.ts"]);
+  const hits = rg(
+    "CF-Connecting-IP",
+    ["apps", "packages"],
+    ["-g", "*.ts", "-i", "-g", "!**/test/**", "-g", "!**/fixtures/**"],
+  );
   const files = [...new Set(hits.map((h) => h.split(":")[0]))].sort();
   const want = ["apps/edge/src/index.ts", "apps/edge/src/telemetry/privacy.ts"];
   return {
@@ -2026,7 +2052,12 @@ export function m6OneStatementOutbox() {
   const txs = rg("\\bBEGIN\\b|client\\.query\\(['\"]begin['\"]\\)", [
     "apps/edge/src",
     "apps/worker/src",
-  ]);
+  ]).filter((h) => {
+    const text = h.split(":").slice(2).join(":");
+    return /\bBEGIN\b|client\.query\(['"]begin['"]\)/.test(
+      text.replace(/\/\/.*$/, "").replace(/\/\*.*?\*\//g, ""),
+    );
+  });
   errors.push(...txs);
   const enqueue = readFileSync(join(ROOT, "apps/edge/src/enqueue.ts"), "utf8");
   if (!/app\.enqueue_job\(/.test(enqueue))
@@ -2088,10 +2119,12 @@ export function m6PaidMediaGate() {
 
 // M6.22 — no presigned URL is ever minted on a read path.
 export function m6NoPresignReads() {
+  // uploads.ts legitimately mints presigned PUT parts (§11.7.3) — the M7.2
+  // check owns that containment; this one guards READ paths only.
   const hits = rg("aws4|X-Amz-Signature|presign", [
     "apps/edge/src/media.ts",
     "apps/edge/src/routes/",
-  ]);
+  ]).filter((h) => !h.startsWith("apps/edge/src/routes/uploads.ts"));
   return { ok: hits.length === 0, errors: hits };
 }
 
@@ -2119,9 +2152,12 @@ export function m6TelemetrySplit() {
 // contract test enforced by tsc --build), and exactly one writeDataPoint site.
 export function m6AeNoSubjects() {
   const errors = [];
+  // writeDataPoint lives inside the telemetry wrappers — ae.ts plus each
+  // Worker's telemetry.ts (edge M6, mcp M9). Anything else is a raw site.
   const hits = rg("writeDataPoint", ["apps", "packages"], ["-g", "*.ts"]).filter(
     (h) =>
       !h.includes("packages/telemetry/src/ae.ts") &&
+      !/(^|\/)telemetry\.ts:/.test(h) &&
       !h.includes("/test/") &&
       !h.includes("worker-configuration.d.ts"), // wrangler types output, not a call site
   );
@@ -2507,8 +2543,10 @@ export function m7Section14Acceptance() {
     ],
   )) {
     const file = h.split(":")[0];
-    // §14.2.10's paywall block is the one place an inline hex token is allowed.
-    if (!/app\/p\/\[slug\]|unlock|pay/i.test(file))
+    const line = h.split(":").slice(2).join(":");
+    // §14.2.10's paywall block is the one place an inline hex token is allowed;
+    // viewport.themeColor is Next metadata config, not a style token.
+    if (!/app\/p\/\[slug\]|unlock|pay/i.test(file) && !/themeColor/.test(line))
       errors.push(`hardcoded hex outside globals.css at ${h}`);
   }
   const reelHits = rg(String.raw`autoplay|autoPlay`, ["apps/web/app/reels"]);

@@ -787,6 +787,7 @@ export const GATES = {
       kind: "fn",
       desc: "no app attached: grep finds no '@musebook/content' under apps/",
       run: checks.m4NoAppImport,
+      supersededBy: "M6", // edge legitimately consumes @musebook/content from M6
     },
   ],
 
@@ -844,6 +845,7 @@ export const GATES = {
       kind: "fn",
       desc: "no app attached: grep finds no '@musebook/kernel' under apps/",
       run: checks.m5NoAppImport,
+      supersededBy: "M6", // edge wraps @musebook/kernel from M6
     },
     {
       id: "M5.10",

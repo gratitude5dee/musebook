@@ -31,10 +31,7 @@ export function MarketingNav() {
           ))}
         </div>
         <div className="flex items-center gap-4">
-          <Link
-            href="/signin"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
+          <Link href="/signin" className="text-sm text-muted-foreground hover:text-foreground">
             Sign in
           </Link>
           <Link

@@ -35,7 +35,7 @@ catalog:
   vitest: "4.1.11"
   "@vitest/coverage-v8": "4.1.11"
   "@vitest/coverage-istanbul": "4.1.11"
-  wrangler: "4.136.1"
+  wrangler: "4.136.3"
   "@cloudflare/vitest-plugin": "1.2.0"
   "@cloudflare/workers-types": "5.20260921.1"
   pg: "8.23.0"
@@ -54,7 +54,7 @@ catalog:
 minimumReleaseAgeExclude:
   - "@cloudflare/vitest-plugin@1.2.0"
   - miniflare@5.20260921.0-alpha
-  - wrangler@4.136.0 || 4.136.1
+  - wrangler@4.136.0 || 4.136.1 || 4.136.3
   - "@cloudflare/unenv-preset@2.16.2"
 patchedDependencies:
   postgres@3.4.9: patches/postgres@3.4.9.patch
