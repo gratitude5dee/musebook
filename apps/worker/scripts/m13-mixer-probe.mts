@@ -326,8 +326,9 @@ async function main() {
           return new Response(
             JSON.stringify({
               data: texts.map((t) => ({
-                embedding: Array.from({ length: 1536 }, (_, d) =>
-                  ((t.charCodeAt(d % t.length) * (d + 7)) % 10000) / 10000,
+                embedding: Array.from(
+                  { length: 1536 },
+                  (_, d) => ((t.charCodeAt(d % t.length) * (d + 7)) % 10000) / 10000,
                 ),
               })),
             }),
