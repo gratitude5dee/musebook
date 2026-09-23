@@ -40,6 +40,26 @@ export interface ClaimedJob {
   attempts: number;
 }
 
+/** The plane roles are NOINHERIT: musebook_worker holds memberships but no
+ *  privileges until a statement runs under `set local role`. app.enter() does
+ *  that — but only for the CURRENT transaction, and a bare statement's implicit
+ *  transaction ends with the statement. Wrap raw-table SQL in an explicit tx so
+ *  the entered role persists across the statements that need it.
+ *  Never nest: a `begin` inside an open tx is a no-op that would let the inner
+ *  `commit` close the caller's transaction. */
+export async function jobsTx<T>(db: DbClient, fn: () => Promise<T>): Promise<T> {
+  await db.query("begin");
+  try {
+    await db.query("select app.enter('musebook_jobs')");
+    const out = await fn();
+    await db.query("commit");
+    return out;
+  } catch (e) {
+    await db.query("rollback").catch(() => undefined);
+    throw e;
+  }
+}
+
 /** The dedupe fence: state queued->running in one statement; null when the
  *  row is already claimed — the second delivery of a redelivered message is a
  *  no-op, which is what makes consumers idempotent (gate check 18). */

@@ -77,14 +77,19 @@ const LEGACY_NEEDLE = "ixkkrousepsiorwlaycp";
 
 // §12.2.8 — AGPL containment. Seven regexes + the sidecar Dockerfile assertion.
 export function agplContainment() {
+  // Specifier regexes require the specifier's first char to be non-`.` so
+  // our own relative `postiz/` client dir (plan §16.6's layout) is exempt;
+  // symbol regexes are scoped to import/export context — a bare identifier
+  // or string literal (e.g. parsing a `{name:"PostValidationException"}`
+  // wire error) references no upstream code, but an import of one does.
   const FORBIDDEN = [
-    String.raw`from\s+['"][^'"]*nestjs-libraries/src/integrations`,
-    String.raw`from\s+['"][^'"]*postiz[^'"]*['"]`,
-    String.raw`require\(\s*['"][^'"]*postiz`,
+    String.raw`from\s+['"][^'".][^'"]*nestjs-libraries/src/integrations`,
+    String.raw`from\s+['"][^'".][^'"]*postiz`,
+    String.raw`require\(\s*['"][^'".][^'"]*postiz`,
     String.raw`['"]@postiz/node['"]`,
-    String.raw`\bSocialAbstract\b`,
-    String.raw`\bsocialIntegrationList\b`,
-    String.raw`\bPostValidationException\b`,
+    String.raw`(?:import|export)\s[^'";]*\bSocialAbstract\b`,
+    String.raw`(?:import|export)\s[^'";]*\bsocialIntegrationList\b`,
+    String.raw`(?:import|export)\s[^'";]*\bPostValidationException\b`,
   ];
   // `workers` is in scope because the distributor now ships inside a Worker
   // bundle; a violation there is exactly as fatal as one in apps/.
@@ -98,12 +103,28 @@ export function agplContainment() {
     if (hits.length) errors.push(`AGPL boundary violated by /${pattern}/\n${hits.join("\n")}`);
   }
 
-  // The sidecar's compose file is infrastructure, not build input.
-  if (existsSync(join(ROOT, "infra/postiz/Dockerfile"))) {
-    errors.push(
-      "infra/postiz/Dockerfile exists. Musebook must run the UPSTREAM image " +
-        "unmodified; layering our code into it creates a combined AGPL work.",
-    );
+  // The sidecar deployment pins the upstream image by digest via a Dockerfile
+  // that may contain ONLY comments and one `FROM …@sha256:` line. §12.2.8's
+  // posture is unchanged: run the upstream image unmodified. Any further
+  // instruction (COPY/ADD/RUN/ENV/…) layers Musebook into the image and is a
+  // combined-work violation — that is what this assertion guards.
+  const dockerfilePath = join(ROOT, "infra/postiz/Dockerfile");
+  if (existsSync(dockerfilePath)) {
+    const lines = readFileSync(dockerfilePath, "utf8")
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l !== "" && !l.startsWith("#"));
+    if (
+      lines.length !== 1 ||
+      !/^FROM\s+ghcr\.io\/gitroomhq\/postiz-app@sha256:[0-9a-f]{64}$/.test(lines[0])
+    ) {
+      errors.push(
+        "infra/postiz/Dockerfile must contain exactly one instruction: " +
+          "`FROM ghcr.io/gitroomhq/postiz-app@sha256:<digest>` (comments aside). " +
+          "Musebook must run the UPSTREAM image unmodified; layering our code " +
+          "into it creates a combined AGPL work.",
+      );
+    }
   }
   return { ok: errors.length === 0, errors };
 }
@@ -2900,4 +2921,111 @@ export function m9StartupBudget() {
     writeFileSync(src, original);
     rmSync(join(ROOT, "apps/mcp/worker-startup.cpuprofile"), { force: true });
   }
+}
+
+// ---------------------------------------------------------------------------
+// M10 — distributor + Postiz sidecar.
+
+const DG = "pnpm vitest run --project distributor";
+const WG_DIST = `${WG} test/distribute.test.ts`;
+const WG_LIC = `${WG} test/m10-license.test.ts`;
+
+// M10.1 — one POST /public/v1/posts for the whole 3-channel fan-out.
+export function m10SinglePostizCall() {
+  return vitestSlice(WG_DIST, "one POST /posts per bucket");
+}
+
+// M10.2 — G-AGPL green AND the sidecar pin file exists (FROM-only, enforced
+// inside agplContainment itself).
+export function m10AgplDockerfile() {
+  const errors = [];
+  const a = agplContainment();
+  if (!a.ok) errors.push(...a.errors);
+  if (!existsSync(join(ROOT, "infra/postiz/Dockerfile")))
+    errors.push("infra/postiz/Dockerfile missing — the pinned sidecar image reference");
+  return { ok: errors.length === 0, errors };
+}
+
+// M10.3 — thirteen platforms, every one with non-null non-'unverified' limits_source.
+export function m10PlatformSeed() {
+  const errors = [];
+  const count = sqlCheck("select count(*) from public.platforms", "13");
+  if (count.blocked) return count;
+  if (!count.ok) errors.push(...count.errors);
+  const unverified = sqlCheck(
+    "select count(*) from public.platforms where limits_source = 'unverified' or limits_source is null",
+    "0",
+  );
+  if (unverified.blocked) return unverified;
+  if (!unverified.ok) errors.push(...unverified.errors);
+  return { ok: errors.length === 0, errors };
+}
+
+// M10.4 — countEffective and the validator see the same number for all 13.
+export function m10CounterParity() {
+  return vitestSlice(`${DG} test/validate.test.ts`, "counter parity");
+}
+
+// M10.5 — media.public_origin is a hard error on paid-bucket URLs.
+export function m10PublicOrigin() {
+  return vitestSlice(`${DG} test/validate.test.ts`, "public_origin");
+}
+
+// M10.6 — variants are full ports, not teasers (CF-SPINE §13.3).
+export function m10FullPorts() {
+  return vitestSlice(`${DG} test/pipeline.test.ts`, "FULL PORTS");
+}
+
+// M10.7 — every emitted stage payload is ids only and far under 128 KB,
+// asserted inside the same end-to-end test as check 1: the e2e inspects the
+// actual outbox rows the producer wrote and requires the id-key set.
+export function m10MessageTransport() {
+  return vitestSlice(WG_DIST, "one POST /posts per bucket");
+}
+
+// M10.8 — redelivered send publishes nothing twice.
+export function m10IdempotentConsumer() {
+  return vitestSlice(WG_DIST, "check 8");
+}
+
+// M10.9 — an unconnected channel is a loud error.
+export function m10UnconnectedChannel() {
+  return vitestSlice(WG_DIST, "check 9");
+}
+
+// M10.10 — licence inheritance from creator_publishing_defaults.
+export function m10LicenseInheritance() {
+  return vitestSlice(WG_LIC, "M10.10");
+}
+
+// M10.11 — action_events_daily re-keyed without loss.
+export function m10RekeyedDaily() {
+  return vitestSlice(WG_LIC, "M10.11");
+}
+
+// M10.12 — musebook-postiz-media serves media.postiz.musebook.dev and no
+// Worker binds it.
+export async function m10SidecarBucket() {
+  const errors = [];
+  for (const h of rg("musebook-postiz-media", ["apps"], ["-g", "wrangler.jsonc"])) {
+    errors.push(`sidecar bucket bound in ${h}`);
+  }
+  const account = process.env.CF_ACCOUNT_ID;
+  const token = process.env.CF_API_TOKEN;
+  if (!account || !token) {
+    return { ok: false, errors, blocked: "CF_ACCOUNT_ID/CF_API_TOKEN unset" };
+  }
+  const res = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${account}/r2/buckets/musebook-postiz-media/custom_domains`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  const body = await res.json();
+  if (body.success !== true)
+    return { ok: false, errors: [`custom_domains list failed: ${JSON.stringify(body.errors)}`] };
+  const match = (body.result?.domains ?? []).find(
+    (d) => d.domain === "media.postiz.musebook.dev" && d.enabled !== false,
+  );
+  if (!match)
+    errors.push("media.postiz.musebook.dev not an enabled custom domain on musebook-postiz-media");
+  return { ok: errors.length === 0, errors };
 }

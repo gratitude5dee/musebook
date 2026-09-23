@@ -6,6 +6,7 @@ import { runSlateJob, type SlateRequest } from "../slate-builder.js";
 import { consumeDlq } from "./dlq.js";
 import { handleR2ObjectCreated } from "./r2-events.js";
 import { runAgentCancel } from "./agent-cancel.js";
+import { runDistribute } from "./distribute.js";
 
 interface JobMessage {
   // postgres.js returns int8 as BigInt; producers JSON.stringify it away but a
@@ -13,6 +14,9 @@ interface JobMessage {
   job_id?: number | bigint;
   kind?: string;
   dedupe_key?: string;
+  // §12.2.6 webhook hints share this batch type — a raw DistributionMessage,
+  // not an outbox claim. Dispatch routes on queue, not shape.
+  stage?: string;
   // R2 event notifications share this batch type — dispatch routes on queue,
   // not shape.
   object?: { key?: string };
@@ -115,11 +119,30 @@ export async function dispatch(batch: MessageBatch, env: Env): Promise<void> {
         // M9: embedding write — existing_embeddings keeps it idempotent.
         await recordRows(db, "app.record_embeddings", payload);
       }),
-    "musebook-distribute": (m) =>
-      consume(env, m, "distribute", async (db, payload) => {
-        // M9-M10: syndication fan-out — record_distribution_jobs is the ledger.
-        await recordRows(db, "app.record_distribution_jobs", payload);
-      }),
+    "musebook-distribute": (m) => {
+      // A message with no job_id is the Postiz webhook's raw reconcile hint
+      // (§12.2.6): no outbox row exists for it, so it cannot be claimed — and
+      // needs no dedupe because the stage is a read-then-conditional-write.
+      // Only 'reconcile' may arrive outboxless; every other stage is produced
+      // by insertStageJob behind a claim, so anything else is a producer bug
+      // worth surfacing (it lands in the DLQ like any throw).
+      if (jobIdOf(m) === null) {
+        if (m.stage !== "reconcile") {
+          throw new Error("distribute: outboxless message with non-reconcile stage");
+        }
+        return (async () => {
+          const db = await pgFresh(env);
+          try {
+            await runDistribute(db, env, m as unknown as Record<string, unknown>);
+          } finally {
+            await db.end();
+          }
+        })();
+      }
+      return consume(env, m, "distribute", async (db, payload) => {
+        await runDistribute(db, env, payload);
+      });
+    },
     "musebook-media": (m) =>
       consume(env, m, "media", async () => {
         // M8: transcode/derivatives for the media pipeline.

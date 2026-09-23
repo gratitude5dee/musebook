@@ -1,0 +1,28 @@
+{
+  "slug": "tiktok",
+  "displayName": "TikTok",
+  "maxChars": 2000,
+  "countMethod": "utf16",
+  "editor": "normal",
+  "minMedia": 1,
+  "maxImages": 35,
+  "maxVideos": 1,
+  "maxVideoSeconds": 600,
+  "maxAltChars": null,
+  "maxTitleChars": 90,
+  "supportsThreads": false,
+  "maxThreadParts": null,
+  "maxHashtags": null,
+  "hashtagStyle": "inline",
+  "requiresAltText": false,
+  "urlCountsAsChars": null,
+  "mediaRules": {
+    "title_max": 90,
+    "requires_media": true,
+    "multi_item_images_only": true,
+    "image_short_side_max_px": 1080,
+    "video_must_be_single_item": true
+  },
+  "postizMaxChars": null,
+  "cdnHost": "cdn.musebook.dev"
+}

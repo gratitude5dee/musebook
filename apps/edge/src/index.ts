@@ -14,6 +14,11 @@ import { handleEvents } from "./routes/events.js"; // §13.4.3
 import { handleBridgePoll, handleBridgeResult } from "./routes/bridge.js"; // §10.6
 import { handleFeedForYou, handleFeedReels, handleFeedScored } from "./routes/feed.js"; // §9.21
 import { handlePublishPost } from "./routes/posts.js"; // §6 flow C
+import { handleDistribute } from "./routes/distribute.js"; // §12.3.7
+import { handleChannelsSync } from "./routes/channels-sync.js"; // §12.2.7
+import { handlePostizWebhook } from "./routes/postiz-webhook.js"; // §12.2.6
+import { handleAgentsMe } from "./routes/agents-me.js"; // §12.2.9
+import { handleInboundPost } from "./routes/inbound-post.js"; // §12.2.9
 import { routeUploads } from "./routes/uploads.js"; // §11.7.3
 import { twin } from "./routes/twin.js"; // §7.11
 import { authorTwin } from "./routes/authors.js";
@@ -36,6 +41,10 @@ const API_ROUTES: Readonly<
   "/api/feed/foryou": handleFeedForYou,
   "/api/feed/reels": handleFeedReels,
   "/api/feed/scored": handleFeedScored,
+  "/api/distribute": handleDistribute,
+  "/api/channels/sync": handleChannelsSync,
+  "/api/v1/agents/me": handleAgentsMe,
+  "/api/v1/posts": handleInboundPost,
 };
 
 export default {
@@ -66,6 +75,12 @@ export default {
     const publishPostId = publishMatch?.[1];
     if (publishPostId !== undefined) {
       return handlePublishPost(request, env, ctx, publishPostId);
+    }
+
+    // §12.2.6: secret carried in the path (Postiz webhooks are unsigned).
+    const webhookMatch = url.pathname.match(/^\/api\/webhooks\/postiz\/([A-Za-z0-9]+)$/);
+    if (webhookMatch?.[1] !== undefined) {
+      return handlePostizWebhook(request, env, ctx, webhookMatch[1]);
     }
 
     // The crawl surface. §7.10.1 owns this table; the handlers render IN THE

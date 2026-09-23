@@ -13,6 +13,9 @@ import {
   refreshConnectorTokens,
 } from "./cron/agent-maintenance.js";
 import { recomputeReputation } from "./cron/agent-reputation.js";
+import { distributeReconcile } from "./cron/distribute-reconcile.js";
+import { collectPlatformAnalytics } from "./cron/analytics.js";
+import { refreshChannelConstraints } from "./cron/refresh-channel-constraints.js";
 import { dispatch } from "./consumers/index.js";
 import { SlateBuilder } from "./slate-builder.js";
 
@@ -36,12 +39,17 @@ export default {
         await sweepOutbox(env, ctx);
         return reconcileSettlements(env);
       case "*/5 * * * *":
-        return noop(); // §15's runAlertPass lands at M15
+        // §12.3.9's reconciler is the state machine's authority; §15's
+        // runAlertPass joins this tick at M15.
+        await distributeReconcile(env);
+        return noop();
       case "0 * * * *":
-        return rebuildAnonSlates(env, ctx); // §9.19 + §13 rollups hang off this one
+        await rebuildAnonSlates(env, ctx); // §9.19 + §13 rollups hang off this one
+        return collectPlatformAnalytics(env); // §12.3.10's decaying collector
       case "0 4 * * 1":
-        // §6.7's asset-domain drift check; §12's refreshPlatformConstraints joins it later.
-        return assertAssetDomainCron(env);
+        // §6.7's asset-domain drift check + §12.3.1's live-constraints refresh.
+        await assertAssetDomainCron(env);
+        return refreshChannelConstraints(env);
       case "*/15 * * * *":
         // §10.15's order matters: release dead holds before claiming new work,
         // so a stuck schedule cannot starve a cap it no longer needs.

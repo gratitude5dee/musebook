@@ -1,0 +1,27 @@
+{
+  "slug": "instagram",
+  "displayName": "Instagram",
+  "maxChars": 2200,
+  "countMethod": "utf16",
+  "editor": "normal",
+  "minMedia": 1,
+  "maxImages": 10,
+  "maxVideos": 1,
+  "maxVideoSeconds": 90,
+  "maxAltChars": 1000,
+  "maxTitleChars": null,
+  "supportsThreads": false,
+  "maxThreadParts": null,
+  "maxHashtags": 30,
+  "hashtagStyle": "trailing",
+  "requiresAltText": false,
+  "urlCountsAsChars": null,
+  "mediaRules": {
+    "carousel_max": 10,
+    "requires_media": true,
+    "audio_only_single_video_reel": true,
+    "trial_reel_exactly_one_video": true
+  },
+  "postizMaxChars": null,
+  "cdnHost": "cdn.musebook.dev"
+}

@@ -1,0 +1,28 @@
+{
+  "slug": "reddit",
+  "displayName": "Reddit",
+  "maxChars": 10000,
+  "countMethod": "utf16",
+  "editor": "normal",
+  "minMedia": 0,
+  "maxImages": 20,
+  "maxVideos": 1,
+  "maxVideoSeconds": null,
+  "maxAltChars": null,
+  "maxTitleChars": 300,
+  "supportsThreads": false,
+  "maxThreadParts": null,
+  "maxHashtags": null,
+  "hashtagStyle": "none",
+  "requiresAltText": false,
+  "urlCountsAsChars": null,
+  "mediaRules": {
+    "type_in": ["self", "link", "media"],
+    "title_min": 2,
+    "subreddit_required": true,
+    "video_requires_thumbnail": true,
+    "media_type_exactly_one_media": true
+  },
+  "postizMaxChars": null,
+  "cdnHost": "cdn.musebook.dev"
+}

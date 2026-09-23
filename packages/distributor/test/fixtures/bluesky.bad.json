@@ -1,0 +1,26 @@
+{
+  "body": "Skeet. https://musebook.dev/p/canonical-post",
+  "threadParts": [],
+  "media": [
+    {
+      "url": "https://cdn.musebook.dev/assets/abc.jpg",
+      "contentType": "image/jpeg",
+      "alt": "cover",
+      "widthPx": 1080,
+      "heightPx": 1080,
+      "durationSeconds": null,
+      "thumbnailUrl": null
+    },
+    {
+      "url": "https://cdn.musebook.dev/assets/abc.mp4",
+      "contentType": "video/mp4",
+      "alt": null,
+      "widthPx": 1080,
+      "heightPx": 1920,
+      "durationSeconds": 30,
+      "thumbnailUrl": "https://cdn.musebook.dev/assets/abc-thumb.jpg"
+    }
+  ],
+  "title": null,
+  "canonicalUrl": "https://musebook.dev/p/canonical-post"
+}

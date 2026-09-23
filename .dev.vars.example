@@ -34,7 +34,7 @@ AI_GATEWAY_API_KEY=""
 ANTHROPIC_API_KEY=""
 
 # ── Postiz (distribution) ─────────────────────────────────────────────────────
-# Sent as a RAW `Authorization: <key>` — no Bearer prefix; the middleware feeds the whole header to findFirst().
+# Sent as a RAW `Authorization: <key>` — no Bearer prefix; the middleware feeds the whole header to findFirst(). Scoped E as well because §12.2.7's channels-sync route calls listIntegrations from musebook-edge.
 POSTIZ_API_KEY=""
 # Carried in the URL path (Postiz webhooks are unsigned). ≥32 random bytes, hex.
 POSTIZ_WEBHOOK_SECRET=""

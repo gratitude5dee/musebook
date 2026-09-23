@@ -1,0 +1,17 @@
+{
+  "body": "Caption. https://musebook.dev/p/canonical-post",
+  "threadParts": [],
+  "media": [
+    {
+      "url": "https://cdn.musebook.dev/assets/abc.jpg",
+      "contentType": "image/jpeg",
+      "alt": "cover",
+      "widthPx": 1080,
+      "heightPx": 1080,
+      "durationSeconds": null,
+      "thumbnailUrl": null
+    }
+  ],
+  "title": null,
+  "canonicalUrl": "https://musebook.dev/p/canonical-post"
+}

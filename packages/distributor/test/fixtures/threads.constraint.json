@@ -1,0 +1,24 @@
+{
+  "slug": "threads",
+  "displayName": "Threads",
+  "maxChars": 500,
+  "countMethod": "utf8_bytes",
+  "editor": "normal",
+  "minMedia": 0,
+  "maxImages": 10,
+  "maxVideos": 1,
+  "maxVideoSeconds": 300,
+  "maxAltChars": 1000,
+  "maxTitleChars": null,
+  "supportsThreads": true,
+  "maxThreadParts": 10,
+  "maxHashtags": null,
+  "hashtagStyle": "inline",
+  "requiresAltText": false,
+  "urlCountsAsChars": null,
+  "mediaRules": {
+    "carousel_supported": true
+  },
+  "postizMaxChars": null,
+  "cdnHost": "cdn.musebook.dev"
+}

@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
     },
   },
   transpilePackages: [
+    "@musebook/distributor",
     "@musebook/ui",
     "@musebook/content",
     "@musebook/kernel",
