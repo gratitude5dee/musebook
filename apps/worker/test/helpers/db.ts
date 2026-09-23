@@ -63,6 +63,11 @@ export async function resetSeed(): Promise<void> {
     ]);
     await c.query(`delete from public.channels where postiz_channel_id like 'test-%'`);
     await c.query(`delete from public.platforms where slug = 'testx'`);
+    // seed.sql writes no assets/post_assets — every row here is test-fixture
+    // output (upload promotion, composer flows) that survives resets and
+    // leaks into app.distribution_media's join on the next suite.
+    await c.query(`delete from public.post_assets`);
+    await c.query(`delete from public.assets`);
   });
 }
 
