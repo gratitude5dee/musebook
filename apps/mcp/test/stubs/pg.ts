@@ -59,7 +59,8 @@ export class Client {
   async end(): Promise<void> {
     // timeout:0 destroys the socket now, inside THIS invocation context — a
     // deferred close straddles the io boundary and workerd kills every
-    // subsequent write on the same hyperdrive proxy socket.
+    // subsequent write on the same hyperdrive proxy socket. (The cf-polyfill
+    // patch in patches/ makes this close the read pump cleanly.)
     await this.sql.end({ timeout: 0 }).catch(() => undefined);
   }
 }
