@@ -16,7 +16,9 @@
     "@musebook/artifacts": "workspace:*",
     "@musebook/classify": "workspace:*",
     "@musebook/connectors": "workspace:*",
+    "@musebook/content": "workspace:*",
     "@musebook/distributor": "workspace:*",
+    "@musebook/kernel": "workspace:*",
     "@musebook/media": "workspace:*",
     "@musebook/muse-mixer": "workspace:*",
     "@musebook/schema": "workspace:*",
@@ -33,5 +35,8 @@
     "typescript": "catalog:",
     "vitest": "catalog:",
     "wrangler": "catalog:"
+  },
+  "exports": {
+    "./agent-draft": "./src/cron/agent-draft.ts"
   }
 }

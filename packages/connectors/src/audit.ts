@@ -3,7 +3,12 @@
 // jobs-plane table: a Worker writes it as musebook_jobs via app.enter, through
 // the same per-statement plane switch the rest of the file uses.
 import type { Actor } from "@musebook/schema";
-import type { Client } from "pg";
+
+/** Minimal queryable — satisfied by a node-postgres Client, a postgres.js
+ *  Sql, and apps/worker's DbClient facade alike. */
+export interface Queryable {
+  query(sql: string, params?: readonly unknown[]): Promise<{ rows: unknown[] }>;
+}
 
 export type AuditRecord = {
   actor: Actor["class"];
@@ -43,6 +48,6 @@ export const auditFromActor = (
  * is returned, and a failure is logged and dropped. app.audit_log_insert is the
  * jobs-plane plpgsql entry point for exactly one row (§4.13's "one plpgsql call").
  */
-export async function audit(fresh: Client, rec: AuditRecord): Promise<void> {
+export async function audit(fresh: Queryable, rec: AuditRecord): Promise<void> {
   await fresh.query(`select app.audit_log_insert($1::jsonb)`, [rec]);
 }

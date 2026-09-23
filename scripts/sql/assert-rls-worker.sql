@@ -75,7 +75,9 @@ begin
              'agent_identities','artifacts','comments','connectors','follows',
              'likes','platform_publishing_defaults','platforms','post_assets',
              'post_classifications','post_counters','posts','profiles',
-             'reposts','scopes')
+             'reposts','scopes',
+             -- M9: pricing/asset readers publish these rows (91700).
+             'creator_publishing_defaults','assets')
            when 'musebook_kernel' then t.tbl not in (
              'access_grants','post_bodies','post_versions','payout_ledger',
              'refunds','sessions','users','wallets','wallet_nonces',
@@ -95,7 +97,9 @@ begin
              'agent_identities','artifacts','comments','connectors','follows',
              'likes','platform_publishing_defaults','platforms','post_assets',
              'post_classifications','post_counters','posts','profiles',
-             'reposts','scopes')
+             'reposts','scopes',
+             -- M9: delegation_for_drafting folds owner defaults in (91700).
+             'creator_publishing_defaults')
          end;
 
   -- Snapshot the matrix into memory: after SET LOCAL ROLE the session can no

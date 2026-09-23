@@ -11,6 +11,14 @@
     {
       "pattern": "mcp.musebook.dev",
       "custom_domain": true
+    },
+    {
+      "pattern": "musebook.dev/mcp*",
+      "zone_name": "musebook.dev"
+    },
+    {
+      "pattern": "musebook.dev/.well-known/oauth-protected-resource*",
+      "zone_name": "musebook.dev"
     }
   ],
   "observability": {
@@ -35,12 +43,12 @@
     {
       "binding": "HYPERDRIVE_CACHED",
       "id": "48c4c1c7cc734a8cb4031bd546160eae",
-      "localConnectionString": "postgres://postgres:postgres@127.0.0.1:54322/postgres"
+      "localConnectionString": "postgres://musebook_worker:postgres@127.0.0.1:54322/postgres"
     },
     {
       "binding": "HYPERDRIVE_FRESH",
       "id": "5288b46cce7340438e840e1d0daeb23d",
-      "localConnectionString": "postgres://postgres:postgres@127.0.0.1:54322/postgres"
+      "localConnectionString": "postgres://musebook_worker:postgres@127.0.0.1:54322/postgres"
     }
   ],
   "kv_namespaces": [
@@ -107,8 +115,7 @@
     "X402_ASSET_DECIMALS": "6",
     "X402_FACILITATOR_URL": "https://api.cdp.coinbase.com/platform/v2/x402",
     "X402_GRANT_CACHE_TTL_S": "86400",
-    "MCP_JWT_KID": "",
-    "MCP_JWT_PUBLIC_JWKS": "",
+    "X402_IDEMPOTENT_WINDOW_SECONDS": "120",
     "TELEMETRY_ENABLED": "true",
     "SENTRY_DSN": ""
   }

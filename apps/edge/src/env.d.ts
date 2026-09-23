@@ -16,6 +16,11 @@ declare global {
      *  (§3.7). A credential reaching musebook-paid is a paywall bypass. */
     R2_ACCESS_KEY_ID: string;
     R2_SECRET_ACCESS_KEY: string;
+
+    /** §10.8.1 — base64 of the 32-byte KEK for connector_credentials; secret. */
+    CONNECTOR_CRED_KEK?: string;
+    /** §10.8.4 — Ed25519 private JWK (JSON) for outbound signing; secret. */
+    CONNECTOR_SIGNING_PRIVATE_KEY?: string;
   }
 
   /** musebook-worker's SlateBuilder entrypoint over the MIXER service binding

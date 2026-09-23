@@ -5,6 +5,7 @@ import { claimJob, finishJob, pgFresh, type DbClient } from "../db.js";
 import { runSlateJob, type SlateRequest } from "../slate-builder.js";
 import { consumeDlq } from "./dlq.js";
 import { handleR2ObjectCreated } from "./r2-events.js";
+import { runAgentCancel } from "./agent-cancel.js";
 
 interface JobMessage {
   // postgres.js returns int8 as BigInt; producers JSON.stringify it away but a
@@ -128,8 +129,8 @@ export async function dispatch(batch: MessageBatch, env: Env): Promise<void> {
         // M8: post-upload finalize — marks the asset readable.
       }),
     "musebook-agent-cancel": (m) =>
-      consume(env, m, "agent_cancel", async () => {
-        // M10: agent task cancellation.
+      consume(env, m, "agent_cancel", async (_db, payload) => {
+        await runAgentCancel(env, payload);
       }),
     "musebook-r2-events": (m) => handleR2ObjectCreated(env, m),
     "musebook-slates": (m) =>

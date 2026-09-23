@@ -16,9 +16,26 @@ export default defineProject({
           Q_MEDIA_FINALIZE: { queueName: "musebook-media-finalize" },
           Q_AGENT_CANCEL: { queueName: "musebook-agent-cancel" },
         },
+        bindings: {
+          // Worker secret in production — a placeholder that exercises the
+          // payTo field end-to-end without holding a real treasury address.
+          X402_PAY_TO: "0x0000000000000000000000000000000000000001",
+          // The wrangler var is "shadow"; the acceptance suite needs the real
+          // 402 contract. settle() still short-circuits on a missing facilitator
+          // kind — nothing here can spend money in tests.
+          X402_MODE: "live",
+        },
       },
     }),
   ],
+  resolve: {
+    alias: {
+      // `pg` ships CJS + node: builtins the workers pool can't transform;
+      // the tests and any src file that takes a pg-shaped client get the
+      // postgres.js shim, exactly like apps/worker's tier (§17.6).
+      pg: new URL("./test/stubs/pg.ts", import.meta.url).pathname,
+    },
+  },
   test: {
     name: "mcp",
     include: ["test/**/*.test.ts"],

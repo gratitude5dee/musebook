@@ -307,6 +307,9 @@ importers:
       aws4fetch:
         specifier: 1.0.20
         version: 1.0.20
+      musebook-worker:
+        specifier: workspace:*
+        version: link:../worker
       pg:
         specifier: 'catalog:'
         version: 8.23.0
@@ -353,18 +356,33 @@ importers:
 
   apps/mcp:
     dependencies:
+      '@cloudflare/workers-oauth-provider':
+        specifier: 0.10.3
+        version: 0.10.3
       '@modelcontextprotocol/server':
         specifier: 2.0.0
         version: 2.0.0
+      '@musebook/content':
+        specifier: workspace:*
+        version: link:../../packages/content
+      '@musebook/kernel':
+        specifier: workspace:*
+        version: link:../../packages/kernel
       '@musebook/schema':
         specifier: workspace:*
         version: link:../../packages/schema
+      '@musebook/x402':
+        specifier: workspace:*
+        version: link:../../packages/x402
       agents:
         specifier: 0.24.0
         version: 0.24.0(@babel/core@8.0.6)(@babel/runtime@7.29.7)(@modelcontextprotocol/client@2.0.0)(@modelcontextprotocol/sdk@1.30.0(@cfworker/json-schema@4.1.1)(supports-color@10.2.2)(zod@4.6.5))(@modelcontextprotocol/server@2.0.0)(@x402/core@2.26.0)(@x402/evm@2.26.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(react@19.3.0)(rolldown@1.2.9)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))(zod@4.6.5)
-      pg:
-        specifier: 'catalog:'
-        version: 8.23.0
+      postgres:
+        specifier: 3.4.9
+        version: 3.4.9
+      zod:
+        specifier: 4.6.5
+        version: 4.6.5
     devDependencies:
       '@cloudflare/vitest-plugin':
         specifier: 'catalog:'
@@ -484,9 +502,15 @@ importers:
       '@musebook/connectors':
         specifier: workspace:*
         version: link:../../packages/connectors
+      '@musebook/content':
+        specifier: workspace:*
+        version: link:../../packages/content
       '@musebook/distributor':
         specifier: workspace:*
         version: link:../../packages/distributor
+      '@musebook/kernel':
+        specifier: workspace:*
+        version: link:../../packages/kernel
       '@musebook/media':
         specifier: workspace:*
         version: link:../../packages/media
@@ -586,9 +610,24 @@ importers:
       '@musebook/schema':
         specifier: workspace:*
         version: link:../schema
+      http-message-sig:
+        specifier: 0.3.0
+        version: 0.3.0
+      jsonwebkey-thumbprint:
+        specifier: 0.1.0
+        version: 0.1.0
       pg:
         specifier: 'catalog:'
         version: 8.23.0
+      structured-headers:
+        specifier: 2.0.3
+        version: 2.0.3
+      web-bot-auth:
+        specifier: 0.2.0
+        version: 0.2.0
+      zod:
+        specifier: 4.6.5
+        version: 4.6.5
     devDependencies:
       '@cloudflare/vitest-plugin':
         specifier: 'catalog:'
@@ -602,6 +641,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 'catalog:'
         version: 4.1.11(vitest@4.1.11)
+      fast-check:
+        specifier: 'catalog:'
+        version: 4.10.2
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -727,6 +769,19 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.11(@types/node@26.6.2)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
+
+  packages/musebook-cli:
+    dependencies:
+      '@modelcontextprotocol/client':
+        specifier: 2.0.0
+        version: 2.0.0
+    devDependencies:
+      '@types/node':
+        specifier: 26.6.2
+        version: 26.6.2
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
 
   packages/schema:
     dependencies:
@@ -1188,6 +1243,9 @@ packages:
     engines: {node: '>=16'}
     cpu: [x64]
     os: [win32]
+
+  '@cloudflare/workers-oauth-provider@0.10.3':
+    resolution: {integrity: sha512-25ufMONJir9PllqVpK4GwOOoSFgpYm3+bM6NBedj7ufMCIfNf5jk4OI0LPuTJBaJgLl2lGCLqFqEPJXcSuPopQ==}
 
   '@cloudflare/workers-types@5.20260921.1':
     resolution: {integrity: sha512-uXGGKlxIrXx9/I33MIdq1hUv+yVTKCBLIJiQ9PthEgLrqePEELYYRC75I0Qw6JUa3cYtoJI8y6ewyLYHPkIP7g==}
@@ -5793,6 +5851,10 @@ packages:
     resolution: {integrity: sha512-Jtc2612XINuBjIl/QTWsV5UvE8UHuNblcO3vVADSrKsrc6RqGX6lOW1cEo3CM2v0XG4Nat8nI+YM7/f26VxXLw==}
     engines: {node: '>=12'}
 
+  postgres@3.4.9:
+    resolution: {integrity: sha512-GD3qdB0x1z9xgFI6cdRD6xu2Sp2WCOEoe3mtnyB5Ee0XrrL5Pe+e4CCnJrRMnL1zYtRDZmQQVbvOttLnKDLnaw==}
+    engines: {node: '>=12'}
+
   powershell-utils@0.1.0:
     resolution: {integrity: sha512-dM0jVuXJPsDN6DvRpea484tCUaMiXWjuCn++HGTqUWzGDjv5tZkEZldAJ/UMlqRYGFrD/etByo4/xOuC/snX2A==}
     engines: {node: '>=20'}
@@ -7447,6 +7509,8 @@ snapshots:
 
   '@cloudflare/workerd-windows-64@1.20260921.1':
     optional: true
+
+  '@cloudflare/workers-oauth-provider@0.10.3': {}
 
   '@cloudflare/workers-types@5.20260921.1': {}
 
@@ -13069,6 +13133,8 @@ snapshots:
       xtend: 4.0.2
 
   postgres@3.4.7: {}
+
+  postgres@3.4.9: {}
 
   powershell-utils@0.1.0: {}
 

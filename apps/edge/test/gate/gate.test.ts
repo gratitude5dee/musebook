@@ -9,8 +9,8 @@
 //     pass through once, denied cells produce ZERO origin subrequests.
 //   * signedBotAuthHeaders signs for the seed crawler's signature_agent URI.
 import { env, SELF } from "cloudflare:test";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { MARKER, SLUG, signedBotAuthHeaders } from "./helpers.js";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { db, MARKER, SLUG, signedBotAuthHeaders } from "./helpers.js";
 
 /** Every origin subrequest the Worker makes, recorded. The count is an assertion. */
 let originHits: Request[] = [];
@@ -20,6 +20,22 @@ const realFetch = globalThis.fetch;
 afterEach(() => {
   vi.restoreAllMocks();
   originHits = [];
+});
+
+const SEED_CRAWLER_ID = "33333333-3333-4333-8333-000000000002";
+
+beforeAll(async () => {
+  // Durable grants survive a test run — a settlement test in another file
+  // (m8-wire's hfap case grants the crawler on SLUG.hfap) flips this file's
+  // 402 cells to 200 on the NEXT run. CI never sees it (fresh reset) but
+  // repeated local gate runs do: clear the crawler's grants on the two posts
+  // this file denies.
+  await db(
+    `delete from public.access_grants
+      where subject_agent_id = $1::uuid
+        and post_id in (select id from public.posts where slug = any($2::text[]))`,
+    [SEED_CRAWLER_ID, [SLUG.hfap, SLUG.gated]],
+  );
 });
 
 /** fetchMock is not in this plugin version: the Worker's outbound fetch goes

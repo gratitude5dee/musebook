@@ -11,6 +11,7 @@ import { applyCacheHeaders } from "./http/cache.js"; // §6.12.5
 import { renderedToResponse, notFound, withSettlement } from "./http.js";
 import { parseResourceUrl, STATIC_ROUTES } from "./router.js"; // §7.10.1
 import { handleEvents } from "./routes/events.js"; // §13.4.3
+import { handleBridgePoll, handleBridgeResult } from "./routes/bridge.js"; // §10.6
 import { handleFeedForYou, handleFeedReels, handleFeedScored } from "./routes/feed.js"; // §9.21
 import { handlePublishPost } from "./routes/posts.js"; // §6 flow C
 import { routeUploads } from "./routes/uploads.js"; // §11.7.3
@@ -29,6 +30,8 @@ const ORIGIN_PASSTHROUGH = new Set(["/security.txt", "/crawlers.json"]);
 const API_ROUTES: Readonly<
   Record<string, (r: Request, e: Env, c: ExecutionContext) => Promise<Response>>
 > = {
+  "/api/bridge/poll": handleBridgePoll,
+  "/api/bridge/result": handleBridgeResult,
   "/api/events": handleEvents,
   "/api/feed/foryou": handleFeedForYou,
   "/api/feed/reels": handleFeedReels,
