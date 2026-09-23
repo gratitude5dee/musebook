@@ -165,17 +165,14 @@ begin
            p.author_user_id,
            case when p.posted_by_agent_id is null then 'human' else 'agent' end,
            p.kind,
-           extract(epoch from p.published_at) * 1000,
+           (extract(epoch from p.published_at) * 1000)::double precision,
            -- artifacts.remix_root_id (section 11.13's 20261103090200_artifacts_versioning.sql,
            -- M16): the materialised root of the fork chain RemixDedupFilter dedupes on.
            -- Scalar subquery, not a join: a post may carry more than one artifacts row
            -- and the candidate set must not fan out. Null before M16 and for every
-           -- non-artifact post.
-           (select a.remix_root_id
-              from public.artifacts a
-             where a.post_id = p.id
-             order by a.created_at
-             limit 1),
+           -- non-artifact post. The column does not exist until M16's migration, so
+           -- this lands as the constant NULL and §11.13 swaps in the subquery verbatim.
+           null::uuid,
            1 - (e.embedding <=> p_probe)
       from public.post_embeddings e
       join public.posts p on p.content_hash = e.content_hash
@@ -195,3 +192,32 @@ grant execute on function app.retrieve_similar_posts(
 
 -- No cron.schedule here. Slate reaping is section 4.13's single `reap-slates` job
 -- ('23 * * * *', expires_at < now() - interval '2 hours'); slate_items cascades.
+
+-- §9.15: v1.0 serves HeuristicMuseRanker — its registry row must exist before a
+-- scored slate can carry model_version='v1.model-heuristic' (slates FK).
+-- family 'linear' (logistic priors = linear family); 'active' for that family —
+-- the one_active index is per-family, so 'reverse_chron' stays untouched.
+insert into public.model_registry (model_version, family, status, metrics, trained_at, created_at)
+values ('v1.model-heuristic', 'linear', 'active', '{}'::jsonb, now(), now())
+on conflict (model_version) do nothing;
+
+-- §9.23: the embed consumer's body read. post_bodies is kernel-plane (§4.14)
+-- so a direct select is impossible under musebook_jobs — this narrow definer
+-- is the capability, same pattern as D39's list_resource helpers. It returns
+-- canonical_markdown for EVERY published body, paid included: a paywalled
+-- body still feeds the embedding the paywall page ranks on.
+create or replace function app.embed_post_bodies(p_content_hashes text[])
+returns table (content_hash text, canonical_markdown text)
+language plpgsql stable
+security definer
+set search_path = public, app, pg_temp
+as $$
+begin
+  return query
+    select b.content_hash, b.canonical_markdown
+      from public.post_bodies b
+     where b.content_hash = any(p_content_hashes);
+end;
+$$;
+revoke all on function app.embed_post_bodies(text[]) from public, anon, authenticated;
+grant execute on function app.embed_post_bodies(text[]) to musebook_worker;

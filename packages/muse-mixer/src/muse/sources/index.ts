@@ -188,6 +188,9 @@ export class AppArtifactSource implements Source<MuseFeedQuery, MuseCandidate> {
 export class RemixLineageSource implements Source<MuseFeedQuery, MuseCandidate> {
   readonly name = "RemixLineageSource";
   async source(q: MuseFeedQuery, ctx: ExecCtx): Promise<MuseCandidate[]> {
+    // No-op until M16: artifacts.remix_root_id lands with §11.13, and the SQL
+    // file is written for that schema. The param flips on when it ships.
+    if (!ctx.params.bool("RemixLineageEnabled", false)) return [];
     if (q.viewerId === null) return [];
     const seq = await ctx.db.recent.loadViewerSequence(q.viewerId, q.agentId);
     const engaged = (seq?.actions ?? []).filter(
@@ -257,7 +260,6 @@ export class ReverseChronSource implements Source<MuseFeedQuery, MuseCandidate> 
   async source(q: MuseFeedQuery, ctx: ExecCtx): Promise<MuseCandidate[]> {
     const rows = await ctx.db.posts.runSourceQuery("reverse_chron", [
       q.viewerId,
-      q.followedCreatorIds,
       reelsKinds(q),
       q.limit * 5,
     ]);
