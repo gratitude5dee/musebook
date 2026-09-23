@@ -15,7 +15,10 @@ export function cached(env: Env): Sql {
 }
 
 export function release(ctx: ExecutionContext, ...clients: Sql[]): void {
-  for (const c of clients) ctx.waitUntil(c.end());
+  // timeout:0 destroys the socket inside THIS invocation — a deferred close
+  // straddles the io boundary and the waitUntil'd end() never resolves,
+  // which keeps the isolate's io-context alive through pool teardown.
+  for (const c of clients) ctx.waitUntil(c.end({ timeout: 0 }).catch(() => undefined));
 }
 
 /**
@@ -40,7 +43,11 @@ export function asDb(sql: Sql): DbClient {
       const rows = (await sql.unsafe(text, [...(params ?? [])] as never[])) as unknown as T[];
       return { rows };
     },
-    end: () => sql.end().then(() => undefined),
+    end: () =>
+      sql
+        .end({ timeout: 0 })
+        .then(() => undefined)
+        .catch(() => undefined),
   };
 }
 

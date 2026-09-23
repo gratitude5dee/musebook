@@ -154,9 +154,11 @@ inherits the delegation's scopes and dies when the delegation is revoked.</p>
           scope: granted,
           props: { dlg: d.id, sub: d.owner_user_id, aid: d.agent_identity_id, scp: granted },
         });
-        return Response.redirect(redirectTo, 302);
+        return new Response(null, { status: 302, headers: { location: redirectTo } });
       } finally {
-        await sql.end();
+        // Detach, don't await: a settled-in-context end() still leaves a task
+        // that pins the io-context on the 3xx path and hangs pool teardown.
+        void sql.end({ timeout: 0 }).catch(() => undefined);
       }
     }
 

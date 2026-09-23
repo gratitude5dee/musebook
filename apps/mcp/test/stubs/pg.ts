@@ -57,11 +57,10 @@ export class Client {
   }
 
   async end(): Promise<void> {
-    // postgres.js/workerd teardown races: end() resolves, then the socket's
-    // internal read pump rejects on the already-closed handle and miniflare
-    // reports a phantom unhandled rejection. end() without awaiting it keeps
-    // the rejection inside postgres's own promise chain.
-    void this.sql.end({ timeout: 5 }).catch(() => undefined);
+    // timeout:0 destroys the socket now, inside THIS invocation context — a
+    // deferred close straddles the io boundary and workerd kills every
+    // subsequent write on the same hyperdrive proxy socket.
+    await this.sql.end({ timeout: 0 }).catch(() => undefined);
   }
 }
 

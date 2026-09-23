@@ -10,7 +10,7 @@ import { signerFromJWK } from "web-bot-auth/crypto";
 import type { JsonWebKey } from "./types.js";
 
 export const SIGNATURE_AGENT_ENTRY =
-  'musebook="<https://musebook.dev/.well-known/http-message-signatures-directory>";type=directory';
+  'musebook="https://musebook.dev/.well-known/http-message-signatures-directory";type=directory';
 const SIGNATURE_AGENT_KEY = "musebook";
 const EXPIRES_MS = 60_000;
 

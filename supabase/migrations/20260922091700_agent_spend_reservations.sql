@@ -823,6 +823,10 @@ revoke all on function app.set_delegation_reputation(uuid, numeric) from public,
 
 grant execute on function app.claim_due_schedules(int) to musebook_worker;
 grant execute on function app.delegation_for_drafting(uuid) to musebook_worker;
+-- app.bridge_task_context calls delegation_for_drafting AFTER app.enter() has
+-- switched to the jobs role, so the jobs plane needs the grant too — its table
+-- grants (delegations, connectors, profiles, ...) already cover the join.
+grant execute on function app.delegation_for_drafting(uuid) to musebook_jobs;
 grant execute on function app.posts_today_by_agent(uuid) to musebook_worker;
 grant execute on function app.connector_credential_for(uuid, text) to musebook_worker;
 grant execute on function app.sweep_stale_holds(interval, text, text, text) to musebook_worker;
@@ -959,7 +963,7 @@ begin
         (endpoint, idempotency_key, actor, state, response_status, response_body)
       values ('bridge.result', p_task_id, p_actor::text, 'complete', 200, p_response)
       on conflict (endpoint, idempotency_key, actor) do nothing
-      returning response_body
+      returning idempotency_keys.response_body
     )
     select true, i.response_body from ins i
     union all
