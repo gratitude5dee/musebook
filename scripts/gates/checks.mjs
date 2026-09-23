@@ -1386,8 +1386,22 @@ function dbTool() {
 function psqlCmd(sql, url = process.env.SUPABASE_DB_URL ?? LOCAL_DB_URL) {
   const tool = dbTool();
   if (tool?.kind === "docker") {
-    if (!/127\.0\.0\.1|localhost/.test(url))
-      return { r: null, blocked: "remote SUPABASE_DB_URL but no host psql" };
+    if (!/127\.0\.0\.1|localhost/.test(url)) {
+      // Remote URL (e.g. SUPABASE_PROD_DB_URL → pooler) with no host psql:
+      // run psql from a locally-pulled postgres image instead.
+      const img = run(
+        "docker images --format '{{.Repository}}:{{.Tag}}' 2>/dev/null | grep -E '^postgres:' | head -1",
+      ).out.trim();
+      if (!img)
+        return {
+          r: null,
+          blocked: "remote SUPABASE_DB_URL but no host psql and no postgres image",
+        };
+      return {
+        r: null,
+        cmd: `docker run --rm ${img} psql ${JSON.stringify(url)} -Atc ${JSON.stringify(sql)}`,
+      };
+    }
     // A non-postgres login (e.g. musebook_worker) goes through the container's
     // own TCP endpoint — docker exec -U <role> can't supply a password and
     // postgres itself holds the musebook plane grants as ADMIN-not-SET, so
