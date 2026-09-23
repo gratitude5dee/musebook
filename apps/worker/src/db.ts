@@ -34,6 +34,27 @@ export async function pgCached(env: Env): Promise<DbClient> {
   return client;
 }
 
+/** The mixer's dedicated connections. The pipeline issues many statements per
+ *  build — hydrators and sources run in parallel on the same socket — so
+ *  jobsTx's begin/enter/commit interleave would be racy. A session-level
+ *  `set role` on a per-build connection has the same effective privilege with
+ *  zero interleave risk; `set local role` inside the app.* helpers still
+ *  overrides it per statement, keyed off session-user membership. The
+ *  connection is ended with the build, so the role never leaks to a pool. */
+async function pgJobsScoped(client: Promise<DbClient>): Promise<DbClient> {
+  const c = await client;
+  await c.query("set role musebook_jobs");
+  return c;
+}
+
+export function pgFreshJobs(env: Env): Promise<DbClient> {
+  return pgJobsScoped(pgFresh(env));
+}
+
+export function pgCachedJobs(env: Env): Promise<DbClient> {
+  return pgJobsScoped(pgCached(env));
+}
+
 export interface ClaimedJob {
   kind: string;
   payload: Record<string, unknown>;

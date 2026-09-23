@@ -1,10 +1,13 @@
 // packages/muse-mixer/src/muse/sideEffects/index.ts
-// §9.22 — the four side effects, closed over the built slate. They run AFTER the
+// §9.22 — the side effects, closed over the built slate. They run AFTER the
 // pass returns, parallel allSettled; a rejection is a logged counter, not a retry.
+// The slate write itself is NOT one of them (§9.22: PersistSlateSideEffect is
+// gone — the pass writes it in one statement, synchronously).
 import type { ExecCtx, SideEffect, SideEffectInput } from "../../framework/types.js";
 import type { MuseFeedQuery } from "../query.js";
 import type { MuseCandidate } from "../candidate.js";
 import { SeenBloom, bloomParams } from "../bloom.js";
+import { weightsRowVersion } from "../build.js";
 
 type In = SideEffectInput<MuseFeedQuery, MuseCandidate>;
 
@@ -15,43 +18,6 @@ function isoWeek(now: number): string {
   const firstThursday = new Date(Date.UTC(thursday.getUTCFullYear(), 0, 4));
   const week = 1 + Math.round((thursday.getTime() - firstThursday.getTime()) / (7 * 86400000));
   return `${thursday.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
-}
-
-/** 1 — persist the slate: header + items in ONE statement (§9.7 writeSlate). */
-export function writeSlateEffect(): SideEffect<MuseFeedQuery, MuseCandidate> {
-  return {
-    name: "WriteSlate",
-    async run(input: In, ctx: ExecCtx): Promise<void> {
-      const q = input.query;
-      const items = input.selected.map((c, i) => ({
-        position: i,
-        postId: c.postId,
-        source: c.sourceNames[0] ?? "unknown",
-        actionScores: Object.fromEntries(
-          Object.entries(c.actionScores ?? {}).filter(
-            (e): e is [string, number] => e[1] !== undefined,
-          ),
-        ),
-        weightedScore: c.weightedScore ?? null,
-        score: c.score ?? null,
-      }));
-      await ctx.db.slates.writeSlate({
-        id: q.slateId,
-        viewerUserId: q.viewerId,
-        viewerAgentId: q.agentId,
-        surface: q.surface,
-        weightsVersion: input.selected[0]?.weightsVersion ?? `${q.weightsVersion}/default`,
-        modelVersion: q.modelVersion,
-        params: {
-          viewerContextVersion: q.viewerContextVersion,
-          actionCount: q.actionCount,
-          limit: q.limit,
-        },
-        expiresAt: new Date(ctx.now + 900_000),
-        items,
-      });
-    },
-  };
 }
 
 /** 2 — update the seen bloom + exact ring buffer (§9.16). */
@@ -119,7 +85,9 @@ export function slateImpressionsEffect(): SideEffect<MuseFeedQuery, MuseCandidat
           position: i,
           surface: q.surface,
           agent_id: q.agentId,
-          weights_version: c.weightsVersion ?? q.weightsVersion,
+          // action_events.weights_version is an FK into ranking_weights' PK —
+          // the version alone, never the candidate's version/cohort compound.
+          weights_version: weightsRowVersion(c.weightsVersion ?? q.weightsVersion),
           model_version: q.modelVersion,
         }));
         await ctx.db.telemetry.insertAgentActions(rows);

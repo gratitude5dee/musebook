@@ -83,7 +83,6 @@ import { ColdStartScorer } from "./scorers/cold_start_scorer.js";
 import { DiversityScorer } from "./scorers/diversity_scorer.js";
 import { TopKScoreSelector } from "./selectors/top_k_score_selector.js";
 import {
-  writeSlateEffect,
   updateSeenBloomEffect,
   telemetryEffect,
   slateImpressionsEffect,
@@ -224,12 +223,10 @@ export function musePipeline(
       return new TopKScoreSelector();
     },
     sideEffects(): Array<SideEffect<MuseFeedQuery, MuseCandidate>> {
-      return [
-        writeSlateEffect(),
-        updateSeenBloomEffect(),
-        telemetryEffect(),
-        slateImpressionsEffect(),
-      ];
+      // §9.22: no writeSlate side effect — the slate is written by
+      // SlatePort.writeSlate() inside the pass, in one statement, because a
+      // slate that exists only if a side effect succeeded sometimes does not exist.
+      return [updateSeenBloomEffect(), telemetryEffect(), slateImpressionsEffect()];
     },
   };
 }

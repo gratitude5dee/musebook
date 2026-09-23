@@ -39,22 +39,52 @@ export function isolateKvCache(): KvCache {
   };
 }
 
-/** Worker env vars as the ParamStore — `MUSE_MAX_CANDIDATES_PER_SOURCE` etc. */
-export function envParamStore(env: Readonly<Record<string, unknown>>): ParamStore {
+/** Param-store names are CamelCase (`MuseSeenExactWindow`, `MixerPassBudgetMs`)
+ *  while Worker vars are `MUSE_SEEN_EXACT_WINDOW` — the raw lookup would never
+ *  find them. Translate first, then honor the few names whose env spelling
+ *  isn't the mechanical snake-case. */
+const PARAM_ENV_ALIASES: Record<string, string> = {
+  MuseAnnEfSearch: "MUSE_HNSW_EF_SEARCH",
+  MuseModelVersion: "MUSE_RANKER_MODEL_ID",
+  MuseRankerModelId: "MUSE_RANKER_MODEL_ID",
+};
+
+function envNameFor(paramName: string): string {
+  return (
+    PARAM_ENV_ALIASES[paramName] ??
+    paramName.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toUpperCase()
+  );
+}
+
+function envLookup(env: Readonly<Record<string, unknown>>, name: string): unknown {
+  return env[name] ?? env[envNameFor(name)];
+}
+
+/** ctx.params resolution order: resolved `ranking_weights` gates first, then
+ *  the Worker var. `gates` is the resolved ActionWeights.gates for this build's
+ *  cohort — §9.10's knobs tune with one UPDATE, never a deploy. */
+export function envParamStore(
+  env: Readonly<Record<string, unknown>>,
+  gates?: Record<string, number | boolean>,
+): ParamStore {
   return {
     num(name, fallback) {
-      const v = env[name];
+      const g = gates?.[name];
+      if (typeof g === "number") return g;
+      const v = envLookup(env, name);
       const n = typeof v === "number" ? v : typeof v === "string" ? Number(v) : NaN;
       return Number.isFinite(n) ? n : fallback;
     },
     bool(name, fallback) {
-      const v = env[name];
+      const g = gates?.[name];
+      if (typeof g === "boolean") return g;
+      const v = envLookup(env, name);
       if (typeof v === "boolean") return v;
       if (typeof v === "string") return v === "true" || v === "1";
       return fallback;
     },
     str(name, fallback) {
-      const v = env[name];
+      const v = envLookup(env, name);
       return typeof v === "string" && v !== "" ? v : fallback;
     },
   };
@@ -86,8 +116,10 @@ export function workersExecCtx(input: {
   cache?: KvCache;
   stats?: StatsSink;
   now?: number;
+  /** Resolved ActionWeights.gates for this build's cohort — wins over env. */
+  gates?: Record<string, number | boolean>;
 }): ExecCtx {
-  const params = envParamStore(input.env);
+  const params = envParamStore(input.env, input.gates);
   const now = input.now ?? Date.now();
   const deadline = now + params.num("MixerPassBudgetMs", 20000);
   return {

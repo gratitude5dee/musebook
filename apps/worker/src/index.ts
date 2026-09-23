@@ -3,7 +3,7 @@
 // entrypoint switches on controller.cron against the canonical crons array in
 // wrangler.jsonc — a cron with no matching case is a §15.28 acceptance failure.
 import { sweepOutbox } from "./cron/outbox.js";
-import { rebuildAnonSlates } from "./cron/slates.js";
+import { rebuildAnonSlates, rebuildWarmSlates } from "./cron/slates.js";
 import { reconcileSettlements } from "./cron/settlements.js";
 import { assertAssetDomainCron } from "./cron/asset-domain.js";
 import { drainDueSchedules } from "./cron/agent-draft.js";
@@ -63,7 +63,11 @@ export default {
         beat("embed-backfill");
         await recomputeUserEmbeddings(env);
         beat("user-embed");
-        await rebuildAnonSlates(env, ctx); // §9.19 + §13 rollups hang off this one
+        // §9.17: warm viewers first, then the anonymous R3 slate. Both write
+        // through SlateBuilder's scored pass, never the request path.
+        await rebuildWarmSlates(env);
+        beat("slates-warm");
+        await rebuildAnonSlates(env, ctx); // §9.20 rung R3 + §13 rollups
         beat("slates-build");
         // §13.7.4: the AE rollup needs the 15-minute CPU budget that only an
         // interval >= 1h gets, so it hangs off this trigger gated on the hour.

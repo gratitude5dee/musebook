@@ -107,6 +107,12 @@ export * from "./muse/sideEffects/index.js";
 
 export { musePipeline, type MusePipelineOptions } from "./muse/pipeline.js";
 export { reelsPipeline } from "./muse/pipelines/reels.js";
+export {
+  buildQuery,
+  slateRowFor,
+  weightsRowVersion,
+  type BuildSlateRequest,
+} from "./muse/build.js";
 
 export {
   memoryActionWeights,

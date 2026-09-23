@@ -8,6 +8,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { postgresDbHandles, PostgresWeightsLoader, SOURCE_SQL } from "../src/adapters/pg.js";
 
 const DB_URL = "postgres://postgres:postgres@127.0.0.1:54322/postgres";
+const WORKER_URL = "postgres://musebook_worker:postgres@127.0.0.1:54322/postgres";
 
 function sqlClient(c: pg.Client) {
   return {
@@ -19,6 +20,7 @@ function sqlClient(c: pg.Client) {
 }
 
 let client: pg.Client;
+let jobsClient: pg.Client;
 let viewerId: string;
 let authorId: string;
 let follows: string[];
@@ -27,6 +29,14 @@ let topics: string[];
 beforeAll(async () => {
   client = new pg.Client({ connectionString: DB_URL });
   await client.connect();
+  // Adapter statements run through `jobsClient` — musebook_worker under
+  // `set role musebook_jobs`, exactly the production feed-build scope
+  // (apps/worker pgFreshJobs/pgCachedJobs). The postgres client stays for
+  // fixture discovery only: kernel/public tables aren't jobs-readable, and
+  // the supautils hook denies `set role` to reserved roles like postgres.
+  jobsClient = new pg.Client({ connectionString: WORKER_URL });
+  await jobsClient.connect();
+  await jobsClient.query("set role musebook_jobs");
   const author = await client.query<{ author_user_id: string }>(
     `select author_user_id from public.posts where status = 'published' limit 1`,
   );
@@ -34,11 +44,16 @@ beforeAll(async () => {
   const viewer = await client.query<{ id: string }>(
     `select u.id from public.users u
       where u.id <> $1
-        and not exists (select 1 from public.slates s where s.viewer_user_id = u.id)
+      order by u.id
       limit 1`,
     [authorId],
   );
   viewerId = viewer.rows[0].id;
+  // The fixture needs a slate-less viewer; prior builds (this suite included)
+  // may have written one — delete rather than require a pristine database.
+  await client.query(`delete from public.slates where viewer_user_id = $1`, [
+    viewerId,
+  ]);
   follows = (
     await client.query<{ followee_user_id: string }>(
       `select followee_user_id from public.follows
@@ -55,12 +70,13 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  await jobsClient.end();
   await client.end();
 });
 
 describe("pg adapter source queries", () => {
   it("runs all 11 source queries against the live schema", async () => {
-    const db = sqlClient(client);
+    const db = sqlClient(jobsClient);
     const cases: ReadonlyArray<readonly [string, readonly unknown[]]> = [
       ["follow_graph", [follows, viewerId, null, 400]],
       ["topic", [topics, null, 400]],
@@ -81,7 +97,7 @@ describe("pg adapter source queries", () => {
   });
 
   it("source rows carry the §9.5 candidate columns", async () => {
-    const db = sqlClient(client);
+    const db = sqlClient(jobsClient);
     const { rows } = await db.query<Record<string, unknown>>(
       SOURCE_SQL["reverse_chron"] as string,
       [viewerId, null, 5],
@@ -99,7 +115,7 @@ describe("pg adapter source queries", () => {
 
 describe("pg adapter ports", () => {
   it("graph/recent/posts/retrieval/slates/bloom/clusters respond", async () => {
-    const db = sqlClient(client);
+    const db = sqlClient(jobsClient);
     const handles = postgresDbHandles({
       cached: db,
       fresh: db,
@@ -202,7 +218,7 @@ describe("pg adapter ports", () => {
   });
 
   it("weights loader resolves the seeded v1 rows", async () => {
-    const db = sqlClient(client);
+    const db = sqlClient(jobsClient);
     const loader = new PostgresWeightsLoader(db);
     const w = await loader.load({
       family: "v1",

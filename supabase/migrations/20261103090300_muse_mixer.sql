@@ -221,3 +221,148 @@ end;
 $$;
 revoke all on function app.embed_post_bodies(text[]) from public, anon, authenticated;
 grant execute on function app.embed_post_bodies(text[]) to musebook_worker;
+
+-- ------------------------------------------- load_resources_by_post_ids
+-- §9.8: MonetizationPort is one call per BATCH — the mixer's
+-- MonetizationHydrator feeds a whole candidate set through the kernel
+-- projection surface. post_bodies is kernel-plane, so the batch resource
+-- read needs a narrow definer, same shape as
+-- app.load_resource_by_post_id (20260922092004_edge_helpers.sql).
+create or replace function app.load_resources_by_post_ids(
+  p_post_ids uuid[],
+  p_actor    uuid default null
+)
+returns table (
+  post_id uuid, author_user_id uuid, author_display_name text, author_handle text,
+  author_wallet text, kind text, status text, publish_mode text, slug text,
+  title text, summary text, canonical_url text, language_code text, tags text[],
+  content_hash text, canonical_markdown text, price_atomic text, price_asset text,
+  price_network text, revenue_share_version text, license_spdx text, license_url text,
+  train_ai boolean, ai_use boolean, search_indexable boolean,
+  attribution_required boolean, citation_template text,
+  published_at text, updated_at text
+)
+language plpgsql stable
+set search_path = public, pg_temp
+as $$
+begin
+  perform app.enter('musebook_kernel', p_actor);
+  return query
+    select
+      p.id, p.author_user_id, pr.display_name, pr.handle, w.address,
+      p.kind::text, p.status::text, p.publish_mode::text, p.slug, p.title,
+      p.summary, p.canonical_url, p.language_code, p.tags, p.content_hash,
+      b.canonical_markdown, p.price_atomic::text, p.price_asset, p.price_network,
+      p.revenue_share_version,
+      p.license_spdx, p.license_url, p.train_ai,
+      p.ai_use, p.search_indexable, p.attribution_required, p.citation_template,
+      to_char(p.published_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+      to_char(p.updated_at   at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+    from public.posts p
+    join public.post_bodies b on b.content_hash = p.content_hash
+    join public.profiles   pr on pr.user_id = p.author_user_id
+    left join lateral (
+      select address from public.wallets
+       where user_id = p.author_user_id and is_primary
+       limit 1
+    ) w on true
+    where p.id = any(p_post_ids) and p.deleted_at is null;
+end;
+$$;
+revoke all on function app.load_resources_by_post_ids(uuid[], uuid)
+  from public, anon, authenticated;
+grant execute on function app.load_resources_by_post_ids(uuid[], uuid)
+  to musebook_worker;
+-- Under the slate build's jobs-scoped session (`set role musebook_jobs`)
+-- EXECUTE binds to the current role, not the session user — the same
+-- capability reaches the mixer through the plane role (precedent:
+-- app.staged_upload_target / app.delegation_for_drafting / rollups).
+grant execute on function app.load_resources_by_post_ids(uuid[], uuid)
+  to musebook_jobs;
+
+-- ---------------------------------------- viewer_paid_content_hashes
+-- The mixer's entitlements read: access_grants is kernel-plane (§4.14), so
+-- the jobs-scoped feed build cannot select it raw. Same sanctioned shape as
+-- app.load_resources_by_post_ids — one plpgsql call that enters the kernel
+-- plane internally, returns every content_hash the viewer (or their wallet)
+-- holds a live grant for. Filter by subject user OR payer wallet (either arm
+-- satisfied is entitled — the same OR the M6 grant check uses).
+create or replace function app.viewer_paid_content_hashes(
+  p_subject_user_id uuid default null,
+  p_payer_wallet     text default null
+)
+returns table (content_hash text)
+language plpgsql stable
+set search_path = public, pg_temp
+as $$
+begin
+  perform app.enter('musebook_kernel', p_subject_user_id);
+  return query
+    select distinct g.content_hash
+      from public.access_grants g
+     where (g.subject_user_id = p_subject_user_id or g.payer = p_payer_wallet)
+       and g.revoked_at is null
+       and (g.expires_at is null or g.expires_at > now());
+end;
+$$;
+revoke all on function app.viewer_paid_content_hashes(uuid, text)
+  from public, anon, authenticated;
+grant execute on function app.viewer_paid_content_hashes(uuid, text)
+  to musebook_worker;
+grant execute on function app.viewer_paid_content_hashes(uuid, text)
+  to musebook_jobs;
+
+-- ---------------------------------------- viewer block/mute capabilities
+-- BlockMuteFilter needs the viewer's own block/mute sets. blocks/mutes are
+-- deliberately user-facing-only — the sole policies are `*_owner_read` to
+-- authenticated via auth.uid() — so no worker plane may hold a table grant,
+-- and an invoker function can't read them under any plane either. The
+-- sanctioned capability is therefore SECURITY DEFINER (the DSAR precedent):
+-- the function is the boundary, and its predicate returns exactly the rows
+-- the viewer's own policy would expose — live mutes only, matching the
+-- adapter's predicate. Revoking EXECUTE from the app roles keeps it
+-- worker-internal; no other caller can enumerate blocks through it.
+create or replace function app.viewer_blocked_user_ids(p_viewer uuid)
+returns table (blocked_user_id uuid)
+language plpgsql stable security definer
+set search_path = public, pg_temp
+as $$
+begin
+  return query
+    select b.blocked_user_id
+      from public.blocks b
+     where b.blocker_user_id = p_viewer;
+end;
+$$;
+revoke all on function app.viewer_blocked_user_ids(uuid)
+  from public, anon, authenticated;
+grant execute on function app.viewer_blocked_user_ids(uuid)
+  to musebook_worker, musebook_jobs;
+
+create or replace function app.viewer_mutes(p_viewer uuid)
+returns table (muted_user_id uuid, muted_keyword text)
+language plpgsql stable security definer
+set search_path = public, pg_temp
+as $$
+begin
+  return query
+    select m.muted_user_id, m.muted_keyword
+      from public.mutes m
+     where m.muter_user_id = p_viewer
+       and (m.expires_at is null or m.expires_at > now());
+end;
+$$;
+revoke all on function app.viewer_mutes(uuid)
+  from public, anon, authenticated;
+grant execute on function app.viewer_mutes(uuid)
+  to musebook_worker, musebook_jobs;
+
+-- assets is public-reader-visible already (musebook_public_reader holds
+-- SELECT); the jobs plane needs the same read for CoreDataHydration's media
+-- join — a strict-subset expansion of an already-public grant.
+grant select on public.assets to musebook_jobs;
+
+-- The hourly anon-slate mirror calls app.read_slate_doc under `set role
+-- musebook_jobs`; EXECUTE binds to the current role there.
+grant execute on function app.read_slate_doc(uuid, uuid, text, uuid, integer, integer, uuid)
+  to musebook_jobs;

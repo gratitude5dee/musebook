@@ -96,9 +96,11 @@ class PgGraph implements GraphPort {
     );
     return rows.map((r) => r.topic_id);
   }
+  /** blocks/mutes carry no plane grants (owner-read policies only) — the
+   *  narrow app.* capabilities return exactly the viewer's own rows. */
   async blockedUserIds(viewerUserId: string): Promise<string[]> {
     const { rows } = await this.cached.query<{ blocked_user_id: string }>(
-      `select blocked_user_id from public.blocks where blocker_user_id = $1`,
+      "select blocked_user_id from app.viewer_blocked_user_ids($1::uuid)",
       [viewerUserId],
     );
     return rows.map((r) => r.blocked_user_id);
@@ -108,8 +110,7 @@ class PgGraph implements GraphPort {
       muted_user_id: string | null;
       muted_keyword: string | null;
     }>(
-      `select muted_user_id, muted_keyword from public.mutes
-        where muter_user_id = $1 and (expires_at is null or expires_at > now())`,
+      "select muted_user_id, muted_keyword from app.viewer_mutes($1::uuid)",
       [viewerUserId],
     );
     return {
@@ -117,13 +118,12 @@ class PgGraph implements GraphPort {
       keywords: rows.flatMap((r) => (r.muted_keyword === null ? [] : [r.muted_keyword])),
     };
   }
-  /** §9.6: grant reads are the one query hydrator that runs on HYPERDRIVE_FRESH. */
+  /** §9.6: grant reads are the one query hydrator that runs on HYPERDRIVE_FRESH.
+   *  access_grants is kernel-plane (§4.14) — never a raw select; the narrow
+   *  app.* capability enters the kernel role inside its own statement. */
   async paidContentHashes(viewerUserId: string, viewerWallet: string | null): Promise<string[]> {
     const { rows } = await this.fresh.query<{ content_hash: string }>(
-      `select distinct content_hash from public.access_grants
-        where (subject_user_id = $1 or payer = $2)
-          and revoked_at is null
-          and (expires_at is null or expires_at > now())`,
+      "select content_hash from app.viewer_paid_content_hashes($1::uuid, $2)",
       [viewerUserId, viewerWallet],
     );
     return rows.map((r) => r.content_hash);
@@ -273,7 +273,9 @@ class PgRetrieval implements RetrievalPort {
   async newUserIndexEmbedding(indexId: string): Promise<number[] | null> {
     void indexId;
     const { rows } = await this.cached.query<{ centroid: unknown }>(
-      `select avg(embedding)::text as centroid from public.user_embeddings`,
+      // pgvector's aggregate lives in the `extensions` schema, which is not
+      // on a worker session's search_path — qualify it.
+      `select extensions.avg(embedding)::text as centroid from public.user_embeddings`,
     );
     const r = rows[0];
     return r === undefined || r.centroid === null ? null : vec(r.centroid);
