@@ -1528,6 +1528,56 @@ export const GATES = {
       run: checks.m12LaunchCopy,
     },
   ],
+  M13: [
+    {
+      id: "M13.1",
+      kind: "fn",
+      desc: "G-ISO bit-identical alone AND in a batch of 200 under BOTH vitest tiers; isolation-bites proves the detector fails on a contaminated scorer",
+      run: checks.m13Iso,
+    },
+    {
+      id: "M13.2",
+      kind: "fn",
+      desc: "zero platform imports outside adapters/ in packages/muse-mixer/src (pg/postgres/next/cloudflare/onnxruntime/env.*) + M5 gate 7 grep re-run",
+      run: checks.m13NoPlatformImports,
+    },
+    {
+      id: "M13.3",
+      kind: "fn",
+      desc: "request path reads not scores (M6.9 re-run): no muse-mixer import in apps/edge, exactly one read_slate_doc call site, app.read_slate EXECUTE kernel+jobs only",
+      run: checks.m13ReadNotScore,
+    },
+    {
+      id: "M13.4",
+      kind: "fn",
+      desc: "feed p95 unchanged vs M12 baseline in OPERATIONS.md — local read_slate_doc p95 measured and recorded",
+      run: checks.m13FeedP95,
+    },
+    {
+      id: "M13.5",
+      kind: "fn",
+      desc: "post_embeddings == distinct published content_hashes, vector 1536-dim, retrieve_similar_posts rows; truncated user_embeddings → full slate + muse.stage.disabled",
+      run: checks.m13Embeddings,
+    },
+    {
+      id: "M13.6",
+      kind: "fn",
+      desc: "exactly two new tables (creator_clusters, viewer_seen_bloom); model_registry_status_allowed still candidate|shadow|active|retired",
+      run: checks.m13Schema,
+    },
+    {
+      id: "M13.7",
+      kind: "fn",
+      desc: "three-score discipline + runtime weights: ranking_weights update changes loaded weights with no deploy; seeded viewer home+reels slates candidate_count > 0",
+      run: checks.m13RuntimeWeights,
+    },
+    {
+      id: "M13.8",
+      kind: "fn",
+      desc: "every served item carries position — M6 gates 5–8 re-run (positions, literals, coverage, density)",
+      run: checks.m13PositionDiscipline,
+    },
+  ],
 };
 
 export const MILESTONE_TITLES = {

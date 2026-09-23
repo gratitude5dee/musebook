@@ -167,11 +167,11 @@ jobs:
       # green-by-accident, because vitest.config.ts sets passWithNoTests: false.
       - name: Candidate isolation (spine invariant 2)
         if: hashFiles('packages/muse-mixer/test/isolation.test.ts') != ''
-        run: pnpm --filter @musebook/muse-mixer test -- isolation
+        run: pnpm --filter @musebook/muse-mixer test isolation
 
       - name: Kernel golden fixtures — 3 modes x 2 actor classes x 4 representations
         if: hashFiles('packages/kernel/test/golden.test.ts') != ''
-        run: pnpm --filter @musebook/kernel test -- golden
+        run: pnpm --filter @musebook/kernel test golden
 
       - name: Generated DB types are current
         if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'preview-db')

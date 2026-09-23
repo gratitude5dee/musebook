@@ -3,7 +3,7 @@
 // entrypoint switches on controller.cron against the canonical crons array in
 // wrangler.jsonc — a cron with no matching case is a §15.28 acceptance failure.
 import { sweepOutbox } from "./cron/outbox.js";
-import { rebuildAnonSlates } from "./cron/slates.js";
+import { rebuildAnonSlates, rebuildWarmSlates } from "./cron/slates.js";
 import { reconcileSettlements } from "./cron/settlements.js";
 import { assertAssetDomainCron } from "./cron/asset-domain.js";
 import { drainDueSchedules } from "./cron/agent-draft.js";
@@ -17,6 +17,7 @@ import { distributeReconcile } from "./cron/distribute-reconcile.js";
 import { collectPlatformAnalytics } from "./cron/analytics.js";
 import { refreshChannelConstraints } from "./cron/refresh-channel-constraints.js";
 import { runAeRollup } from "./cron/ae-rollup.js";
+import { backfillPostEmbeddings, recomputeUserEmbeddings } from "./cron/embed.js";
 import { runAlertPass, writeHeartbeat } from "./alerts.js";
 import { dispatch } from "./consumers/index.js";
 import { SlateBuilder } from "./slate-builder.js";
@@ -56,7 +57,17 @@ export default {
         await runAlertPass(env, ctx);
         return noop();
       case "0 * * * *": {
-        await rebuildAnonSlates(env, ctx); // §9.19 + §13 rollups hang off this one
+        // §9.23: embeddings land before the slate rebuild in the same tick so
+        //  a viewer's fresh embedding feeds the slate built seconds later.
+        await backfillPostEmbeddings(env);
+        beat("embed-backfill");
+        await recomputeUserEmbeddings(env);
+        beat("user-embed");
+        // §9.17: warm viewers first, then the anonymous R3 slate. Both write
+        // through SlateBuilder's scored pass, never the request path.
+        await rebuildWarmSlates(env);
+        beat("slates-warm");
+        await rebuildAnonSlates(env, ctx); // §9.20 rung R3 + §13 rollups
         beat("slates-build");
         // §13.7.4: the AE rollup needs the 15-minute CPU budget that only an
         // interval >= 1h gets, so it hangs off this trigger gated on the hour.

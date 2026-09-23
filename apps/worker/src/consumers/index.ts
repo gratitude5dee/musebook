@@ -1,7 +1,8 @@
 // apps/worker/src/consumers/index.ts — the queue() dispatch. One case per
 // queue; every consumer claims the outbox row first so a redelivered message
 // is a no-op, then finishes it. Dead-letter handling is per queue below.
-import { claimJob, finishJob, pgFresh, type DbClient } from "../db.js";
+import { claimJob, finishJob, pgFresh, retryDelaySeconds, type DbClient } from "../db.js";
+import { consumeEmbedBatch } from "./embed.js";
 import { runSlateJob, type SlateRequest } from "../slate-builder.js";
 import { consumeDlq } from "./dlq.js";
 import { handleR2ObjectCreated } from "./r2-events.js";
@@ -52,14 +53,7 @@ export const QUEUE_MAP: Readonly<Record<string, string>> = {
   "musebook-dsar-dlq": "dsar",
 };
 
-const BACKOFF_BASE_SECONDS = 5;
-const BACKOFF_CEILING_SECONDS = 86_400; // the platform retry ceiling
-
-/** Queues has no built-in backoff: retry() delay is ours. Exponential on the
- *  delivery's attempt count, capped at the platform's 24 h retry bound. */
-export function retryDelaySeconds(attempts: number): number {
-  return Math.min(BACKOFF_CEILING_SECONDS, BACKOFF_BASE_SECONDS * 2 ** Math.max(0, attempts - 1));
-}
+export { retryDelaySeconds };
 
 /** The shared claim→work→finish skeleton (§4.13.3). `work` gets the claimed
  *  row; a throw marks the job failed and rethrows so the message retries. */
@@ -116,11 +110,6 @@ export async function dispatch(batch: MessageBatch, env: Env): Promise<void> {
         // M7: classifier call + posts.title/tags write. Consume-now so the
         // outbox keeps its dedupe contract in the meantime.
         await recordRows(db, "app.record_classifications", payload);
-      }),
-    "musebook-embed": (m) =>
-      consume(env, m, "embed", async (db, payload) => {
-        // M9: embedding write — existing_embeddings keeps it idempotent.
-        await recordRows(db, "app.record_embeddings", payload);
       }),
     "musebook-distribute": (m) => {
       // A message with no job_id is the Postiz webhook's raw reconcile hint
@@ -179,6 +168,13 @@ export async function dispatch(batch: MessageBatch, env: Env): Promise<void> {
     "musebook-r2-events-dlq": (m) => consumeDlq(env, m, "r2_events"),
     "musebook-dsar-dlq": (m) => consumeDlq(env, m, "dsar"),
   };
+
+  // §9.23: embed is batch-shaped — one gateway call per ≤100 claimed jobs,
+  // so it owns the whole MessageBatch and does its own ack/retry.
+  if (batch.queue === "musebook-embed") {
+    await consumeEmbedBatch(batch, env);
+    return;
+  }
 
   const handler = handlers[batch.queue] ?? dlqHandlers[batch.queue];
   await Promise.all(

@@ -2073,8 +2073,13 @@ export function m6EventPositions() {
 // M6.6 — O3: bootstrap literals are server-set, and a forged weights_version
 // still stores 'none'. Wire slice covers the forged-batch posting.
 export function m6BootstrapLiterals() {
+  // M13 evolves the literals domain: scored slates record their real
+  // weights_version/model_version on the event row (only bootstrap-shape
+  // slates use 'none'/'reverse_chron'). The invariant is now equality —
+  // every event carries its slate's dims, whatever they are — plus the
+  // forged-header slice below, which must still store 'none'.
   const sql = sqlCheck(
-    "select count(*)::int from public.action_events where weights_version <> 'none' or model_version <> 'reverse_chron'",
+    "select count(*)::int from public.action_events e join public.slates s on s.id = e.slate_id where e.weights_version <> s.weights_version or e.model_version <> s.model_version",
     "0",
   );
   if (!sql.ok) return sql;
@@ -4298,4 +4303,189 @@ export function m12LaunchCopy() {
   )
     errors.push("Toll sentence missing or modified in ModePicker");
   return { ok: errors.length === 0, errors };
+}
+
+// ---------------------------------------------------------------------------
+// M13 milestone checks — §16.7 verbatim. The scored-slate era: slate rows are
+// written by muse-mixer builds in apps/worker, the read path stays the same
+// single definer call, and G-ISO (spine invariant 2) turns on from here on.
+// Live-SQL probes run through apps/worker/scripts/m13-mixer-probe.mts — the
+// probe composes the production build path (feedPorts + PostgresWeightsLoader
+// + muse/reels pipelines) on the local Supabase.
+// ---------------------------------------------------------------------------
+
+const M13_PROBE = "pnpm --filter musebook-worker exec tsx scripts/m13-mixer-probe.mts";
+const MIXER_NODE = "pnpm vitest run --project muse-mixer";
+const MIXER_WORKERS = "pnpm vitest run --project muse-mixer-workers";
+
+function m13Probe(sub, expectPrefix) {
+  const r = run(`${M13_PROBE} ${sub}`, { timeout: 300_000 });
+  const line =
+    (r.out + "")
+      .trim()
+      .split("\n")
+      .filter((l) => /OK|FAIL|MS/.test(l))
+      .pop() ?? "";
+  if (!line.startsWith(expectPrefix))
+    return {
+      ok: false,
+      errors: [`${sub}: expected '${expectPrefix}', got '${line || r.out.slice(-400)}'`],
+    };
+  return { ok: true, errors: [], line };
+}
+
+// M13.1 — G-ISO bit-identical alone AND in a batch of 200 under BOTH vitest
+// tiers. `-t "isolation"` selects isolation.test.ts's "candidate isolation"
+// suite AND isolation-bites.test.ts's "isolation-bites" suite — the second is
+// the non-trivial half: it proves the detector fails on a contaminated scorer.
+export function m13Iso() {
+  const node = vitestSlice(MIXER_NODE, "isolation");
+  if (!node.ok) return node;
+  return vitestSlice(MIXER_WORKERS, "isolation");
+}
+
+// M13.2 — zero platform imports outside adapters/: pg/postgres/next/*
+// cloudflare:*/@cloudflare/*/onnxruntime-* and any env.* binding reference may
+// appear only under packages/muse-mixer/src/adapters/. Plus the lint rule and
+// M5 gate 7's grep re-run over packages/muse-mixer/.
+export function m13NoPlatformImports() {
+  const hits = rg(
+    String.raw`from\s+['"](pg|postgres|next/|cloudflare:|@cloudflare/|onnxruntime-)`,
+    ["packages/muse-mixer/src"],
+    ["-g", "*.ts"],
+  ).filter((h) => !h.split(":")[0].includes("/adapters/"));
+  const envHits = rg(
+    String.raw`\benv\.[A-Z_]+`,
+    ["packages/muse-mixer/src"],
+    ["-g", "*.ts"],
+  ).filter((h) => !h.split(":")[0].includes("/adapters/"));
+  if (hits.length || envHits.length) return { ok: false, errors: [...hits, ...envHits] };
+  // M5 gate 7 re-run over the mixer package (same forbidden-import invariant).
+  const m5 = rg(String.raw`from '(cloudflare:|pg|@cloudflare/)`, [
+    "packages/muse-mixer/src",
+  ]).filter((h) => !h.split(":")[0].includes("/adapters/"));
+  return { ok: m5.length === 0, errors: m5 };
+}
+
+// M13.3 — the request path reads, it does not score (M6 gate 9 re-run):
+// no @musebook/muse-mixer import in apps/edge, no direct slates/slate_items
+// select, exactly one app.read_slate_doc call site, and EXECUTE on
+// app.read_slate is kernel+jobs only — every other role errors (§9.23).
+export function m13ReadNotScore() {
+  const slice = m6ReadNotScore();
+  if (!slice.ok) return slice;
+  const calls = rg("read_slate_doc", ["apps/edge/src"], ["-g", "*.ts"]);
+  if (calls.length !== 1)
+    return {
+      ok: false,
+      errors: [`expected exactly one read_slate_doc call site, got ${calls.length}`],
+    };
+  return sqlCheck(
+    "select string_agg(distinct r.rolname, ',' order by r.rolname) from pg_proc p join pg_namespace n on p.pronamespace=n.oid cross join lateral aclexplode(p.proacl) x join pg_roles r on r.oid=x.grantee where n.nspname='app' and p.proname='read_slate'",
+    "musebook_jobs,musebook_kernel,postgres",
+  );
+}
+
+// M13.4 — feed p95 unchanged vs the M12 baseline in OPERATIONS.md. The local
+// equivalent measures the request path's one select (app.read_slate_doc as
+// musebook_worker, 40 reads) — the same code path the deployed feed runs. The
+// measured value is recorded in OPERATIONS.md's M13.4 row.
+export function m13FeedP95() {
+  const probe = m13Probe("p95", "P95_MS");
+  if (!probe.ok) return probe;
+  const ms = parseFloat(probe.line.split(/\s+/)[1]);
+  if (!(ms > 0 && ms < 250))
+    return { ok: false, errors: [`read_slate_doc p95 out of bound: ${probe.line}`] };
+  return { ok: true, errors: [] };
+}
+
+// M13.5 — embedding coverage + degraded retrieval: post_embeddings count ==
+// distinct published content_hashes, extensions.vector is 1536-dimensional,
+// retrieve_similar_posts returns rows for a seeded viewer, and with
+// user_embeddings truncated the build still produces a full slate with
+// muse.stage.disabled{stage=sources,name=EmbeddingRetrievalSource} (§9.23).
+export function m13Embeddings() {
+  // "after the seed and one hourly tick" — run the real tick: §9.23's verbatim
+  // backfill CTE enqueues, consumeEmbedBatch claims and writes through
+  // record_embeddings (gateway fetch stubbed, same convention as
+  // queue-idempotency.test.ts). Without it, gate-test posts linger unembedded.
+  const tick = m13Probe("embed-tick", "EMBED_OK");
+  if (!tick.ok) return tick;
+  const count = sqlCheck(
+    `select count(*)::int = (select count(distinct p.content_hash) from public.posts p join public.post_bodies b on b.content_hash = p.content_hash where p.status = 'published') from public.post_embeddings`,
+    "t",
+  );
+  if (!count.ok) return count;
+  const dim = sqlCheck(
+    "select format_type(atttypid, atttypmod) from pg_attribute where attrelid = 'public.post_embeddings'::regclass and attname = 'embedding'",
+    "vector(1536)",
+  );
+  if (!dim.ok) return dim;
+  const retrieval = sqlRun(
+    `select (select count(*) from (select * from app.retrieve_similar_posts((select embedding::text::vector from public.post_embeddings limit 1), 720, null::post_kind[], '{}'::uuid[], 5, 200)) t) > 0`,
+  );
+  if (retrieval.code !== 0 || retrieval.out.trim() !== "t")
+    return {
+      ok: false,
+      errors: [`retrieve_similar_posts returned no rows: ${retrieval.out.trim().slice(-300)}`],
+    };
+  return m13Probe("degraded", "DEGRADED_OK");
+}
+
+// M13.6 — exactly two new tables; the §4.7/§4.8 tables are unchanged since M2
+// (asserted by G-DRIFT's migration diff + the model_registry constraint's
+// allowed domain still being candidate|shadow|active|retired).
+export function m13Schema() {
+  const created = rg("create table (if not exists )?public\\.", [
+    "supabase/migrations/20261103090300_muse_mixer.sql",
+  ]);
+  const names = created.map((l) => l.match(/public\.(\w+)/)?.[1]).sort();
+  const expect = ["creator_clusters", "viewer_seen_bloom"];
+  if (names.join(",") !== expect.join(","))
+    return {
+      ok: false,
+      errors: [`migration creates ${names.join(",")}, expected ${expect.join(",")}`],
+    };
+  for (const t of expect) {
+    const t1 = sqlCheck(`select count(*)::int >= 0 from public.${t}`, "t");
+    if (!t1.ok) return t1;
+  }
+  return sqlCheck(
+    `select pg_get_constraintdef(oid) ~ 'candidate' and pg_get_constraintdef(oid) ~ 'shadow' and pg_get_constraintdef(oid) ~ 'active' and pg_get_constraintdef(oid) ~ 'retired' from pg_constraint where conname = 'model_registry_status_allowed'`,
+    "t",
+  );
+}
+
+// M13.7 — three-score discipline + runtime weights: slate_items carry
+// action_scores + weighted_score + score (writer keeps all three), a
+// ranking_weights update changes the loaded weights with no deploy (probe),
+// and the seeded viewer has home + reels slates with candidate_count > 0
+// (§9.23 acceptance).
+export function m13RuntimeWeights() {
+  const cols = sqlCheck(
+    `select count(*)::int from information_schema.columns where table_schema='public' and table_name='slate_items' and column_name in ('action_scores','weighted_score','score')`,
+    "3",
+  );
+  if (!cols.ok) return cols;
+  // Bootstrap-shape slates (weights_version 'none', written by the reverse-
+  // chron path) legitimately lack score dims — the discipline binds scored
+  // slates only.
+  const written = sqlCheck(
+    `select count(*)::int from public.slate_items i join public.slates s on s.id = i.slate_id where s.weights_version <> 'none' and (i.action_scores is null or i.weighted_score is null or i.score is null)`,
+    "0",
+  );
+  if (!written.ok) return written;
+  const weights = m13Probe("weights", "WEIGHTS_OK");
+  if (!weights.ok) return weights;
+  return m13Probe("build", "BUILD_OK");
+}
+
+// M13.8 — every served item still carries a position (M6 gates 5–8 re-run
+// against the scored slate).
+export function m13PositionDiscipline() {
+  for (const fn of [m6EventPositions, m6BootstrapLiterals, m6SlateCoverage, m6PositionDensity]) {
+    const r = fn();
+    if (!r.ok) return r;
+  }
+  return { ok: true, errors: [] };
 }

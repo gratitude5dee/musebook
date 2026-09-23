@@ -99,7 +99,10 @@ begin
              'post_classifications','post_counters','posts','profiles',
              'reposts','scopes',
              -- M9: delegation_for_drafting folds owner defaults in (91700).
-             'creator_publishing_defaults')
+             'creator_publishing_defaults',
+             -- M13: MediaHydrator reads duration/url/storage for reels
+             -- candidates; rows are already fully public to public_reader.
+             'assets')
          end;
 
   -- Snapshot the matrix into memory: after SET LOCAL ROLE the session can no

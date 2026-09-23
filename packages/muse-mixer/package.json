@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./adapters/pg": "./src/adapters/pg.ts",
+    "./adapters/workers": "./src/adapters/workers/index.ts"
   },
   "scripts": {
     "build": "tsc --build --pretty",
