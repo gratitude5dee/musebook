@@ -1238,7 +1238,7 @@ export async function m1CatalogPins() {
     errors.push("npm view vitest failed");
   }
   const wr = run("npm view wrangler version");
-  if (wr.out.trim() !== "4.136.3") errors.push(`wrangler latest is ${wr.out.trim()}, not 4.136.3`);
+  if (wr.out.trim() !== "4.137.0") errors.push(`wrangler latest is ${wr.out.trim()}, not 4.137.0`);
   return { ok: errors.length === 0, errors };
 }
 
