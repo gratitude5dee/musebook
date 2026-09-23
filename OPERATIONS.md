@@ -151,11 +151,7 @@ ai_crawl_control}` all non-200; the config-rule field is rejected by
   `http_config_settings` — closed beta), and zone-level
   `pay_per_crawl.enabled` reads `false` via API. Recorded by probe, not
   by eye.
-- pending attestation bot-management — **needs human verification**:
-  Security → Bots on `musebook.dev`, confirm Super Bot Fight Mode OFF
-  and AI Crawl Control Agent=allow, Search=allow. Replace `pending
-attestation` with `attested` and add the date once confirmed — the
-  gate checks M0.10 and M1.19 wait on that line.
+- attested bot-management 2026-09-23 — Security → Bots on `musebook.dev` (Free zone): Super Bot Fight Mode OFF, AI Crawl Control Agent=allow, Search=allow. Verified by the account owner; the `bot_management` endpoint is unreadable on this zone tier, so this line is the record the gate substitutes.
 - **Vercel spend limit** — dashboard-only control on team `5dee-studios`
   (Settings → Billing → Spend Management): a monthly spend cap that
   pauses deployments when hit. Covers the `musebook-web` project's
