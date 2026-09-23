@@ -36,8 +36,12 @@ function trySh(cmd) {
   if (/vitest|playwright/.test(cmd)) {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const file = `/tmp/gate-sh-${id}.out`;
+    const supervisor = `/tmp/gate-sh-${id}.sh`;
     const secs = 900;
-    const inner = `setsid bash -c '${cmd.replace(/'/g, `'\''`)} > ${file} 2>&1' &
+    writeFileSync(
+      supervisor,
+      `#!/usr/bin/env bash
+setsid bash -c "${cmd.replace(/"/g, '\\"')} > ${file} 2>&1" &
 pid=$!
 for i in $(seq 1 ${secs}); do
   if ! kill -0 $pid 2>/dev/null; then wait $pid; exit 0; fi
@@ -46,9 +50,11 @@ done
 kill -TERM -- -$pid 2>/dev/null
 sleep 5
 kill -KILL -- -$pid 2>/dev/null
-exit 124`;
+exit 124
+`,
+    );
     try {
-      execSync(`bash -c '${inner.replace(/'/g, `'\''`)}'`, {
+      execSync(`bash ${supervisor}`, {
         cwd: ROOT,
         encoding: "utf8",
         stdio: ["ignore", "pipe", "pipe"],

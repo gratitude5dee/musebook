@@ -97,9 +97,9 @@ export const ConnectorManifestZ = z.strictObject({
   }),
   submittedBy: z.object({
     walletAddress: z.string().regex(/^0x[0-9a-fA-F]{40}$/),
-    /** viem verifyMessage over canonicalize(manifest-without-submittedBy.signature),
-     *  checked once in apps/web at review time. Never at the edge: secp256k1 is not
-     *  in workerd's WebCrypto (CF-SPINE §12). */
+    /** ECDSA secp256k1 message-recover over canonicalize(manifest-without-
+     *  submittedBy.signature), checked once in apps/web at review time. Never
+     *  at the edge: secp256k1 is not in workerd's WebCrypto (CF-SPINE §12). */
     signature: z.string().regex(/^0x[0-9a-fA-F]{130}$/),
   }),
 });

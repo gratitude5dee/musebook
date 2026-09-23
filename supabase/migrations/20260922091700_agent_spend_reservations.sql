@@ -454,12 +454,14 @@ end;
 $$;
 
 revoke all on function public.insert_draft_post(
-  uuid, uuid, uuid, text, text, text[], publish_mode, boolean,
-  uuid, uuid, text[], text, text, text)
+  uuid, uuid, uuid, text, text, text[], text, boolean,
+  uuid, uuid, text[], text, text, text,
+  numeric(78,0), text, boolean, boolean, boolean)
   from public, anon, authenticated;
 grant execute on function public.insert_draft_post(
-  uuid, uuid, uuid, text, text, text[], publish_mode, boolean,
-  uuid, uuid, text[], text, text, text)
+  uuid, uuid, uuid, text, text, text[], text, boolean,
+  uuid, uuid, text[], text, text, text,
+  numeric(78,0), text, boolean, boolean, boolean)
   to musebook_worker, service_role;
 
 -- ── §10.15's drafting reads/writes, all through app.* helpers (D23: a sibling
