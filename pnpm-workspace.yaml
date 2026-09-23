@@ -53,3 +53,5 @@ minimumReleaseAgeExclude:
   - miniflare@5.20260921.0-alpha
   - wrangler@4.136.0 || 4.136.1
   - "@cloudflare/unenv-preset@2.16.2"
+patchedDependencies:
+  postgres@3.4.9: patches/postgres@3.4.9.patch

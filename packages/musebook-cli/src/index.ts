@@ -6,6 +6,7 @@
 // MUSEBOOK_TOKEN or ~/.config/musebook/token.
 import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
 import { readFile } from "node:fs/promises";
+import { pathToFileURL } from "node:url";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -39,7 +40,7 @@ async function connect({ url, token }: CliEnv): Promise<Client> {
   return client;
 }
 
-function parseJsonArgv(argv: string[]): Record<string, unknown> {
+export function parseJsonArgv(argv: string[]): Record<string, unknown> {
   // --key value | --key=value | --flag (true) | JSON blob as one arg
   if (argv.length === 1 && argv[0] !== undefined && argv[0].trim().startsWith("{")) {
     return JSON.parse(argv[0]) as Record<string, unknown>;
@@ -75,6 +76,20 @@ function coerce(v: string): unknown {
   }
 }
 
+export const TOOL_FOR: Record<string, string> = {
+  search: "search_posts",
+  read: "get_post",
+  feed: "get_feed",
+  authors: "list_authors",
+  artifact: "get_artifact",
+  asset: "download_asset",
+  pricing: "get_pricing",
+  pay: "purchase_access",
+  follow: "subscribe_author",
+  post: "submit_post",
+  analytics: "get_analytics",
+};
+
 const USAGE = `musebook — the agent-first CLI for musebook.dev
 
 usage:
@@ -97,7 +112,7 @@ env: MUSEBOOK_MCP_URL (default ${DEFAULT_URL})
      MUSEBOOK_TOKEN (or ~/.config/musebook/token)
 `;
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   const [cmd, ...rest] = process.argv.slice(2);
   if (cmd === undefined || cmd === "help" || cmd === "--help" || cmd === "-h") {
     console.log(USAGE);
@@ -119,20 +134,7 @@ async function main(): Promise<void> {
       return;
     }
 
-    const toolFor: Record<string, string> = {
-      search: "search_posts",
-      read: "get_post",
-      feed: "get_feed",
-      authors: "list_authors",
-      artifact: "get_artifact",
-      asset: "download_asset",
-      pricing: "get_pricing",
-      pay: "purchase_access",
-      follow: "subscribe_author",
-      post: "submit_post",
-      analytics: "get_analytics",
-    };
-    const tool = cmd === "call" ? rest[0] : toolFor[cmd];
+    const tool = cmd === "call" ? rest[0] : TOOL_FOR[cmd];
     if (tool === undefined) {
       console.error(`unknown command: ${cmd}`);
       console.log(USAGE);
@@ -161,7 +163,13 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((e: unknown) => {
-  console.error(e instanceof Error ? e.message : String(e));
-  process.exitCode = 1;
-});
+// Run only when invoked directly (`node dist/index.js`); bin/musebook.mjs
+// calls main() itself — argv[1] there is the wrapper, never this module.
+const invoked =
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (invoked) {
+  main().catch((e: unknown) => {
+    console.error(e instanceof Error ? e.message : String(e));
+    process.exitCode = 1;
+  });
+}

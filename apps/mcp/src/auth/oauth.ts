@@ -158,6 +158,7 @@ inherits the delegation's scopes and dies when the delegation is revoked.</p>
       } finally {
         // Detach, don't await: a settled-in-context end() still leaves a task
         // that pins the io-context on the 3xx path and hangs pool teardown.
+        // (The cf-polyfill patch in patches/ makes this end() close cleanly.)
         void sql.end({ timeout: 0 }).catch(() => undefined);
       }
     }
