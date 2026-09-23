@@ -99,7 +99,9 @@ begin
              'post_classifications','post_counters','posts','profiles',
              'reposts','scopes',
              -- M9: delegation_for_drafting folds owner defaults in (91700).
-             'creator_publishing_defaults')
+             'creator_publishing_defaults',
+             -- M11: erase_user_subject runs on the jobs plane (92103).
+             'users','wallets','sessions')
          end;
 
   -- Snapshot the matrix into memory: after SET LOCAL ROLE the session can no
