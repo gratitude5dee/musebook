@@ -249,7 +249,8 @@
     "TELEMETRY_ANON_COOKIE_TTL_S": "86400",
     "ANALYTICS_MIN_COHORT": "5",
     "SENTRY_DSN": "",
-    "SYNTHETIC_GATED_SLUG": ""
+    "SYNTHETIC_GATED_SLUG": "",
+    "POSTIZ_URL": "https://postiz.musebook.dev"
   },
   "env": {
     "preview": {

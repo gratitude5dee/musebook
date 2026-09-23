@@ -1,0 +1,29 @@
+{
+  "slug": "youtube",
+  "displayName": "YouTube",
+  "maxChars": 5000,
+  "countMethod": "utf16",
+  "editor": "normal",
+  "minMedia": 1,
+  "maxImages": 0,
+  "maxVideos": 1,
+  "maxVideoSeconds": null,
+  "maxAltChars": null,
+  "maxTitleChars": 100,
+  "supportsThreads": false,
+  "maxThreadParts": null,
+  "maxHashtags": null,
+  "hashtagStyle": "inline",
+  "requiresAltText": false,
+  "urlCountsAsChars": null,
+  "mediaRules": {
+    "title_max": 100,
+    "title_min": 2,
+    "must_be_mp4": true,
+    "exactly_one_media": true,
+    "tags_total_chars_max": 500,
+    "tag_whitespace_surcharge": 2
+  },
+  "postizMaxChars": null,
+  "cdnHost": "cdn.musebook.dev"
+}

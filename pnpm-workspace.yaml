@@ -25,6 +25,9 @@ allowBuilds:
   bufferutil: true
   utf-8-validate: true
   keccak: true
+  # core-js@2.x ships a postinstall ad for its maintainer; the polyfill itself
+  # installs fine without the script — deny it like @swc/core above.
+  core-js: false
 catalog:
   react: "19.3.0"
   react-dom: "19.3.0"

@@ -1,0 +1,29 @@
+{
+  "slug": "pinterest",
+  "displayName": "Pinterest",
+  "maxChars": 500,
+  "countMethod": "utf16",
+  "editor": "normal",
+  "minMedia": 1,
+  "maxImages": 5,
+  "maxVideos": 1,
+  "maxVideoSeconds": null,
+  "maxAltChars": null,
+  "maxTitleChars": 100,
+  "supportsThreads": false,
+  "maxThreadParts": null,
+  "maxHashtags": null,
+  "hashtagStyle": "none",
+  "requiresAltText": false,
+  "urlCountsAsChars": null,
+  "mediaRules": {
+    "max_media": 5,
+    "title_max": 100,
+    "board_required": true,
+    "requires_media": true,
+    "multi_image_identical_dimensions": true,
+    "video_requires_exactly_two_items": true
+  },
+  "postizMaxChars": null,
+  "cdnHost": "cdn.musebook.dev"
+}

@@ -21,6 +21,7 @@
     { "path": "../../packages/content" },
     { "path": "../../packages/kernel" },
     { "path": "../../packages/media" },
-    { "path": "../../packages/ui" }
+    { "path": "../../packages/ui" },
+    { "path": "../../packages/distributor" }
   ]
 }

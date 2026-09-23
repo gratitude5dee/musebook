@@ -1,0 +1,30 @@
+{
+  "slug": "bluesky",
+  "displayName": "Bluesky",
+  "maxChars": 300,
+  "countMethod": "graphemes",
+  "editor": "normal",
+  "minMedia": 0,
+  "maxImages": 4,
+  "maxVideos": 1,
+  "maxVideoSeconds": 180,
+  "maxAltChars": null,
+  "maxTitleChars": null,
+  "supportsThreads": true,
+  "maxThreadParts": 25,
+  "maxHashtags": 8,
+  "hashtagStyle": "inline",
+  "requiresAltText": false,
+  "urlCountsAsChars": null,
+  "mediaRules": {
+    "tags_max": 8,
+    "text_max_bytes": 3000,
+    "image_max_bytes": 2000000,
+    "video_max_bytes": 300000000,
+    "tag_max_graphemes": 64,
+    "images_or_one_video": true,
+    "applies_to_replies_too": true
+  },
+  "postizMaxChars": null,
+  "cdnHost": "cdn.musebook.dev"
+}

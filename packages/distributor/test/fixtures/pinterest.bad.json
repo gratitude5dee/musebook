@@ -1,0 +1,26 @@
+{
+  "body": "Pin. https://musebook.dev/p/canonical-post",
+  "threadParts": [],
+  "media": [
+    {
+      "url": "https://cdn.musebook.dev/assets/abc.jpg",
+      "contentType": "image/jpeg",
+      "alt": "cover",
+      "widthPx": 1080,
+      "heightPx": 1080,
+      "durationSeconds": null,
+      "thumbnailUrl": null
+    },
+    {
+      "url": "https://cdn.musebook.dev/assets/abc.jpg",
+      "contentType": "image/jpeg",
+      "alt": "cover",
+      "widthPx": 1080,
+      "heightPx": 1350,
+      "durationSeconds": null,
+      "thumbnailUrl": null
+    }
+  ],
+  "title": "Pin title",
+  "canonicalUrl": "https://musebook.dev/p/canonical-post"
+}

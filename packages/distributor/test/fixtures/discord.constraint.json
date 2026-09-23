@@ -1,0 +1,24 @@
+{
+  "slug": "discord",
+  "displayName": "Discord",
+  "maxChars": 1980,
+  "countMethod": "utf16",
+  "editor": "markdown",
+  "minMedia": 0,
+  "maxImages": 10,
+  "maxVideos": 1,
+  "maxVideoSeconds": null,
+  "maxAltChars": null,
+  "maxTitleChars": null,
+  "supportsThreads": false,
+  "maxThreadParts": null,
+  "maxHashtags": null,
+  "hashtagStyle": "none",
+  "requiresAltText": false,
+  "urlCountsAsChars": null,
+  "mediaRules": {
+    "webhook_posting": true
+  },
+  "postizMaxChars": null,
+  "cdnHost": "cdn.musebook.dev"
+}

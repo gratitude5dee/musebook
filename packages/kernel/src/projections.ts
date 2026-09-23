@@ -1,9 +1,10 @@
 // packages/kernel/src/projections.ts — plan.md §6.3, verbatim.
 import type { PublishMode, Resource } from "@musebook/schema";
-import { loadResource } from "./load";
 import { getPorts } from "./registry";
 
-/** §12.3.3: a paid post is syndicated as a teaser, never as a copy. */
+/** §12.3.3 / CF-SPINE §13.3: variants are FULL PORTS, never teasers — paid or
+ *  not, the syndicated copy carries the whole piece. The union is kept so the
+ *  teaser path can return if the product decision reverses. */
 export type VariantIntent = "full" | "teaser";
 
 /** The distributor's stage-1 planner calls this; it never sees publish_mode.
@@ -11,8 +12,9 @@ export type VariantIntent = "full" | "teaser";
 export async function variantIntentFor(postId: string): Promise<VariantIntent> {
   const row = await getPorts().resources.loadRowByPostId(postId);
   if (row === null) throw new Error(`variantIntentFor: no live post ${postId}`);
-  const resource = loadResource(row);
-  return resource.publishMode === "x402_always" ? "teaser" : "full";
+  // CF-SPINE §13.3: a paid post is ported in full like any other. The paywall
+  // lives on the canonical URL; the variant always links back to it.
+  return "full";
 }
 
 /**

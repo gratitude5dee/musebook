@@ -46,19 +46,28 @@ export async function resetSeed(): Promise<void> {
          (select id::text from public.job_outbox
            where dedupe_key like 'test-%' or dedupe_key like 'sweep-%'
               or dedupe_key like 'classify:%' or dedupe_key like 'embed:%'
-              or dedupe_key like 'distribute:%')`,
+              or dedupe_key like 'distribute:%' or dedupe_key like 'distribute-%')`,
     );
     await c.query(
       `delete from public.job_outbox
          where dedupe_key like 'test-%' or dedupe_key like 'sweep-%'
             or dedupe_key like 'classify:%' or dedupe_key like 'embed:%'
-            or dedupe_key like 'distribute:%'`,
+            or dedupe_key like 'distribute:%' or dedupe_key like 'distribute-%'`,
     );
     await c.query(`delete from public.post_classifications where content_hash = $1`, [hash]);
     await c.query(`delete from public.post_embeddings where content_hash = $1`, [hash]);
     await c.query(`delete from public.distribution_jobs where idempotency_key like 'test-%'`);
+    await c.query(`delete from public.distribution_jobs where idempotency_key like 'dist:%'`);
+    await c.query(`delete from public.platform_variants where post_version_id = $1`, [
+      SEED_POST_VERSION_ID,
+    ]);
     await c.query(`delete from public.channels where postiz_channel_id like 'test-%'`);
     await c.query(`delete from public.platforms where slug = 'testx'`);
+    // seed.sql writes no assets/post_assets — every row here is test-fixture
+    // output (upload promotion, composer flows) that survives resets and
+    // leaks into app.distribution_media's join on the next suite.
+    await c.query(`delete from public.post_assets`);
+    await c.query(`delete from public.assets`);
   });
 }
 
@@ -103,9 +112,11 @@ export async function seedOutboxJob(queue: string): Promise<SeededJob> {
     },
   };
 
-  let record = records[kind];
   if (kind === "distribute") {
-    record = await withDb(async (c) => {
+    // §12.3.3's on-wire payload is the publish_post plan message; the plan
+    // stage keys its effect row dist:${pvid}:${cid} (§12.3.9), which is what
+    // `key` must carry for the effect-count assertion.
+    const channelId = await withDb(async (c) => {
       await c.query(
         `insert into public.platforms (slug, display_name) values ('testx', 'Test X')
            on conflict (slug) do nothing`,
@@ -119,15 +130,32 @@ export async function seedOutboxJob(queue: string): Promise<SeededJob> {
         `select id from public.channels where postiz_channel_id = $1`,
         [`test-ch-${stamp}`],
       );
-      return {
-        post_id: SEED_POST_ID,
-        post_version_id: SEED_POST_VERSION_ID,
-        channel_id: ch.rows[0].id,
-        idempotency_key: key,
-      };
+      return ch.rows[0].id;
     });
+    const { rows } = await withDb((c) =>
+      c.query<{ id: number }>(
+        `insert into public.job_outbox (kind, dedupe_key, payload)
+         values ($1, $2, $3::jsonb) returning id`,
+        [
+          kind,
+          key,
+          {
+            post_id: SEED_POST_ID,
+            post_version_id: SEED_POST_VERSION_ID,
+            platforms: ["testx"],
+            source: "composer",
+          },
+        ],
+      ),
+    );
+    return {
+      id: Number(rows[0].id),
+      contentHash,
+      key: `dist:${SEED_POST_VERSION_ID}:${channelId}`,
+    };
   }
 
+  let record = records[kind];
   const { rows } = await withDb((c) =>
     c.query<{ id: number }>(
       `insert into public.job_outbox (kind, dedupe_key, payload)

@@ -1,0 +1,25 @@
+{
+  "slug": "mastodon",
+  "displayName": "Mastodon",
+  "maxChars": 500,
+  "countMethod": "graphemes",
+  "editor": "normal",
+  "minMedia": 0,
+  "maxImages": 4,
+  "maxVideos": 1,
+  "maxVideoSeconds": null,
+  "maxAltChars": 10000,
+  "maxTitleChars": null,
+  "supportsThreads": true,
+  "maxThreadParts": 25,
+  "maxHashtags": null,
+  "hashtagStyle": "trailing",
+  "requiresAltText": false,
+  "urlCountsAsChars": 23,
+  "mediaRules": {
+    "per_instance_limits": true,
+    "instance_config_endpoint": "/api/v2/instance"
+  },
+  "postizMaxChars": null,
+  "cdnHost": "cdn.musebook.dev"
+}

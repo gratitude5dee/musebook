@@ -1283,6 +1283,84 @@ export const GATES = {
       run: checks.m9StartupBudget,
     },
   ],
+
+  // §16.5 M10 — @musebook/distributor + the Postiz sidecar: full-port variants,
+  // one-bucket Postiz call, AGPL containment, seeded constraints, the fan-out
+  // review surface, and the sidecar's own R2 domain.
+  M10: [
+    {
+      id: "M10.1",
+      kind: "fn",
+      desc: "one POST /public/v1/posts per 3-channel fan-out (acceptance 8)",
+      run: checks.m10SinglePostizCall,
+    },
+    {
+      id: "M10.2",
+      kind: "fn",
+      desc: "G-AGPL clean and infra/postiz/Dockerfile exists (FROM-only pin)",
+      run: checks.m10AgplDockerfile,
+    },
+    {
+      id: "M10.3",
+      kind: "fn",
+      desc: "13 platforms seeded; none unverified or null limits_source",
+      run: checks.m10PlatformSeed,
+    },
+    {
+      id: "M10.4",
+      kind: "fn",
+      desc: "countEffective↔validator parity property for all 13 platforms",
+      run: checks.m10CounterParity,
+    },
+    {
+      id: "M10.5",
+      kind: "fn",
+      desc: "media.public_origin is a hard error (paid URL fails, cdn passes)",
+      run: checks.m10PublicOrigin,
+    },
+    {
+      id: "M10.6",
+      kind: "fn",
+      desc: "variants are full ports, not teasers (CF-SPINE §13.3)",
+      run: checks.m10FullPorts,
+    },
+    {
+      id: "M10.7",
+      kind: "fn",
+      desc: "every DistributionMessage <128KB and carries ids/R2 keys only",
+      run: checks.m10MessageTransport,
+    },
+    {
+      id: "M10.8",
+      kind: "fn",
+      desc: "consumer idempotent: same send twice = one Postiz call",
+      run: checks.m10IdempotentConsumer,
+    },
+    {
+      id: "M10.9",
+      kind: "fn",
+      desc: "unconnected channel is a loud error, not a silent no-op",
+      run: checks.m10UnconnectedChannel,
+    },
+    {
+      id: "M10.10",
+      kind: "fn",
+      desc: "licence inheritance: creator_publishing_defaults CC0-1.0+train_ai carried to new posts",
+      run: checks.m10LicenseInheritance,
+    },
+    {
+      id: "M10.11",
+      kind: "fn",
+      desc: "action_events_daily re-keyed (day, actor_plane, source, post_id, action), totals preserved",
+      run: checks.m10RekeyedDaily,
+    },
+    {
+      id: "M10.12",
+      kind: "fn",
+      desc: "musebook-postiz-media serves media.postiz.musebook.dev; no Worker binds it",
+      run: checks.m10SidecarBucket,
+    },
+  ],
 };
 
 export const MILESTONE_TITLES = {

@@ -21,6 +21,12 @@ declare global {
     CONNECTOR_CRED_KEK?: string;
     /** §10.8.4 — Ed25519 private JWK (JSON) for outbound signing; secret. */
     CONNECTOR_SIGNING_PRIVATE_KEY?: string;
+
+    /** §12 — the Postiz sidecar. URL is a [vars] row; the API key is a Worker
+     *  secret scoped E (channels-sync calls listIntegrations from here) and
+     *  the webhook secret is carried in the URL path, unsigned (§12.2.6). */
+    POSTIZ_API_KEY?: string;
+    POSTIZ_WEBHOOK_SECRET?: string;
   }
 
   /** musebook-worker's SlateBuilder entrypoint over the MIXER service binding

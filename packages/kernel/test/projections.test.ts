@@ -61,10 +61,10 @@ describe("toAccessBadge", () => {
 });
 
 describe("variantIntentFor", () => {
-  it("returns 'teaser' only for x402_always; 'full' otherwise", async () => {
+  it("returns 'full' for every publish mode (CF-SPINE §13.3 full-port rule)", async () => {
     configureKernel(stubPorts());
     expect(await variantIntentFor(FREE_ROW.post_id)).toBe("full");
-    expect(await variantIntentFor(GATED_ROW.post_id)).toBe("teaser");
+    expect(await variantIntentFor(GATED_ROW.post_id)).toBe("full");
   });
 
   it("throws on an unknown post", async () => {

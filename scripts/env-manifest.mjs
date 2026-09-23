@@ -377,7 +377,7 @@ export const GROUPS = [
     vars: [
       {
         name: "POSTIZ_URL",
-        scope: ["J", "L"],
+        scope: ["E", "J", "L"],
         kind: "var",
         local: "http://localhost:4200",
         comment:
@@ -385,10 +385,10 @@ export const GROUPS = [
       },
       {
         name: "POSTIZ_API_KEY",
-        scope: ["J"],
+        scope: ["E", "J"],
         kind: "secret",
         comment:
-          "Sent as a RAW `Authorization: <key>` — no Bearer prefix; the middleware feeds the whole header to findFirst().",
+          "Sent as a RAW `Authorization: <key>` — no Bearer prefix; the middleware feeds the whole header to findFirst(). Scoped E as well because §12.2.7's channels-sync route calls listIntegrations from musebook-edge.",
       },
       {
         name: "POSTIZ_WEBHOOK_SECRET",

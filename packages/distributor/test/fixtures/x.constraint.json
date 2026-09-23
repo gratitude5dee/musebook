@@ -1,0 +1,26 @@
+{
+  "slug": "x",
+  "displayName": "X",
+  "maxChars": 280,
+  "countMethod": "x_weighted",
+  "editor": "html",
+  "minMedia": 0,
+  "maxImages": 4,
+  "maxVideos": 1,
+  "maxVideoSeconds": 140,
+  "maxAltChars": 1000,
+  "maxTitleChars": null,
+  "supportsThreads": true,
+  "maxThreadParts": 25,
+  "maxHashtags": null,
+  "hashtagStyle": "inline",
+  "requiresAltText": false,
+  "urlCountsAsChars": 23,
+  "mediaRules": {
+    "images_or_one_video": true,
+    "article_mode_images_only": true,
+    "draft_article_no_replies": true
+  },
+  "postizMaxChars": null,
+  "cdnHost": "cdn.musebook.dev"
+}

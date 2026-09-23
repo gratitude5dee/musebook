@@ -20,6 +20,9 @@
     },
     {
       "path": "../../packages/x402"
+    },
+    {
+      "path": "../../packages/distributor"
     }
   ]
 }

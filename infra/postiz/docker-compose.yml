@@ -1,0 +1,113 @@
+# infra/postiz/docker-compose.yml  (NOT in the Musebook repo's build graph;
+# this file is infrastructure, it ships no Postiz source)
+services:
+  postiz:
+    image: ghcr.io/gitroomhq/postiz-app@sha256:01b24a4fc1055f6833122c99614805bea702fdc0ee30c9b5d09330b521fa1efa
+    container_name: postiz
+    restart: always
+    environment:
+      # --- Required
+      MAIN_URL: "https://postiz.musebook.dev"
+      FRONTEND_URL: "https://postiz.musebook.dev"
+      NEXT_PUBLIC_BACKEND_URL: "https://postiz.musebook.dev/api"
+      BACKEND_INTERNAL_URL: "http://localhost:3000"
+      JWT_SECRET: "${POSTIZ_JWT_SECRET}"
+      DATABASE_URL: "${POSTIZ_DATABASE_URL}"
+      REDIS_URL: "redis://postiz-redis:6379"
+      IS_GENERAL: "true"
+      DISABLE_REGISTRATION: "true"
+
+      # --- Temporal Cloud (replaces the 5-container local stack)
+      TEMPORAL_ADDRESS: "${TEMPORAL_ADDRESS}" # <namespace>.<acct>.tmprl.cloud:7233
+      TEMPORAL_NAMESPACE: "${TEMPORAL_NAMESPACE}"
+      TEMPORAL_TLS: "true"
+      TEMPORAL_API_KEY: "${TEMPORAL_API_KEY}"
+
+      # --- Storage: R2 bucket musebook-postiz-media. POSTIZ'S OWN BUCKET.
+      # It is a FIFTH bucket in the same Cloudflare account and is NOT one of
+      # CF-SPINE §5's four. It carries an R2 custom domain, which is bucket-wide
+      # and unconditionally public — so it must never hold Musebook paid bytes,
+      # and the access key below must be scoped to this bucket alone.
+      STORAGE_PROVIDER: "cloudflare"
+      CLOUDFLARE_ACCOUNT_ID: "${CF_ACCOUNT_ID}"
+      CLOUDFLARE_ACCESS_KEY: "${CF_POSTIZ_ACCESS_KEY}"
+      CLOUDFLARE_SECRET_ACCESS_KEY: "${CF_POSTIZ_SECRET_ACCESS_KEY}"
+      CLOUDFLARE_BUCKETNAME: "musebook-postiz-media"
+      CLOUDFLARE_BUCKET_URL: "https://media.postiz.musebook.dev/"
+      CLOUDFLARE_REGION: "auto"
+
+      # --- Hardening / policy
+      RESTRICT_UPLOAD_DOMAINS: "media.postiz.musebook.dev" # see 12.2.5
+      API_LIMIT: "300" # see 12.2.4
+      # STRIPE_SECRET_KEY deliberately UNSET: setting it makes the public API
+      # return 401 "No subscription found" for an org with no subscription.
+      # MCP_ONLY deliberately UNSET: setting it to true unregisters the entire
+      # /public/v1 controller, which is the only surface Musebook uses.
+      OPENAI_API_KEY: "" # Musebook owns reformatting. Postiz's AI stays off.
+
+      # --- Per-platform OAuth apps (see 12.2.7)
+      X_URL: "${X_URL}"
+      X_API_KEY: "${X_API_KEY}"
+      X_API_SECRET: "${X_API_SECRET}"
+      LINKEDIN_CLIENT_ID: "${LINKEDIN_CLIENT_ID}"
+      LINKEDIN_CLIENT_SECRET: "${LINKEDIN_CLIENT_SECRET}"
+      REDDIT_CLIENT_ID: "${REDDIT_CLIENT_ID}"
+      REDDIT_CLIENT_SECRET: "${REDDIT_CLIENT_SECRET}"
+      THREADS_APP_ID: "${THREADS_APP_ID}"
+      THREADS_APP_SECRET: "${THREADS_APP_SECRET}"
+      FACEBOOK_APP_ID: "${FACEBOOK_APP_ID}"
+      FACEBOOK_APP_SECRET: "${FACEBOOK_APP_SECRET}"
+      YOUTUBE_CLIENT_ID: "${YOUTUBE_CLIENT_ID}"
+      YOUTUBE_CLIENT_SECRET: "${YOUTUBE_CLIENT_SECRET}"
+      TIKTOK_CLIENT_ID: "${TIKTOK_CLIENT_ID}"
+      TIKTOK_CLIENT_SECRET: "${TIKTOK_CLIENT_SECRET}"
+      PINTEREST_CLIENT_ID: "${PINTEREST_CLIENT_ID}"
+      PINTEREST_CLIENT_SECRET: "${PINTEREST_CLIENT_SECRET}"
+      DISCORD_CLIENT_ID: "${DISCORD_CLIENT_ID}"
+      DISCORD_CLIENT_SECRET: "${DISCORD_CLIENT_SECRET}"
+      DISCORD_BOT_TOKEN_ID: "${DISCORD_BOT_TOKEN_ID}"
+      MASTODON_URL: "https://mastodon.social"
+      MASTODON_CLIENT_ID: "${MASTODON_CLIENT_ID}"
+      MASTODON_CLIENT_SECRET: "${MASTODON_CLIENT_SECRET}"
+      NEYNAR_CLIENT_ID: "${NEYNAR_CLIENT_ID}"
+      NEYNAR_SECRET_KEY: "${NEYNAR_SECRET_KEY}"
+      NEYNAR_APP_FID: "${NEYNAR_APP_FID}"
+      NEYNAR_APP_MNEMONIC: "${NEYNAR_APP_MNEMONIC}"
+    ports:
+      - "5000:5000" # nginx inside the container; /api/ -> localhost:3000
+    depends_on:
+      postiz-postgres: { condition: service_healthy }
+      postiz-redis: { condition: service_healthy }
+    networks: [postiz-network]
+
+  postiz-postgres:
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postiz
+      POSTGRES_PASSWORD: "${POSTIZ_PG_PASSWORD}"
+      POSTGRES_DB: postiz
+    volumes: [postiz-pg:/var/lib/postgresql/data]
+    healthcheck:
+      test: pg_isready -U postiz -d postiz
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks: [postiz-network]
+
+  postiz-redis:
+    image: redis:7.2
+    restart: always
+    volumes: [postiz-redis:/data]
+    healthcheck:
+      test: redis-cli ping
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks: [postiz-network]
+
+volumes:
+  postiz-pg: {}
+  postiz-redis: {}
+networks:
+  postiz-network: {}

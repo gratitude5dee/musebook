@@ -1,0 +1,27 @@
+{
+  "slug": "telegram",
+  "displayName": "Telegram",
+  "maxChars": 4096,
+  "countMethod": "utf16",
+  "editor": "html",
+  "minMedia": 0,
+  "maxImages": 10,
+  "maxVideos": 1,
+  "maxVideoSeconds": null,
+  "maxAltChars": null,
+  "maxTitleChars": null,
+  "supportsThreads": false,
+  "maxThreadParts": null,
+  "maxHashtags": null,
+  "hashtagStyle": "none",
+  "requiresAltText": false,
+  "urlCountsAsChars": null,
+  "mediaRules": {
+    "caption_max_chars": 1024,
+    "multi_media_group": true,
+    "one_media_caption": true,
+    "zero_media_text_message": true
+  },
+  "postizMaxChars": null,
+  "cdnHost": "cdn.musebook.dev"
+}

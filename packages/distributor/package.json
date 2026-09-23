@@ -4,7 +4,10 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./validate": "./src/validate.ts",
+    "./count": "./src/count.ts",
+    "./constraints": "./src/constraints.ts"
   },
   "scripts": {
     "build": "tsc --build --pretty",
@@ -13,13 +16,19 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@musebook/schema": "workspace:*"
+    "ai": "7.0.99",
+    "p-retry": "8.0.1",
+    "twitter-text": "3.1.0",
+    "zod": "4.6.5"
   },
   "devDependencies": {
-    "@types/node": "26.6.2",
-    "@vitest/coverage-v8": "catalog:",
     "@cloudflare/vitest-plugin": "catalog:",
+    "@types/node": "26.6.2",
+    "@types/twitter-text": "3.1.10",
+    "@vitest/coverage-v8": "catalog:",
+    "fast-check": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@cloudflare/workers-types": "catalog:"
   }
 }
