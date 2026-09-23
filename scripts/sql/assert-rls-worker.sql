@@ -62,8 +62,8 @@ begin
         ('platform_analytics'), ('platform_variants'),
         ('post_classifications_raw'), ('post_embeddings'), ('ranking_weights'),
         ('slate_items'), ('slates'), ('user_embeddings'),
-        -- client-own tables nobody else reads
-        ('blocks'), ('bookmarks'), ('mutes'),
+        -- client-own tables only their declared planes read
+        ('agent_post_schedules'), ('blocks'), ('bookmarks'), ('mutes'),
         -- public-read surface (worker_read grants all three planes)
         ('agent_identities'), ('artifacts'), ('comments'), ('connectors'),
         ('follows'), ('likes'), ('platform_publishing_defaults'),
