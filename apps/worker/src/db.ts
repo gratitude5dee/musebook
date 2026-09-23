@@ -101,7 +101,7 @@ export async function claimJob(db: DbClient, jobId: number): Promise<ClaimedJob 
 export async function finishJob(
   db: DbClient,
   jobId: number,
-  state: "succeeded" | "failed" | "dead",
+  state: "queued" | "succeeded" | "failed" | "dead",
   opts: {
     component?: string;
     event?: string;

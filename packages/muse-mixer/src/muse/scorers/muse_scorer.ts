@@ -37,7 +37,7 @@ export interface CandidateFeatures {
   creatorAffinity: number; // log1p(viewer's prior positive actions on this creator)
   topicAffinity: number; // dot(viewerTopicVector, postTopicVector)
   quality: number; // post_classifications.quality (rubric family), 0 when null
-  qAgentValue: number; // post_classifications.q_agent_value (rubric family)
+  qAgentValue: number; // post_classifications.agent_value (rubric family)
   pUnsafe: number; // post_classifications.p_unsafe (probability family)
   ageMinutesLog: number;
   recencyDecay: number; // exp(-ageMinutes / HalfLifeMinutes)

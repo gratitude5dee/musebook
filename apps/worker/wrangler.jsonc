@@ -258,6 +258,7 @@
     "TYPESAFE_DEFAULT_MODEL": "jev-latest",
     "TYPESAFE_LOG_LEVEL": "warn",
     "CLASSIFY_TAXONOMY_MODE": "walk",
+    "CLASSIFY_DAILY_TOKEN_BUDGET": "2000000",
     "GEN_MODEL": "anthropic/claude-opus-5",
     "REFORMAT_MODEL": "anthropic/claude-sonnet-5",
     "REFORMAT_MAX_REPAIRS": "2",

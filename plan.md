@@ -3293,6 +3293,7 @@ Jev classifies; it never generates. Classification runs in the `musebook-classif
 | `TYPESAFE_DEFAULT_MODEL` | J L | var | Defaults to `jev-latest`, the only model ID verified to exist. Do not hard-code `jev-preview`; enumerate with `client.models.list()`. |
 | `TYPESAFE_LOG_LEVEL` | J L | var | `debug` logs full request **and response bodies** — post bodies are the request body. Never `debug` in a deployed environment (§8.2). |
 | `CLASSIFY_TAXONOMY_MODE` | J L | var | `walk` (default) \| `flat`. `flat` folds the 38-leaf choice into the battery — one request per post — and is the switch to flip if the classification queue backs up (§8.8). |
+| `CLASSIFY_DAILY_TOKEN_BUDGET` | J L | var | Rolling-24h `input_tokens` ceiling; `0`/unset disables. Over-budget defers the whole batch (ops_events `token_budget` + `musebook.classify.outcome{result=degraded}` — the A14 signal). Tokens, not dollars: provider pricing is UNVERIFIED (§8.9). |
 | `AI_GATEWAY_API_KEY` | J | **secret** | The reformatting pass and every generation call 401. The deterministic reformat fallback still produces valid variants, so distribution degrades rather than stops. |
 | `GEN_MODEL` | J | var | Gateway model slug for generation in §10 (agent drafting) and §11 (prompt screening, media prompts). Default `anthropic/claude-opus-5`. |
 | `REFORMAT_MODEL` | J | var | Gateway model slug for the per-platform reformatting pass (§12.3.4). Default `anthropic/claude-sonnet-5`. |
@@ -13776,6 +13777,7 @@ The extension `pgmq` is **not installed** on `musebook-prod` (§4.1). Any text a
 | `TYPESAFE_DEFAULT_MODEL` | J L | Worker var | Default `jev-latest`. Enumerate with `client.models.list()`; do not invent `jev-preview`. |
 | `TYPESAFE_LOG_LEVEL` | J L | Worker var | `warn`. Never `debug` in a deployment — see below. |
 | `CLASSIFY_TAXONOMY_MODE` | J L | Worker var | `walk` (default) \| `flat` (§8.6). |
+| `CLASSIFY_DAILY_TOKEN_BUDGET` | J L | Worker var | Rolling-24h `input_tokens` ceiling; `0`/unset disables (§8.9). |
 
 There is **no `CRON_SECRET`** and **no `SUPABASE_DB_URL`** in this section any more. The first no longer exists anywhere in the plan (§3.7, "Removed") — a Queue consumer has no HTTP endpoint to guess, so there is nothing to authenticate and nothing to rotate. The second is `L CI` only; the consumer's connection string comes from the `HYPERDRIVE_FRESH` binding, not from the environment. Introducing a new variable anywhere in `packages/classify` or `apps/worker/src/consumers/classify.ts` means adding the row to §3.7 in the same change.
 

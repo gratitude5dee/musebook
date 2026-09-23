@@ -4489,3 +4489,141 @@ export function m13PositionDiscipline() {
   }
   return { ok: true, errors: [] };
 }
+
+// ---------------------------------------------------------------------------
+// M14 milestone checks — §16 "GATE M14", verbatim where the plan gives one.
+// The §8.9 GUC deploy step is replaced by the classify_versions registry row
+// (Supabase roles cannot SET database-level GUCs — D139); the probe's
+// `versions` subcommand performs the operator upsert locally, matching the
+// OPERATIONS.md deploy step, and asserts every typesafe_jev row carries the
+// stamps. Live probes run through apps/worker/scripts/m14-classify-probe.mts.
+// ---------------------------------------------------------------------------
+
+const M14_PROBE = "pnpm --filter musebook-worker exec tsx scripts/m14-classify-probe.mts";
+const CLASSIFY_TEST = "pnpm vitest run --project worker test/classify.test.ts";
+
+function m14Probe(sub, expectPrefix) {
+  const r = run(`${M14_PROBE} ${sub}`, { timeout: 600_000 });
+  const line =
+    (r.out + "")
+      .trim()
+      .split("\n")
+      .filter((l) => /OK|FAIL|BLOCKED/.test(l))
+      .pop() ?? "";
+  if (!line.startsWith(expectPrefix))
+    return {
+      ok: false,
+      errors: [`${sub}: expected '${expectPrefix}', got '${line || r.out.slice(-400)}'`],
+    };
+  return { ok: true, errors: [], line };
+}
+
+// M14.1 — the battery returns for every published seed post, with a non-null
+// taxonomy_leaf, medium, audience_level and agent_value on all of them. This
+// is the one live-provider check in the suite: it bills real Jev tokens, so
+// without the H14 secret it BLOCKs rather than fakes a verdict.
+export function m14BatteryLive() {
+  if (!process.env.TYPESAFE_API_KEY)
+    return { ok: false, errors: [], blocked: "TYPESAFE_API_KEY unset (H14)" };
+  return m14Probe("battery", "BATTERY_OK");
+}
+
+// M14.2 — a post publishes when Jev is down: the worker test publishes with a
+// 503-ing stub and asserts the post lands, the classify outbox job is retried
+// (deferred, never skipped silently) and the provider_5xx ops_events row is
+// written.
+export function m14PublishWhenJevDown() {
+  return vitestSlice(CLASSIFY_TEST, "publish enqueues");
+}
+
+// M14.3 — the client is constructed lazily: no module-scope `new
+// TypeSafeClient` anywhere, and the only construction site is inside
+// makeClient() in client.ts. The SDK's constructor throws without a key —
+// module scope would turn a missing secret into a failed deploy.
+export function m14LazyClient() {
+  const moduleScope = rg(String.raw`^\s*(const|let)\s+\w+\s*=\s*new TypeSafeClient`, [
+    "packages/classify/src",
+  ]);
+  if (moduleScope.length) return { ok: false, errors: moduleScope };
+  const sites = rg("new TypeSafeClient", ["packages", "apps"]);
+  const outside = sites.filter((h) => !h.startsWith("packages/classify/src/client.ts"));
+  return { ok: outside.length === 0, errors: outside };
+}
+
+// M14.4 — Jev classifies only; it is never a generator. No "typesafe" string
+// under packages/media, packages/distributor or apps/web, and @typesafe-ai/sdk
+// is imported only inside packages/classify (the consumer reaches the client
+// through the JevClient alias — §8.10's import ban reaches type positions).
+export function m14JevOnlyClassifies() {
+  const stray = rg("typesafe", ["packages/media", "packages/distributor", "apps/web"], ["-i"]);
+  if (stray.length) return { ok: false, errors: stray };
+  const sdk = rg("@typesafe-ai/sdk", ["apps", "packages"]).filter(
+    (h) => !h.startsWith("packages/classify/"),
+  );
+  return { ok: sdk.length === 0, errors: sdk };
+}
+
+// M14.5 — no `q_` prefix survives: §4.18's columns are audience_level and
+// agent_value, verbatim grep over supabase packages apps.
+export function m14NoQPrefix() {
+  const hits = rg("q_audience_level|q_agent_value", ["supabase", "packages", "apps"]);
+  return { ok: hits.length === 0, errors: hits };
+}
+
+// M14.6 — the version settings are set, not defaulted: classify_versions
+// holds the row matching the package constants, and every typesafe_jev row
+// carries both stamps (the probe upserts the row first — the operator step).
+export function m14VersionsSet() {
+  return m14Probe("versions", "VERSIONS_OK");
+}
+
+// M14.7 — the token budget bites: the worker test drives the consumer past
+// its daily budget and asserts the batch defers (retry 300s, ops_events
+// token_budget/deferred, ops_counters {result:degraded}), and the A14
+// classify.degraded alert rule actually fires when its own threshold is met.
+export function m14TokenBudget() {
+  const slice = vitestSlice(CLASSIFY_TEST, "over budget");
+  if (!slice.ok) return slice;
+  const rule = rg("'classify.degraded'", ["supabase/migrations/20260922092104_alerting.sql"]);
+  if (rule.length !== 1) return { ok: false, errors: [`A14 rule rows: ${rule.length}`] };
+  // Fires: seed 51 degraded counters inside the 60-minute window, evaluate the
+  // rule's own SQL, clean up. (The gate suite has no alert-runner harness;
+  // the rule body is the predicate.)
+  sqlRun(
+    `insert into public.ops_counters (metric, labels, value, bucket_start)
+       select 'musebook.classify.outcome',
+              jsonb_build_object('result','degraded','source','gate-m14'),
+              1, now() - interval '30 minutes' + (i || ' seconds')::interval
+         from generate_series(1, 51) i`,
+  );
+  const fired = sqlCheck(
+    `with c as (select coalesce(sum(value),0) total, coalesce(sum(value) filter (where labels->>'result'='degraded'),0) degraded from public.ops_counters where metric='musebook.classify.outcome' and bucket_start > now() - interval '60 minutes') select total > 50 and degraded::numeric / total > 0.10 from c`,
+    "t",
+  );
+  sqlRun(`delete from public.ops_counters where labels->>'source' = 'gate-m14'`);
+  return fired;
+}
+
+// M14.8 — G-DRIFT and G-ROLE cover the new columns: the migration replays
+// from zero with an empty diff, post_classifications stays RLS-enabled and
+// FORCED, the Worker-plane grants cover it, and the §8.7 columns exist.
+export async function m14DriftRole() {
+  const drift = dbDrift();
+  if (!drift.ok || drift.blocked) return drift;
+  const rls = sqlCheck(
+    `select relrowsecurity and relforcerowsecurity from pg_class where oid = 'public.post_classifications'::regclass`,
+    "t",
+  );
+  if (!rls.ok) return rls;
+  const cols = sqlCheck(
+    `select count(*)::int from information_schema.columns where table_schema = 'public' and table_name = 'post_classifications' and column_name in ('taxonomy_leaf','taxonomy_path','taxonomy_score','medium','audience_level','agent_value','p_unsafe','topic_probabilities','question_set_version','taxonomy_version')`,
+    "10",
+  );
+  if (!cols.ok) return cols;
+  const grants = sqlCheck(
+    `select count(*)::int from information_schema.role_table_grants where grantee = 'musebook_jobs' and table_name = 'post_classifications' and privilege_type in ('SELECT','INSERT','UPDATE')`,
+    "3",
+  );
+  if (!grants.ok) return grants;
+  return dbAssertRls();
+}

@@ -31,5 +31,9 @@ declare global {
     /** §9.23/§11 — bearer for the Vercel AI Gateway (OpenAI-compatible
      *  /v1/embeddings). Worker secret; M17 owns the generation calls. */
     AI_GATEWAY_API_KEY?: string;
+
+    /** §8.1 — TypeSafe Jev API key for the classify consumer. Worker secret;
+     *  absent ⇒ deploy still succeeds, TypeSafeError throws at first use. */
+    TYPESAFE_API_KEY?: string;
   }
 }

@@ -8,6 +8,7 @@ import { env, createExecutionContext, waitOnExecutionContext } from "cloudflare:
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import worker from "../src/index.js";
 import { withDb, resetSeed, seedOutboxJob } from "./helpers/db.js";
+import { stubJev } from "./helpers/jev.js";
 
 /** A Message with real ack/retry spies. Queues redelivers on retry AND on ack timeout. */
 function message<T>(id: string, body: T, attempts = 1) {
@@ -29,19 +30,31 @@ const deliver = async (queue: string, msgs: ReturnType<typeof message>[]) => {
 
 beforeEach(resetSeed);
 
-// §9.23: the embed consumer is the real one now — it calls the AI Gateway's
-// /v1/embeddings over fetch. Stub the wire shape (one data entry per input,
-// 1536 dims) so the suite exercises the actual write path end to end.
+// §9.23/§8.9: embed and classify are both real consumers over fetch now —
+// the stub answers /v1/systemone for classify and /v1/embeddings for embed
+// so the suite exercises the actual write paths end to end.
 beforeEach(() => {
   env.AI_GATEWAY_API_KEY = "test";
-  vi.stubGlobal("fetch", async (_input: unknown, init?: { body?: string }) => {
-    const texts = (JSON.parse(init?.body ?? "{}") as { input?: string[] }).input ?? [];
-    return new Response(
+  env.TYPESAFE_API_KEY = "test";
+  env.CLASSIFY_DAILY_TOKEN_BUDGET = "0";
+  const embedFetch = async (_input: unknown, init?: { body?: string }) =>
+    new Response(
       JSON.stringify({
-        data: texts.map(() => ({ embedding: new Array(1536).fill(0.001) })),
+        data: ((JSON.parse(init?.body ?? "{}") as { input?: string[] }).input ?? []).map(() => ({
+          embedding: new Array(1536).fill(0.001),
+        })),
       }),
       { status: 200 },
     );
+  const jevFetch = stubJev([]);
+  vi.stubGlobal("fetch", async (input: unknown, init?: { body?: string }) => {
+    const url =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.href
+          : (input as { url?: string }).url ?? "";
+    return url.includes("/v1/systemone") ? jevFetch(input, init) : embedFetch(input, init);
   });
 });
 afterAll(() => vi.unstubAllGlobals());
@@ -95,14 +108,9 @@ describe("every consumer is idempotent under at-least-once delivery", () => {
 
   it("a failure retries with computed backoff, because Queues has none built in", async () => {
     const job = await seedOutboxJob("musebook-classify");
-    // Corrupt the record so the effect INSERT fails — the consumer's own
-    // failure path is what retries, not a mocked dependency.
-    await withDb((c) =>
-      c.query(
-        'update public.job_outbox set payload = \'{"record":{"content_hash":null}}\' where id = $1',
-        [job.id],
-      ),
-    );
+    // The real consumer's failure path: Jev is down, so the claim-work-finish
+    // loop lands on dispositionFor → provider_5xx → retry, not a mock seam.
+    vi.stubGlobal("fetch", stubJev([], { status: 503 }));
     const msg = message("m-fail", { job_id: job.id }, 3);
     await deliver("musebook-classify", [msg]);
     expect(msg.ack).not.toHaveBeenCalled();
