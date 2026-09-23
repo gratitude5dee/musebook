@@ -159,10 +159,11 @@ begin
   reset role;
 
   set local role musebook_jobs;
-  -- 40 is the seeded corpus; gate-ordered test slices may emit more.
-  if pg_temp.count_or_zero('action_events') < 40 then
-    raise exception 'jobs action_events count % < 40',
-      pg_temp.count_or_zero('action_events');
+  -- Positive control only (readable rows exist). No corpus floor: the edge
+  -- wire suite wipes action_events wholesale and re-emits its own telemetry,
+  -- so the seeded 40 cannot be assumed.
+  if pg_temp.count_or_zero('action_events') <= 0 then
+    raise exception 'jobs cannot read action_events';
   end if;
   if pg_temp.count_or_zero('delegations') <= 0 then
     raise exception 'jobs cannot read delegations';
