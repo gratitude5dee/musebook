@@ -1,0 +1,38 @@
+diff --git a/cf/polyfills.js b/cf/polyfills.js
+index 53c5203dd5b057d741d14d708ba83b27751b527c..b1ed554e8b613617c9442dc345197a7200916a39 100644
+--- a/cf/polyfills.js
++++ b/cf/polyfills.js
+@@ -185,8 +185,17 @@ function Socket() {
+ 
+   function end(data) {
+     return data
+-      ? tcp.write(data, () => tcp.raw.close())
+-      : tcp.raw.close()
++      ? tcp.write(data, closeRaw)
++      : closeRaw()
++  }
++
++  async function closeRaw() {
++    // Cancel the pending reader BEFORE closing the socket: an abort on an
++    // in-flight read() surfaces as emit('error') — which postgres.js only
++    // hears if its own 'close' handler hasn't already run removeAllListeners
++    // (worker-level teardown races this and produces orphan rejections).
++    try { tcp.reader && await tcp.reader.cancel() } catch (_) { /* close anyway */ }
++    return tcp.raw ? tcp.raw.close() : undefined
+   }
+ 
+   function destroy() {
+@@ -211,7 +220,12 @@ function Socket() {
+   }
+ 
+   function error(err) {
+-    tcp.emit('error', err)
++    // EventEmitter#emit('error') throws when nothing is listening — postgres.js
++    // strips every listener in its 'close' handler, and workerd teardown makes
++    // late socket errors (mid-read aborts) reach this path after that. Emitting
++    // anyway turns a benign teardown error into an unhandled rejection.
++    if (tcp.listenerCount('error') > 0)
++      tcp.emit('error', err)
+     tcp.emit('close')
+   }
+ }

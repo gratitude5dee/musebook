@@ -18,6 +18,9 @@ export function release(ctx: ExecutionContext, ...clients: Sql[]): void {
   // timeout:0 destroys the socket inside THIS invocation — a deferred close
   // straddles the io boundary and the waitUntil'd end() never resolves,
   // which keeps the isolate's io-context alive through pool teardown.
+  // The postgres.js cf polyfill is patched (patches/postgres@3.4.9.patch) to
+  // cancel its pending reader before socket.close(), so end() can no longer
+  // abort a mid-read and emit an orphan 'error' rejection.
   for (const c of clients) ctx.waitUntil(c.end({ timeout: 0 }).catch(() => undefined));
 }
 
