@@ -538,6 +538,9 @@ importers:
       '@musebook/schema':
         specifier: workspace:*
         version: link:../../packages/schema
+      '@musebook/telemetry':
+        specifier: workspace:*
+        version: link:../../packages/telemetry
       '@musebook/x402':
         specifier: workspace:*
         version: link:../../packages/x402

@@ -86,6 +86,7 @@ import {
   updateSeenBloomEffect,
   telemetryEffect,
   slateImpressionsEffect,
+  shadowScoreEffect,
 } from "./sideEffects/index.js";
 import type { MuseFeedQuery } from "./query.js";
 import type { MuseCandidate } from "./candidate.js";
@@ -102,6 +103,10 @@ function deserializeBloom(serialized: string | null): SeenBloom | null {
 export interface MusePipelineOptions {
   ranker: MuseRanker;
   weightsLoader: WeightsLoader;
+  /** §9.18 — the model_registry `shadow` row's ranker. When set, it scores
+   *  every built slate and logs `muse.shadow_score` per candidate while the
+   *  active ranker serves; never shown, never a deploy-time swap. */
+  shadowRanker?: MuseRanker;
   /** bloom bypass ratio — MUSE_BLOOM_BYPASS_REMOVAL_RATIO (0.70). */
   bloomBypassRatio?: number;
   /** MuseRetrievalNewUserActionThreshold — distinct from the ranker's (50). */
@@ -226,7 +231,11 @@ export function musePipeline(
       // §9.22: no writeSlate side effect — the slate is written by
       // SlatePort.writeSlate() inside the pass, in one statement, because a
       // slate that exists only if a side effect succeeded sometimes does not exist.
-      return [updateSeenBloomEffect(), telemetryEffect(), slateImpressionsEffect()];
+      const effects = [updateSeenBloomEffect(), telemetryEffect(), slateImpressionsEffect()];
+      if (opts.shadowRanker !== undefined) {
+        effects.push(shadowScoreEffect(opts.shadowRanker, opts.weightsLoader));
+      }
+      return effects;
     },
   };
 }

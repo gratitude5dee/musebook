@@ -304,9 +304,26 @@ export interface ClusterPort {
   ): Promise<Array<{ clusterId: number; weight: number }>>;
 }
 
+/** §9.18's one point per shadow-scored candidate — the canonical §13.3.1
+ *  layout (index1 post, blob4 slate, blob6 model, double8 score), which the
+ *  generic `writeDataPoint(metric, value, tags)` slot map cannot express. */
+export interface ShadowScorePoint {
+  postId: string;
+  slateId: string;
+  surface: string;
+  weightsVersion: string;
+  modelVersion: string;
+  plane: "human" | "agent";
+  position: number;
+  /** The shadow ranker's weightedScore for this candidate (double8). */
+  value: number;
+}
+
 export interface TelemetryPort {
   /** Analytics Engine writeDataPoint — fire-and-forget. */
   writeDataPoint(metric: string, value: number, tags?: Record<string, string>): void;
+  /** §9.18's `muse.shadow_score` point — fire-and-forget like writeDataPoint. */
+  writeShadowPoint(point: ShadowScorePoint): void;
   /** agent-plane action rows written server-side (§13); human plane reports via ingest. */
   insertAgentActions(rows: ReadonlyArray<Record<string, unknown>>): Promise<void>;
 }

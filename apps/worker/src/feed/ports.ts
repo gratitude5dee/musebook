@@ -10,6 +10,7 @@ import type { PublishMode } from "@musebook/schema";
 import { postgresDbHandles } from "@musebook/muse-mixer/adapters/pg";
 import { weightsRowVersion } from "@musebook/muse-mixer";
 import { workersTelemetry } from "@musebook/muse-mixer/adapters/workers";
+import { writePoint } from "@musebook/telemetry";
 import type { DbClient } from "../db.js";
 
 const BADGE_MODE = {
@@ -99,12 +100,38 @@ export function feedPorts(input: {
   ae?: {
     writeDataPoint(point: { indexes?: string[]; doubles?: number[]; blobs?: string[] }): void;
   };
+  /** Effective impression/mixer sample rate — TELEMETRY_IMPRESSION_SAMPLE.
+   *  Required: §13.3.1's double3 has no default and a shadow point that lies
+   *  about its rate is worse than no point. */
+  telemetrySampleRate: number;
 }): DbHandles {
   const { cached, fresh } = input;
+  const ae = input.ae;
   return postgresDbHandles({
     cached,
     fresh,
     monetization: kernelMonetization(fresh),
-    telemetry: workersTelemetry(input.ae, (rows) => insertAgentActions(fresh, rows)),
+    telemetry: workersTelemetry(
+      ae,
+      (rows) => insertAgentActions(fresh, rows),
+      ae === undefined
+        ? undefined
+        : {
+            sampleRate: input.telemetrySampleRate,
+            writePoint: (p) =>
+              writePoint(ae, {
+                postId: p.postId,
+                action: "muse.shadow_score",
+                plane: p.plane,
+                surface: p.surface,
+                slateId: p.slateId,
+                weightsVersion: p.weightsVersion,
+                modelVersion: p.modelVersion,
+                position: p.position,
+                value: p.value,
+                sampleRate: p.sampleRate,
+              }),
+          },
+    ),
   });
 }

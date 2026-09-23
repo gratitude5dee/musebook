@@ -141,41 +141,51 @@ export const HEURISTIC_V1_COEFFICIENTS: HeuristicCoefficients = {
   },
 };
 
+/**
+ * The per-candidate logistic evaluation both v1.x rankers share — heuristic
+ * and learned differ only in where the coefficient blob comes from (constants
+ * vs a `ranking_weights` row), never in the math (§9.15).
+ */
+export function evaluateLogistic(
+  coefs: HeuristicCoefficients,
+  feats: readonly CandidateFeatures[],
+): ActionPrediction[] {
+  return feats.map((f) => {
+    const flat = flatFeatures(f);
+    const discrete: ActionPrediction["discrete"] = {};
+    for (const a of MUSE_ACTIONS) {
+      const head = coefs[a];
+      if (head === undefined) continue;
+      let x = head.intercept;
+      for (const [name, beta] of Object.entries(head.coefs)) x += beta * (flat[name] ?? 0);
+      discrete[a] = sigmoid(x);
+    }
+    const continuous: ActionPrediction["continuous"] = {};
+    for (const cn of MUSE_CONTINUOUS) {
+      const spec = coefs.continuous?.[cn];
+      if (spec === undefined) continue;
+      // posterior mean nudged by the probability of its parent action
+      const driver =
+        cn === "watch_time_ms"
+          ? (discrete.play ?? 0)
+          : cn === "dwell_time_s"
+            ? (discrete.dwell ?? 0)
+            : cn === "scroll_depth"
+              ? (discrete.view ?? 0)
+              : cn === "tip_amount_usdc"
+                ? (discrete.tip ?? 0)
+                : (discrete.dwell ?? 0);
+      continuous[cn] = spec.mean * (0.5 + driver);
+    }
+    return { discrete, continuous };
+  });
+}
+
 export class HeuristicMuseRanker implements MuseRanker {
   readonly modelVersion = "v1.model-heuristic";
   constructor(private readonly coefs: HeuristicCoefficients = HEURISTIC_V1_COEFFICIENTS) {}
 
   predict(_vc: ViewerContext, feats: readonly CandidateFeatures[]): Promise<ActionPrediction[]> {
-    return Promise.resolve(
-      feats.map((f) => {
-        const flat = flatFeatures(f);
-        const discrete: ActionPrediction["discrete"] = {};
-        for (const a of MUSE_ACTIONS) {
-          const head = this.coefs[a];
-          if (head === undefined) continue;
-          let x = head.intercept;
-          for (const [name, beta] of Object.entries(head.coefs)) x += beta * (flat[name] ?? 0);
-          discrete[a] = sigmoid(x);
-        }
-        const continuous: ActionPrediction["continuous"] = {};
-        for (const cn of MUSE_CONTINUOUS) {
-          const spec = this.coefs.continuous?.[cn];
-          if (spec === undefined) continue;
-          // posterior mean nudged by the probability of its parent action
-          const driver =
-            cn === "watch_time_ms"
-              ? (discrete.play ?? 0)
-              : cn === "dwell_time_s"
-                ? (discrete.dwell ?? 0)
-                : cn === "scroll_depth"
-                  ? (discrete.view ?? 0)
-                  : cn === "tip_amount_usdc"
-                    ? (discrete.tip ?? 0)
-                    : (discrete.dwell ?? 0);
-          continuous[cn] = spec.mean * (0.5 + driver);
-        }
-        return { discrete, continuous };
-      }),
-    );
+    return Promise.resolve(evaluateLogistic(this.coefs, feats));
   }
 }

@@ -19,6 +19,7 @@ import { refreshChannelConstraints } from "./cron/refresh-channel-constraints.js
 import { runAeRollup } from "./cron/ae-rollup.js";
 import { backfillPostEmbeddings, recomputeUserEmbeddings } from "./cron/embed.js";
 import { runAlertPass, writeHeartbeat } from "./alerts.js";
+import { deriveNotDwelledLabels } from "./cron/label-builder.js";
 import { dispatch } from "./consumers/index.js";
 import { SlateBuilder } from "./slate-builder.js";
 
@@ -92,6 +93,9 @@ export default {
         await sweepHeldReservations(env);
         await refreshConnectorTokens(env);
         await drainDueSchedules(env, ctx);
+        // §13.4.1's label builder on the same tick as the settle window.
+        await deriveNotDwelledLabels(env);
+        beat("label-builder");
         return beat("agent-suite");
       case "17 3 * * *":
         await recomputeReputation(env);
