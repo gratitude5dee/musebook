@@ -322,7 +322,7 @@
     "ANALYTICS_AGENT_BREAKDOWN_CACHE_S": "900",
     "SENTRY_DSN": "",
     "ALERT_WEBHOOK_URL": "",
-    "SYNTHETIC_GATED_SLUG": "",
+    "SYNTHETIC_GATED_SLUG": "seed-article-x402",
     "ORIGIN_HOST": ""
   }
 }

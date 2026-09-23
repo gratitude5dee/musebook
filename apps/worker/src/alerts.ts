@@ -327,13 +327,31 @@ export async function runAlertPass(env: Env, ctx: ExecutionContext): Promise<voi
       headers: { accept: "text/markdown" },
       redirect: "manual",
     });
-    if (gate.status !== 402) await page(env, "P1", "edge.gate_bypassable:no_402", "R-16");
+    if (gate.status !== 402) {
+      await page(env, "P1", "edge.gate_bypassable:no_402", "R-16");
+    } else {
+      // M12.4: a green probe is evidence, not silence — the counter is what
+      // "the synthetic 402 is live and firing" reads back out of.
+      const db = await pgFresh(env);
+      await db.query(
+        `select public.bump_ops_counter('musebook.synthetic_402.gate', '{}'::jsonb, 1)`,
+      );
+      await db.end().catch(() => {});
+    }
 
     // T17: the origin must refuse anything without x-musebook-edge.
     const origin = await fetch(`https://${env.ORIGIN_HOST}/p/${env.SYNTHETIC_GATED_SLUG}`, {
       redirect: "manual",
     });
-    if (origin.status !== 404) await page(env, "P1", "edge.gate_bypassable:origin_open", "R-16");
+    if (origin.status !== 404) {
+      await page(env, "P1", "edge.gate_bypassable:origin_open", "R-16");
+    } else {
+      const db = await pgFresh(env);
+      await db.query(
+        `select public.bump_ops_counter('musebook.synthetic_402.origin_closed', '{}'::jsonb, 1)`,
+      );
+      await db.end().catch(() => {});
+    }
   } catch (e) {
     failures.push(`synthetic:${String(e)}`);
   }

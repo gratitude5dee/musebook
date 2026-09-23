@@ -1,0 +1,358 @@
+{
+  "milestone": "M0",
+  "commit": "194db4e3",
+  "branch": "m12-launch-hardening",
+  "dirty": true,
+  "started": "2026-09-23T16:32:41.275Z",
+  "finished": "2026-09-23T16:32:41.275Z",
+  "seed_hash": "12fc28f65387b0e4",
+  "versions": {
+    "node": "v24.21.0",
+    "pnpm": "12.5.1",
+    "next": "0.0.0",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11",
+    "wrangler": "4.137.0",
+    "@cloudflare/vitest-plugin": "1.2.0",
+    "supabase_cli": "2.117.0"
+  },
+  "checks": [
+    {
+      "id": "M0.1",
+      "status": "pass",
+      "duration_s": 0.3,
+      "exit_code": 0,
+      "output": "true",
+      "prereq": "H1"
+    },
+    {
+      "id": "M0.2",
+      "status": "pass",
+      "duration_s": 0.44,
+      "exit_code": 0,
+      "output": "true",
+      "prereq": "H1"
+    },
+    {
+      "id": "M0.3",
+      "status": "skip",
+      "supersededBy": "M12"
+    },
+    {
+      "id": "M0.4",
+      "status": "pass",
+      "duration_s": 0.24,
+      "exit_code": 0,
+      "output": "",
+      "prereq": "H1"
+    },
+    {
+      "id": "M0.5",
+      "status": "pass",
+      "duration_s": 0.32,
+      "exit_code": 0,
+      "output": "",
+      "prereq": "H1"
+    },
+    {
+      "id": "M0.6",
+      "status": "pass",
+      "duration_s": 0.15,
+      "exit_code": 0,
+      "output": "",
+      "prereq": "H1"
+    },
+    {
+      "id": "M0.7",
+      "status": "pass",
+      "duration_s": 2.71,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M0.8",
+      "status": "pass",
+      "duration_s": 0,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M0.9",
+      "status": "pass",
+      "duration_s": 0.26,
+      "exit_code": 0,
+      "output": "",
+      "prereq": "H1"
+    },
+    {
+      "id": "M0.10",
+      "status": "pass",
+      "duration_s": 0.13,
+      "exit_code": 0,
+      "output": "",
+      "prereq": "H1"
+    },
+    {
+      "id": "M0.11",
+      "status": "pass",
+      "duration_s": 0.36,
+      "exit_code": 0,
+      "output": "",
+      "prereq": "H1"
+    },
+    {
+      "id": "M0.12",
+      "status": "pass",
+      "duration_s": 0.18,
+      "exit_code": 0,
+      "output": "",
+      "prereq": "H1"
+    },
+    {
+      "id": "M0.13",
+      "status": "pass",
+      "duration_s": 1.8,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M0.14",
+      "status": "pass",
+      "duration_s": 0,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M0.15",
+      "status": "skip",
+      "supersededBy": "M2"
+    },
+    {
+      "id": "M0.16",
+      "status": "pass",
+      "duration_s": 0.13,
+      "exit_code": 0,
+      "output": "",
+      "prereq": "H2"
+    },
+    {
+      "id": "M0.17",
+      "status": "pass",
+      "duration_s": 0.79,
+      "exit_code": 0,
+      "output": "",
+      "prereq": "H2"
+    },
+    {
+      "id": "M0.18",
+      "status": "pass",
+      "duration_s": 0.22,
+      "exit_code": 0,
+      "output": "",
+      "prereq": "H3"
+    },
+    {
+      "id": "M0.19",
+      "status": "pass",
+      "duration_s": 0.34,
+      "exit_code": 0,
+      "output": "",
+      "prereq": "H3"
+    },
+    {
+      "id": "M0.20",
+      "status": "pass",
+      "duration_s": 0.31,
+      "exit_code": 0,
+      "output": "",
+      "prereq": "H3"
+    },
+    {
+      "id": "M0.21",
+      "status": "pass",
+      "duration_s": 0.8,
+      "exit_code": 0,
+      "output": "",
+      "prereq": "H3"
+    },
+    {
+      "id": "M0.22",
+      "status": "pass",
+      "duration_s": 1.09,
+      "exit_code": 0,
+      "output": "",
+      "prereq": "H3"
+    },
+    {
+      "id": "M0.23",
+      "status": "pass",
+      "duration_s": 0,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M0.24",
+      "status": "pass",
+      "duration_s": 0,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M0.25",
+      "status": "pass",
+      "duration_s": 0,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-BUILD",
+      "status": "skip",
+      "activeFrom": "M1"
+    },
+    {
+      "id": "G-TYPES",
+      "status": "skip",
+      "activeFrom": "M1"
+    },
+    {
+      "id": "G-BOUND",
+      "status": "skip",
+      "activeFrom": "M1"
+    },
+    {
+      "id": "G-FMT",
+      "status": "skip",
+      "activeFrom": "M1"
+    },
+    {
+      "id": "G-TEST",
+      "status": "skip",
+      "activeFrom": "M1"
+    },
+    {
+      "id": "G-CFTEST",
+      "status": "skip",
+      "activeFrom": "M1"
+    },
+    {
+      "id": "G-ENV",
+      "status": "skip",
+      "activeFrom": "M1"
+    },
+    {
+      "id": "G-ZOD",
+      "status": "skip",
+      "activeFrom": "M1"
+    },
+    {
+      "id": "G-AGPL",
+      "status": "skip",
+      "activeFrom": "M1"
+    },
+    {
+      "id": "G-LINT",
+      "status": "skip",
+      "activeFrom": "M1"
+    },
+    {
+      "id": "G-LEGACY",
+      "status": "skip",
+      "activeFrom": "M1"
+    },
+    {
+      "id": "G-VERCEL-DEAD",
+      "status": "skip",
+      "activeFrom": "M1"
+    },
+    {
+      "id": "G-SKIP",
+      "status": "skip",
+      "activeFrom": "M1"
+    },
+    {
+      "id": "G-CFDRY",
+      "status": "skip",
+      "activeFrom": "M1"
+    },
+    {
+      "id": "G-SEED",
+      "status": "skip",
+      "activeFrom": "M2"
+    },
+    {
+      "id": "G-RLS",
+      "status": "skip",
+      "activeFrom": "M2"
+    },
+    {
+      "id": "G-ROLE",
+      "status": "skip",
+      "activeFrom": "M2"
+    },
+    {
+      "id": "G-DRIFT",
+      "status": "skip",
+      "activeFrom": "M2"
+    },
+    {
+      "id": "G-BUNDLE",
+      "status": "skip",
+      "activeFrom": "M3"
+    },
+    {
+      "id": "G-R2-SEAL",
+      "status": "skip",
+      "activeFrom": "M3"
+    },
+    {
+      "id": "G-COV",
+      "status": "skip",
+      "activeFrom": "M4"
+    },
+    {
+      "id": "G-GOLDEN",
+      "status": "skip",
+      "activeFrom": "M5"
+    },
+    {
+      "id": "G-EDGE-ROUTES",
+      "status": "skip",
+      "activeFrom": "M6"
+    },
+    {
+      "id": "G-PROXY",
+      "status": "skip",
+      "activeFrom": "M6"
+    },
+    {
+      "id": "G-FRESH",
+      "status": "skip",
+      "activeFrom": "M6"
+    },
+    {
+      "id": "G-AXE",
+      "status": "skip",
+      "activeFrom": "M7"
+    },
+    {
+      "id": "G-FAKE-TX",
+      "status": "skip",
+      "activeFrom": "M8"
+    },
+    {
+      "id": "G-X402-V1",
+      "status": "skip",
+      "activeFrom": "M8"
+    },
+    {
+      "id": "G-PLANE-JOIN",
+      "status": "skip",
+      "activeFrom": "M11"
+    },
+    {
+      "id": "G-ISO",
+      "status": "skip",
+      "activeFrom": "M13"
+    }
+  ]
+}

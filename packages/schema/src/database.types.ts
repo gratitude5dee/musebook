@@ -107,18 +107,29 @@ export type Database = {
           action: Database["public"]["Enums"]["action_kind"]
           actor_agent_id: string | null
           actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
           client: Json
           comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
           dwell_ms: number | null
           event_id: string
           ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
           model_version: string
           occurred_at: string
+          outcome: string
           position: number
           post_id: string | null
           request_id: string | null
+          settlement_id: string | null
           slate_id: string
           surface: string
+          view_session_id: string | null
           viewer_user_id: string | null
           weights_version: string
         }
@@ -126,18 +137,29 @@ export type Database = {
           action: Database["public"]["Enums"]["action_kind"]
           actor_agent_id?: string | null
           actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
           client?: Json
           comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
           dwell_ms?: number | null
           event_id?: string
           ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
           model_version: string
           occurred_at?: string
+          outcome?: string
           position: number
           post_id?: string | null
           request_id?: string | null
+          settlement_id?: string | null
           slate_id: string
           surface: string
+          view_session_id?: string | null
           viewer_user_id?: string | null
           weights_version: string
         }
@@ -145,18 +167,29 @@ export type Database = {
           action?: Database["public"]["Enums"]["action_kind"]
           actor_agent_id?: string | null
           actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
           client?: Json
           comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
           dwell_ms?: number | null
           event_id?: string
           ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
           model_version?: string
           occurred_at?: string
+          outcome?: string
           position?: number
           post_id?: string | null
           request_id?: string | null
+          settlement_id?: string | null
           slate_id?: string
           surface?: string
+          view_session_id?: string | null
           viewer_user_id?: string | null
           weights_version?: string
         }
@@ -182,18 +215,29 @@ export type Database = {
           action: Database["public"]["Enums"]["action_kind"]
           actor_agent_id: string | null
           actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
           client: Json
           comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
           dwell_ms: number | null
           event_id: string
           ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
           model_version: string
           occurred_at: string
+          outcome: string
           position: number
           post_id: string | null
           request_id: string | null
+          settlement_id: string | null
           slate_id: string
           surface: string
+          view_session_id: string | null
           viewer_user_id: string | null
           weights_version: string
         }
@@ -201,18 +245,29 @@ export type Database = {
           action: Database["public"]["Enums"]["action_kind"]
           actor_agent_id?: string | null
           actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
           client?: Json
           comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
           dwell_ms?: number | null
           event_id?: string
           ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
           model_version: string
           occurred_at?: string
+          outcome?: string
           position: number
           post_id?: string | null
           request_id?: string | null
+          settlement_id?: string | null
           slate_id: string
           surface: string
+          view_session_id?: string | null
           viewer_user_id?: string | null
           weights_version: string
         }
@@ -220,18 +275,29 @@ export type Database = {
           action?: Database["public"]["Enums"]["action_kind"]
           actor_agent_id?: string | null
           actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
           client?: Json
           comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
           dwell_ms?: number | null
           event_id?: string
           ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
           model_version?: string
           occurred_at?: string
+          outcome?: string
           position?: number
           post_id?: string | null
           request_id?: string | null
+          settlement_id?: string | null
           slate_id?: string
           surface?: string
+          view_session_id?: string | null
           viewer_user_id?: string | null
           weights_version?: string
         }
@@ -242,18 +308,29 @@ export type Database = {
           action: Database["public"]["Enums"]["action_kind"]
           actor_agent_id: string | null
           actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
           client: Json
           comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
           dwell_ms: number | null
           event_id: string
           ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
           model_version: string
           occurred_at: string
+          outcome: string
           position: number
           post_id: string | null
           request_id: string | null
+          settlement_id: string | null
           slate_id: string
           surface: string
+          view_session_id: string | null
           viewer_user_id: string | null
           weights_version: string
         }
@@ -261,18 +338,29 @@ export type Database = {
           action: Database["public"]["Enums"]["action_kind"]
           actor_agent_id?: string | null
           actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
           client?: Json
           comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
           dwell_ms?: number | null
           event_id?: string
           ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
           model_version: string
           occurred_at?: string
+          outcome?: string
           position: number
           post_id?: string | null
           request_id?: string | null
+          settlement_id?: string | null
           slate_id: string
           surface: string
+          view_session_id?: string | null
           viewer_user_id?: string | null
           weights_version: string
         }
@@ -280,18 +368,29 @@ export type Database = {
           action?: Database["public"]["Enums"]["action_kind"]
           actor_agent_id?: string | null
           actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
           client?: Json
           comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
           dwell_ms?: number | null
           event_id?: string
           ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
           model_version?: string
           occurred_at?: string
+          outcome?: string
           position?: number
           post_id?: string | null
           request_id?: string | null
+          settlement_id?: string | null
           slate_id?: string
           surface?: string
+          view_session_id?: string | null
           viewer_user_id?: string | null
           weights_version?: string
         }
@@ -302,18 +401,29 @@ export type Database = {
           action: Database["public"]["Enums"]["action_kind"]
           actor_agent_id: string | null
           actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
           client: Json
           comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
           dwell_ms: number | null
           event_id: string
           ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
           model_version: string
           occurred_at: string
+          outcome: string
           position: number
           post_id: string | null
           request_id: string | null
+          settlement_id: string | null
           slate_id: string
           surface: string
+          view_session_id: string | null
           viewer_user_id: string | null
           weights_version: string
         }
@@ -321,18 +431,29 @@ export type Database = {
           action: Database["public"]["Enums"]["action_kind"]
           actor_agent_id?: string | null
           actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
           client?: Json
           comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
           dwell_ms?: number | null
           event_id?: string
           ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
           model_version: string
           occurred_at?: string
+          outcome?: string
           position: number
           post_id?: string | null
           request_id?: string | null
+          settlement_id?: string | null
           slate_id: string
           surface: string
+          view_session_id?: string | null
           viewer_user_id?: string | null
           weights_version: string
         }
@@ -340,18 +461,29 @@ export type Database = {
           action?: Database["public"]["Enums"]["action_kind"]
           actor_agent_id?: string | null
           actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
           client?: Json
           comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
           dwell_ms?: number | null
           event_id?: string
           ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
           model_version?: string
           occurred_at?: string
+          outcome?: string
           position?: number
           post_id?: string | null
           request_id?: string | null
+          settlement_id?: string | null
           slate_id?: string
           surface?: string
+          view_session_id?: string | null
           viewer_user_id?: string | null
           weights_version?: string
         }
@@ -365,6 +497,7 @@ export type Database = {
           dwell_ms: number
           n: number
           post_id: string
+          source: string
         }
         Insert: {
           action: Database["public"]["Enums"]["action_kind"]
@@ -373,6 +506,7 @@ export type Database = {
           dwell_ms?: number
           n?: number
           post_id: string
+          source?: string
         }
         Update: {
           action?: Database["public"]["Enums"]["action_kind"]
@@ -381,6 +515,7 @@ export type Database = {
           dwell_ms?: number
           n?: number
           post_id?: string
+          source?: string
         }
         Relationships: []
       }
@@ -389,18 +524,29 @@ export type Database = {
           action: Database["public"]["Enums"]["action_kind"]
           actor_agent_id: string | null
           actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
           client: Json
           comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
           dwell_ms: number | null
           event_id: string
           ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
           model_version: string
           occurred_at: string
+          outcome: string
           position: number
           post_id: string | null
           request_id: string | null
+          settlement_id: string | null
           slate_id: string
           surface: string
+          view_session_id: string | null
           viewer_user_id: string | null
           weights_version: string
         }
@@ -408,18 +554,29 @@ export type Database = {
           action: Database["public"]["Enums"]["action_kind"]
           actor_agent_id?: string | null
           actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
           client?: Json
           comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
           dwell_ms?: number | null
           event_id?: string
           ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
           model_version: string
           occurred_at?: string
+          outcome?: string
           position: number
           post_id?: string | null
           request_id?: string | null
+          settlement_id?: string | null
           slate_id: string
           surface: string
+          view_session_id?: string | null
           viewer_user_id?: string | null
           weights_version: string
         }
@@ -427,18 +584,29 @@ export type Database = {
           action?: Database["public"]["Enums"]["action_kind"]
           actor_agent_id?: string | null
           actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
           client?: Json
           comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
           dwell_ms?: number | null
           event_id?: string
           ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
           model_version?: string
           occurred_at?: string
+          outcome?: string
           position?: number
           post_id?: string | null
           request_id?: string | null
+          settlement_id?: string | null
           slate_id?: string
           surface?: string
+          view_session_id?: string | null
           viewer_user_id?: string | null
           weights_version?: string
         }
@@ -449,18 +617,29 @@ export type Database = {
           action: Database["public"]["Enums"]["action_kind"]
           actor_agent_id: string | null
           actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
           client: Json
           comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
           dwell_ms: number | null
           event_id: string
           ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
           model_version: string
           occurred_at: string
+          outcome: string
           position: number
           post_id: string | null
           request_id: string | null
+          settlement_id: string | null
           slate_id: string
           surface: string
+          view_session_id: string | null
           viewer_user_id: string | null
           weights_version: string
         }
@@ -468,18 +647,29 @@ export type Database = {
           action: Database["public"]["Enums"]["action_kind"]
           actor_agent_id?: string | null
           actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
           client?: Json
           comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
           dwell_ms?: number | null
           event_id?: string
           ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
           model_version: string
           occurred_at?: string
+          outcome?: string
           position: number
           post_id?: string | null
           request_id?: string | null
+          settlement_id?: string | null
           slate_id: string
           surface: string
+          view_session_id?: string | null
           viewer_user_id?: string | null
           weights_version: string
         }
@@ -487,18 +677,29 @@ export type Database = {
           action?: Database["public"]["Enums"]["action_kind"]
           actor_agent_id?: string | null
           actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
           client?: Json
           comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
           dwell_ms?: number | null
           event_id?: string
           ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
           model_version?: string
           occurred_at?: string
+          outcome?: string
           position?: number
           post_id?: string | null
           request_id?: string | null
+          settlement_id?: string | null
           slate_id?: string
           surface?: string
+          view_session_id?: string | null
           viewer_user_id?: string | null
           weights_version?: string
         }
@@ -509,18 +710,29 @@ export type Database = {
           action: Database["public"]["Enums"]["action_kind"]
           actor_agent_id: string | null
           actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
           client: Json
           comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
           dwell_ms: number | null
           event_id: string
           ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
           model_version: string
           occurred_at: string
+          outcome: string
           position: number
           post_id: string | null
           request_id: string | null
+          settlement_id: string | null
           slate_id: string
           surface: string
+          view_session_id: string | null
           viewer_user_id: string | null
           weights_version: string
         }
@@ -528,18 +740,29 @@ export type Database = {
           action: Database["public"]["Enums"]["action_kind"]
           actor_agent_id?: string | null
           actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
           client?: Json
           comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
           dwell_ms?: number | null
           event_id?: string
           ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
           model_version: string
           occurred_at?: string
+          outcome?: string
           position: number
           post_id?: string | null
           request_id?: string | null
+          settlement_id?: string | null
           slate_id: string
           surface: string
+          view_session_id?: string | null
           viewer_user_id?: string | null
           weights_version: string
         }
@@ -547,22 +770,84 @@ export type Database = {
           action?: Database["public"]["Enums"]["action_kind"]
           actor_agent_id?: string | null
           actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
           client?: Json
           comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
           dwell_ms?: number | null
           event_id?: string
           ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
           model_version?: string
           occurred_at?: string
+          outcome?: string
           position?: number
           post_id?: string | null
           request_id?: string | null
+          settlement_id?: string | null
           slate_id?: string
           surface?: string
+          view_session_id?: string | null
           viewer_user_id?: string | null
           weights_version?: string
         }
         Relationships: []
+      }
+      agent_appeals: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decision_note: string | null
+          delegation_id: string
+          id: string
+          owner_user_id: string
+          reputation_before: number
+          state: string
+          statement: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decision_note?: string | null
+          delegation_id: string
+          id?: string
+          owner_user_id: string
+          reputation_before: number
+          state?: string
+          statement: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decision_note?: string | null
+          delegation_id?: string
+          id?: string
+          owner_user_id?: string
+          reputation_before?: number
+          state?: string
+          statement?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_appeals_delegation_id_fkey"
+            columns: ["delegation_id"]
+            isOneToOne: false
+            referencedRelation: "delegations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_appeals_owner_user_id_fkey"
+            columns: ["owner_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agent_identities: {
         Row: {
@@ -738,6 +1023,62 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "delegations"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      alert_rules: {
+        Row: {
+          enabled: boolean
+          for_minutes: number
+          name: string
+          runbook: string
+          severity: string
+          sql: string
+        }
+        Insert: {
+          enabled?: boolean
+          for_minutes?: number
+          name: string
+          runbook: string
+          severity: string
+          sql: string
+        }
+        Update: {
+          enabled?: boolean
+          for_minutes?: number
+          name?: string
+          runbook?: string
+          severity?: string
+          sql?: string
+        }
+        Relationships: []
+      }
+      alert_state: {
+        Row: {
+          firing_since: string | null
+          last_notified: string | null
+          name: string
+          notify_count: number
+        }
+        Insert: {
+          firing_since?: string | null
+          last_notified?: string | null
+          name: string
+          notify_count?: number
+        }
+        Update: {
+          firing_since?: string | null
+          last_notified?: string | null
+          name?: string
+          notify_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_state_name_fkey"
+            columns: ["name"]
+            isOneToOne: true
+            referencedRelation: "alert_rules"
+            referencedColumns: ["name"]
           },
         ]
       }
@@ -1045,6 +1386,41 @@ export type Database = {
           },
         ]
       }
+      channel_constraint_overrides: {
+        Row: {
+          channel_id: string
+          max_chars: number | null
+          refreshed_at: string
+          rules_text: string | null
+          settings_schema: Json | null
+          tools: Json
+        }
+        Insert: {
+          channel_id: string
+          max_chars?: number | null
+          refreshed_at?: string
+          rules_text?: string | null
+          settings_schema?: Json | null
+          tools?: Json
+        }
+        Update: {
+          channel_id?: string
+          max_chars?: number | null
+          refreshed_at?: string
+          rules_text?: string | null
+          settings_schema?: Json | null
+          tools?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_constraint_overrides_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: true
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       channels: {
         Row: {
           avatar_url: string | null
@@ -1192,6 +1568,47 @@ export type Database = {
           },
         ]
       }
+      connector_credentials: {
+        Row: {
+          ciphertext: string
+          created_at: string
+          delegation_id: string
+          expires_at: string | null
+          id: string
+          key_id: string
+          kind: string
+          rotated_at: string | null
+        }
+        Insert: {
+          ciphertext: string
+          created_at?: string
+          delegation_id: string
+          expires_at?: string | null
+          id?: string
+          key_id: string
+          kind: string
+          rotated_at?: string | null
+        }
+        Update: {
+          ciphertext?: string
+          created_at?: string
+          delegation_id?: string
+          expires_at?: string | null
+          id?: string
+          key_id?: string
+          kind?: string
+          rotated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connector_credentials_delegation_id_fkey"
+            columns: ["delegation_id"]
+            isOneToOne: false
+            referencedRelation: "delegations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       connectors: {
         Row: {
           auth_kind: string
@@ -1240,6 +1657,44 @@ export type Database = {
         }
         Relationships: []
       }
+      consent_events: {
+        Row: {
+          anon_id: string | null
+          at: string
+          granted: boolean
+          id: number
+          purpose: string
+          source: string
+          user_id: string | null
+        }
+        Insert: {
+          anon_id?: string | null
+          at?: string
+          granted: boolean
+          id?: never
+          purpose: string
+          source: string
+          user_id?: string | null
+        }
+        Update: {
+          anon_id?: string | null
+          at?: string
+          granted?: boolean
+          id?: never
+          purpose?: string
+          source?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consent_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_publishing_defaults: {
         Row: {
           ai_use: boolean
@@ -1277,6 +1732,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      creator_stats_daily: {
+        Row: {
+          agent_fetches: number
+          computed_at: string
+          creator_id: string
+          day: string
+          distinct_agents: number
+          dwell_hist: number[]
+          engagements: number
+          followers_gained: number
+          impressions: number
+          opens: number
+          posts_published: number
+          purchases: number
+          revenue_atomic: number
+        }
+        Insert: {
+          agent_fetches?: number
+          computed_at?: string
+          creator_id: string
+          day: string
+          distinct_agents?: number
+          dwell_hist?: number[]
+          engagements?: number
+          followers_gained?: number
+          impressions?: number
+          opens?: number
+          posts_published?: number
+          purchases?: number
+          revenue_atomic?: number
+        }
+        Update: {
+          agent_fetches?: number
+          computed_at?: string
+          creator_id?: string
+          day?: string
+          distinct_agents?: number
+          dwell_hist?: number[]
+          engagements?: number
+          followers_gained?: number
+          impressions?: number
+          opens?: number
+          posts_published?: number
+          purchases?: number
+          revenue_atomic?: number
+        }
+        Relationships: []
       }
       delegation_spend: {
         Row: {
@@ -1499,6 +2002,63 @@ export type Database = {
           },
         ]
       }
+      dsar_requests: {
+        Row: {
+          agent_id: string | null
+          artifact_key: string | null
+          completed_at: string | null
+          due_at: string
+          id: string
+          kind: string
+          note: string | null
+          requested_at: string
+          started_at: string | null
+          state: string
+          user_id: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          artifact_key?: string | null
+          completed_at?: string | null
+          due_at?: string
+          id?: string
+          kind: string
+          note?: string | null
+          requested_at?: string
+          started_at?: string | null
+          state?: string
+          user_id?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          artifact_key?: string | null
+          completed_at?: string | null
+          due_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          requested_at?: string
+          started_at?: string | null
+          state?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dsar_requests_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_identities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dsar_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follows: {
         Row: {
           actor_agent_id: string | null
@@ -1590,6 +2150,60 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_request_nonces: {
+        Row: {
+          expires_at: string
+          key_id: string
+          method: string
+          nonce: string
+          path: string
+          seen_at: string
+        }
+        Insert: {
+          expires_at: string
+          key_id: string
+          method: string
+          nonce: string
+          path: string
+          seen_at?: string
+        }
+        Update: {
+          expires_at?: string
+          key_id?: string
+          method?: string
+          nonce?: string
+          path?: string
+          seen_at?: string
+        }
+        Relationships: []
+      }
+      job_heartbeats: {
+        Row: {
+          expected_every: string
+          grace: string
+          job: string
+          last_error: string | null
+          last_error_at: string | null
+          last_success_at: string | null
+        }
+        Insert: {
+          expected_every: string
+          grace?: string
+          job: string
+          last_error?: string | null
+          last_error_at?: string | null
+          last_success_at?: string | null
+        }
+        Update: {
+          expected_every?: string
+          grace?: string
+          job?: string
+          last_error?: string | null
+          last_error_at?: string | null
+          last_success_at?: string | null
+        }
+        Relationships: []
+      }
       job_outbox: {
         Row: {
           attempts: number
@@ -1629,6 +2243,75 @@ export type Database = {
           last_error?: string | null
           payload?: Json
           state?: Database["public"]["Enums"]["job_state"]
+        }
+        Relationships: []
+      }
+      legal_acceptances: {
+        Row: {
+          accepted_at: string
+          id: string
+          ip_hash: string | null
+          slug: string
+          user_agent: string | null
+          user_id: string
+          version: string
+        }
+        Insert: {
+          accepted_at?: string
+          id?: string
+          ip_hash?: string | null
+          slug: string
+          user_agent?: string | null
+          user_id: string
+          version: string
+        }
+        Update: {
+          accepted_at?: string
+          id?: string
+          ip_hash?: string | null
+          slug?: string
+          user_agent?: string | null
+          user_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_acceptances_slug_version_fkey"
+            columns: ["slug", "version"]
+            isOneToOne: false
+            referencedRelation: "legal_documents"
+            referencedColumns: ["slug", "version"]
+          },
+          {
+            foreignKeyName: "legal_acceptances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_documents: {
+        Row: {
+          content_sha256: string
+          effective_from: string
+          slug: string
+          summary: string | null
+          version: string
+        }
+        Insert: {
+          content_sha256: string
+          effective_from: string
+          slug: string
+          summary?: string | null
+          version: string
+        }
+        Update: {
+          content_sha256?: string
+          effective_from?: string
+          slug?: string
+          summary?: string | null
+          version?: string
         }
         Relationships: []
       }
@@ -1750,6 +2433,30 @@ export type Database = {
           },
         ]
       }
+      ops_counters: {
+        Row: {
+          bucket_start: string
+          labels: Json
+          metric: string
+          sum_ms: number
+          value: number
+        }
+        Insert: {
+          bucket_start: string
+          labels?: Json
+          metric: string
+          sum_ms?: number
+          value?: number
+        }
+        Update: {
+          bucket_start?: string
+          labels?: Json
+          metric?: string
+          sum_ms?: number
+          value?: number
+        }
+        Relationships: []
+      }
       ops_events: {
         Row: {
           at: string
@@ -1760,6 +2467,7 @@ export type Database = {
           metadata: Json
           outcome: string | null
           request_id: string | null
+          subject_id: string | null
         }
         Insert: {
           at?: string
@@ -1770,6 +2478,7 @@ export type Database = {
           metadata?: Json
           outcome?: string | null
           request_id?: string | null
+          subject_id?: string | null
         }
         Update: {
           at?: string
@@ -1780,6 +2489,7 @@ export type Database = {
           metadata?: Json
           outcome?: string | null
           request_id?: string | null
+          subject_id?: string | null
         }
         Relationships: []
       }
@@ -1863,6 +2573,8 @@ export type Database = {
           platform_post_id: string
           post_id: string | null
           raw: Json
+          reposts: number
+          saves: number
           shares: number
         }
         Insert: {
@@ -1877,6 +2589,8 @@ export type Database = {
           platform_post_id: string
           post_id?: string | null
           raw?: Json
+          reposts?: number
+          saves?: number
           shares?: number
         }
         Update: {
@@ -1891,6 +2605,8 @@ export type Database = {
           platform_post_id?: string
           post_id?: string | null
           raw?: Json
+          reposts?: number
+          saves?: number
           shares?: number
         }
         Relationships: [
@@ -2006,14 +2722,30 @@ export type Database = {
       }
       platforms: {
         Row: {
+          analytics_supported: boolean
           aspect_ratios: Json
+          concurrency_ceiling: number | null
+          count_method: string
           display_name: string
+          editor: string
+          hashtag_style: string
+          limits_checked_at: string | null
+          limits_source: string
           max_alt_chars: number | null
           max_chars: number | null
+          max_hashtags: number | null
           max_images: number
+          max_thread_parts: number | null
+          max_title_chars: number | null
           max_video_seconds: number | null
+          max_videos: number
+          media_rules: Json
+          min_media: number
           notes: string | null
+          postiz_identifier: string | null
+          requires_alt_text: boolean
           slug: string
+          stagger_seconds: number
           supports_alt_text: boolean
           supports_link_preview: boolean
           supports_threads: boolean
@@ -2021,14 +2753,30 @@ export type Database = {
           url_counts_as_chars: number | null
         }
         Insert: {
+          analytics_supported?: boolean
           aspect_ratios?: Json
+          concurrency_ceiling?: number | null
+          count_method?: string
           display_name: string
+          editor?: string
+          hashtag_style?: string
+          limits_checked_at?: string | null
+          limits_source?: string
           max_alt_chars?: number | null
           max_chars?: number | null
+          max_hashtags?: number | null
           max_images?: number
+          max_thread_parts?: number | null
+          max_title_chars?: number | null
           max_video_seconds?: number | null
+          max_videos?: number
+          media_rules?: Json
+          min_media?: number
           notes?: string | null
+          postiz_identifier?: string | null
+          requires_alt_text?: boolean
           slug: string
+          stagger_seconds?: number
           supports_alt_text?: boolean
           supports_link_preview?: boolean
           supports_threads?: boolean
@@ -2036,19 +2784,89 @@ export type Database = {
           url_counts_as_chars?: number | null
         }
         Update: {
+          analytics_supported?: boolean
           aspect_ratios?: Json
+          concurrency_ceiling?: number | null
+          count_method?: string
           display_name?: string
+          editor?: string
+          hashtag_style?: string
+          limits_checked_at?: string | null
+          limits_source?: string
           max_alt_chars?: number | null
           max_chars?: number | null
+          max_hashtags?: number | null
           max_images?: number
+          max_thread_parts?: number | null
+          max_title_chars?: number | null
           max_video_seconds?: number | null
+          max_videos?: number
+          media_rules?: Json
+          min_media?: number
           notes?: string | null
+          postiz_identifier?: string | null
+          requires_alt_text?: boolean
           slug?: string
+          stagger_seconds?: number
           supports_alt_text?: boolean
           supports_link_preview?: boolean
           supports_threads?: boolean
           updated_at?: string
           url_counts_as_chars?: number | null
+        }
+        Relationships: []
+      }
+      post_agent_stats_daily: {
+        Row: {
+          ae_applied_at: string | null
+          by_tool: Json
+          bytes_served: number
+          citations_declared: number
+          computed_at: string
+          creator_id: string
+          day: string
+          distinct_agents: number
+          fetches: number
+          mcp_calls: number
+          paywall_hits: number
+          post_id: string
+          purchases: number
+          revenue_atomic: number
+          signed_agents: number
+        }
+        Insert: {
+          ae_applied_at?: string | null
+          by_tool?: Json
+          bytes_served?: number
+          citations_declared?: number
+          computed_at?: string
+          creator_id: string
+          day: string
+          distinct_agents?: number
+          fetches?: number
+          mcp_calls?: number
+          paywall_hits?: number
+          post_id: string
+          purchases?: number
+          revenue_atomic?: number
+          signed_agents?: number
+        }
+        Update: {
+          ae_applied_at?: string | null
+          by_tool?: Json
+          bytes_served?: number
+          citations_declared?: number
+          computed_at?: string
+          creator_id?: string
+          day?: string
+          distinct_agents?: number
+          fetches?: number
+          mcp_calls?: number
+          paywall_hits?: number
+          post_id?: string
+          purchases?: number
+          revenue_atomic?: number
+          signed_agents?: number
         }
         Relationships: []
       }
@@ -2286,6 +3104,144 @@ export type Database = {
           },
         ]
       }
+      post_stats_daily: {
+        Row: {
+          ae_applied_at: string | null
+          bookmarks: number
+          comments: number
+          computed_at: string
+          creator_id: string
+          day: string
+          distinct_readers: number
+          dwell_events: number
+          dwell_hist: number[]
+          dwell_ms_total: number
+          impressions: number
+          label_sample_rate: number
+          likes: number
+          media_completes: number
+          media_plays: number
+          media_q25: number
+          media_q50: number
+          media_q75: number
+          opens: number
+          post_id: string
+          replays: number
+          reposts: number
+          scroll_completes: number
+          shares: number
+        }
+        Insert: {
+          ae_applied_at?: string | null
+          bookmarks?: number
+          comments?: number
+          computed_at?: string
+          creator_id: string
+          day: string
+          distinct_readers?: number
+          dwell_events?: number
+          dwell_hist?: number[]
+          dwell_ms_total?: number
+          impressions?: number
+          label_sample_rate?: number
+          likes?: number
+          media_completes?: number
+          media_plays?: number
+          media_q25?: number
+          media_q50?: number
+          media_q75?: number
+          opens?: number
+          post_id: string
+          replays?: number
+          reposts?: number
+          scroll_completes?: number
+          shares?: number
+        }
+        Update: {
+          ae_applied_at?: string | null
+          bookmarks?: number
+          comments?: number
+          computed_at?: string
+          creator_id?: string
+          day?: string
+          distinct_readers?: number
+          dwell_events?: number
+          dwell_hist?: number[]
+          dwell_ms_total?: number
+          impressions?: number
+          label_sample_rate?: number
+          likes?: number
+          media_completes?: number
+          media_plays?: number
+          media_q25?: number
+          media_q50?: number
+          media_q75?: number
+          opens?: number
+          post_id?: string
+          replays?: number
+          reposts?: number
+          scroll_completes?: number
+          shares?: number
+        }
+        Relationships: []
+      }
+      post_stats_rolling: {
+        Row: {
+          agent_fetches_24h: number
+          citations_7d: number
+          completion_rate_24h: number
+          computed_at: string
+          distinct_agents_24h: number
+          dwell_ms_p50_24h: number
+          dwell_ms_p90_24h: number
+          engagements_24h: number
+          human_impressions_24h: number
+          human_opens_24h: number
+          post_id: string
+          purchases_24h: number
+          replays_24h: number
+          revenue_7d_atomic: number
+          signed_agent_fetches_24h: number
+          velocity_24h: number
+        }
+        Insert: {
+          agent_fetches_24h?: number
+          citations_7d?: number
+          completion_rate_24h?: number
+          computed_at?: string
+          distinct_agents_24h?: number
+          dwell_ms_p50_24h?: number
+          dwell_ms_p90_24h?: number
+          engagements_24h?: number
+          human_impressions_24h?: number
+          human_opens_24h?: number
+          post_id: string
+          purchases_24h?: number
+          replays_24h?: number
+          revenue_7d_atomic?: number
+          signed_agent_fetches_24h?: number
+          velocity_24h?: number
+        }
+        Update: {
+          agent_fetches_24h?: number
+          citations_7d?: number
+          completion_rate_24h?: number
+          computed_at?: string
+          distinct_agents_24h?: number
+          dwell_ms_p50_24h?: number
+          dwell_ms_p90_24h?: number
+          engagements_24h?: number
+          human_impressions_24h?: number
+          human_opens_24h?: number
+          post_id?: string
+          purchases_24h?: number
+          replays_24h?: number
+          revenue_7d_atomic?: number
+          signed_agent_fetches_24h?: number
+          velocity_24h?: number
+        }
+        Relationships: []
+      }
       post_versions: {
         Row: {
           change_note: string | null
@@ -2378,6 +3334,7 @@ export type Database = {
           price_network: string | null
           publish_mode: Database["public"]["Enums"]["publish_mode"]
           published_at: string | null
+          revenue_share_version: string
           scheduled_for: string | null
           search_indexable: boolean
           search_tsv: unknown
@@ -2412,6 +3369,7 @@ export type Database = {
           price_network?: string | null
           publish_mode?: Database["public"]["Enums"]["publish_mode"]
           published_at?: string | null
+          revenue_share_version?: string
           scheduled_for?: string | null
           search_indexable?: boolean
           search_tsv?: unknown
@@ -2446,6 +3404,7 @@ export type Database = {
           price_network?: string | null
           publish_mode?: Database["public"]["Enums"]["publish_mode"]
           published_at?: string | null
+          revenue_share_version?: string
           scheduled_for?: string | null
           search_indexable?: boolean
           search_tsv?: unknown
@@ -2485,6 +3444,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "agent_identities"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_revenue_share_version_fkey"
+            columns: ["revenue_share_version"]
+            isOneToOne: false
+            referencedRelation: "revenue_share_policies"
+            referencedColumns: ["version"]
           },
         ]
       }
@@ -2562,6 +3528,24 @@ export type Database = {
           notes?: string | null
           weights?: Json
           weights_version?: string
+        }
+        Relationships: []
+      }
+      rate_limit_buckets: {
+        Row: {
+          count: number
+          key: string
+          window_start: string
+        }
+        Insert: {
+          count: number
+          key: string
+          window_start: string
+        }
+        Update: {
+          count?: number
+          key?: string
+          window_start?: string
         }
         Relationships: []
       }
@@ -2664,6 +3648,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      revenue_share_policies: {
+        Row: {
+          effective_from: string
+          note: string | null
+          platform_fee_bps: number
+          version: string
+        }
+        Insert: {
+          effective_from?: string
+          note?: string | null
+          platform_fee_bps: number
+          version: string
+        }
+        Update: {
+          effective_from?: string
+          note?: string | null
+          platform_fee_bps?: number
+          version?: string
+        }
+        Relationships: []
       }
       scopes: {
         Row: {
@@ -2852,6 +3857,96 @@ export type Database = {
           },
         ]
       }
+      staged_uploads: {
+        Row: {
+          byte_len: number
+          content_type: string
+          created_at: string
+          object_key: string
+          post_id: string | null
+          upload_id: string | null
+          uploader_user_id: string
+        }
+        Insert: {
+          byte_len: number
+          content_type: string
+          created_at?: string
+          object_key: string
+          post_id?: string | null
+          upload_id?: string | null
+          uploader_user_id: string
+        }
+        Update: {
+          byte_len?: number
+          content_type?: string
+          created_at?: string
+          object_key?: string
+          post_id?: string | null
+          upload_id?: string | null
+          uploader_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staged_uploads_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staged_uploads_uploader_user_id_fkey"
+            columns: ["uploader_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      telemetry_ae_runs: {
+        Row: {
+          day: string
+          detail: string | null
+          pass: string
+          ran_at: string
+          rows: number
+          status: string
+        }
+        Insert: {
+          day: string
+          detail?: string | null
+          pass: string
+          ran_at?: string
+          rows?: number
+          status: string
+        }
+        Update: {
+          day?: string
+          detail?: string | null
+          pass?: string
+          ran_at?: string
+          rows?: number
+          status?: string
+        }
+        Relationships: []
+      }
+      telemetry_salts: {
+        Row: {
+          created_at: string
+          day: string
+          salt: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          salt?: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          salt?: string
+        }
+        Relationships: []
+      }
       user_embeddings: {
         Row: {
           embedding: string
@@ -2925,6 +4020,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      viewer_recent_actions: {
+        Row: {
+          action_count: number
+          actions: Json
+          computed_at: string
+          topic_counts: Json
+          viewer_user_id: string
+          window_start: string
+        }
+        Insert: {
+          action_count?: number
+          actions?: Json
+          computed_at?: string
+          topic_counts?: Json
+          viewer_user_id: string
+          window_start?: string
+        }
+        Update: {
+          action_count?: number
+          actions?: Json
+          computed_at?: string
+          topic_counts?: Json
+          viewer_user_id?: string
+          window_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "viewer_recent_actions_viewer_user_id_fkey"
+            columns: ["viewer_user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wallet_nonces: {
         Row: {
@@ -3085,8 +4215,10 @@ export type Database = {
           nonce: string
           pay_to: string
           payer: string
+          payment_payload: Json | null
           post_id: string | null
           quote_id: string | null
+          revenue_share_version: string | null
           settle_response: Json | null
           settled_at: string | null
           status: Database["public"]["Enums"]["settlement_status"]
@@ -3105,8 +4237,10 @@ export type Database = {
           nonce: string
           pay_to: string
           payer: string
+          payment_payload?: Json | null
           post_id?: string | null
           quote_id?: string | null
+          revenue_share_version?: string | null
           settle_response?: Json | null
           settled_at?: string | null
           status?: Database["public"]["Enums"]["settlement_status"]
@@ -3125,8 +4259,10 @@ export type Database = {
           nonce?: string
           pay_to?: string
           payer?: string
+          payment_payload?: Json | null
           post_id?: string | null
           quote_id?: string | null
+          revenue_share_version?: string | null
           settle_response?: Json | null
           settled_at?: string | null
           status?: Database["public"]["Enums"]["settlement_status"]
@@ -3148,6 +4284,13 @@ export type Database = {
             referencedRelation: "x402_quotes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "x402_settlements_revenue_share_version_fkey"
+            columns: ["revenue_share_version"]
+            isOneToOne: false
+            referencedRelation: "revenue_share_policies"
+            referencedColumns: ["version"]
+          },
         ]
       }
     }
@@ -3159,12 +4302,57 @@ export type Database = {
         Args: { p_delta: number; p_metric: string; p_post_id: string }
         Returns: undefined
       }
+      bump_ops_counter: {
+        Args: {
+          p_bucket?: string
+          p_delta?: number
+          p_labels?: Json
+          p_metric: string
+          p_ms?: number
+        }
+        Returns: undefined
+      }
+      check_rate_limit: {
+        Args: { p_key: string; p_limit: number; p_window_s: number }
+        Returns: boolean
+      }
       claim_job: {
         Args: { p_job_id: number }
         Returns: {
           attempts: number
           kind: string
           payload: Json
+        }[]
+      }
+      erase_user_subject: { Args: { p_user_id: string }; Returns: Json }
+      evaluate_alerts: { Args: never; Returns: undefined }
+      fold_ops_counters: { Args: never; Returns: undefined }
+      insert_draft_post: {
+        Args: {
+          p_agent_identity_id: string
+          p_ai_use?: boolean
+          p_attribution_required?: boolean
+          p_canonical_markdown: string
+          p_content_hash: string
+          p_delegation_id: string
+          p_language_code?: string
+          p_license_spdx?: string
+          p_mode: string
+          p_owner_user_id: string
+          p_pending: boolean
+          p_platforms?: string[]
+          p_price_atomic?: number
+          p_reservation_id?: string
+          p_schedule_id?: string
+          p_summary?: string
+          p_tags: string[]
+          p_title?: string
+          p_train_ai?: boolean
+        }
+        Returns: {
+          approval_id: string
+          job_id: number
+          post_id: string
         }[]
       }
       link_wallet_identity: {
@@ -3175,11 +4363,119 @@ export type Database = {
           user_id: string
         }[]
       }
+      load_draft: {
+        Args: { p_post_id: string }
+        Returns: {
+          access_mode: Database["public"]["Enums"]["publish_mode"]
+          ai_use: boolean
+          attribution_required: boolean
+          canonical_markdown: string
+          citation_template: string
+          content_hash: string
+          current_version: number
+          kind: Database["public"]["Enums"]["post_kind"]
+          license_spdx: string
+          license_url: string
+          live_grant_count: number
+          post_id: string
+          price_asset: string
+          price_atomic: number
+          price_network: string
+          search_indexable: boolean
+          slug: string
+          status: Database["public"]["Enums"]["post_status"]
+          summary: string
+          tags: string[]
+          title: string
+          train_ai: boolean
+          updated_at: string
+        }[]
+      }
+      my_publishing_defaults: {
+        Args: never
+        Returns: {
+          access_mode: Database["public"]["Enums"]["publish_mode"]
+          ai_use: boolean
+          license_spdx: string
+          price_cents: number
+          train_ai: boolean
+        }[]
+      }
       publish_post: {
         Args: { p_platforms?: string[]; p_post_id: string }
         Returns: {
           job_ids: number[]
           post_id: string
+        }[]
+      }
+      release_agent_spend: {
+        Args: { p_now?: string; p_reason: string; p_reservation_id: string }
+        Returns: boolean
+      }
+      reserve_agent_spend: {
+        Args: {
+          p_delegation_id: string
+          p_estimate_atomic: number
+          p_external_kind?: string
+          p_external_ref?: string
+          p_idempotency_key: string
+          p_now?: string
+          p_purpose: string
+        }
+        Returns: {
+          allowed: boolean
+          reason: string
+          remaining_atomic: number
+          reservation_id: string
+        }[]
+      }
+      revoke_delegation: {
+        Args: {
+          p_actor_user_id?: string
+          p_delegation_id: string
+          p_now?: string
+          p_reason: string
+        }
+        Returns: number
+      }
+      save_draft: {
+        Args: {
+          p_access_mode?: Database["public"]["Enums"]["publish_mode"]
+          p_ai_use?: boolean
+          p_attribution_required?: boolean
+          p_citation_template?: string
+          p_kind?: Database["public"]["Enums"]["post_kind"]
+          p_license_spdx?: string
+          p_license_url?: string
+          p_markdown?: string
+          p_post_id?: string
+          p_price_asset?: string
+          p_price_atomic?: number
+          p_price_network?: string
+          p_search_indexable?: boolean
+          p_slug_hint?: string
+          p_summary?: string
+          p_tags?: string[]
+          p_title?: string
+          p_train_ai?: boolean
+        }
+        Returns: {
+          content_hash: string
+          post_id: string
+          slug: string
+          version: number
+        }[]
+      }
+      settle_agent_spend: {
+        Args: {
+          p_actual_atomic: number
+          p_now?: string
+          p_reservation_id: string
+        }
+        Returns: {
+          committed_atomic: number
+          reason: string
+          settled: boolean
         }[]
       }
     }

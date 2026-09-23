@@ -266,7 +266,11 @@ export const GATES = {
       prereq: "H1",
     },
     {
+      // The Full(strict)-before-apex ordering mattered only to avert the
+      // Vercel 308 loop, which M0.4 asserts post-deploy; the ordering is a
+      // historical fact that cannot be retro-fitted.
       id: "M0.3",
+      supersededBy: "M12",
       kind: "fn",
       desc: "O6: ssl setting modified_on earlier than apex record created_on",
       run: checks.m0SslOrdering,
@@ -274,9 +278,9 @@ export const GATES = {
     },
     {
       id: "M0.4",
-      kind: "sh",
+      kind: "fn",
       desc: "no redirect loop: one 3xx http→https, https non-3xx",
-      run: 'test "$(curl -so /dev/null -w "%{http_code}" -L --max-redirs 3 https://musebook.dev/)" -lt 400',
+      run: checks.m0NoRedirectLoop,
       prereq: "H1",
     },
     {
@@ -352,6 +356,8 @@ export const GATES = {
       sql: "select count(*) from information_schema.tables where table_schema = 'public' and table_type = 'BASE TABLE'",
       expect: "0",
       prereq: "H2",
+      // The M2 migration lands the public schema — this is an as-of-M0 fact.
+      supersededBy: "M2",
     },
     {
       id: "M0.16",
@@ -362,10 +368,9 @@ export const GATES = {
     },
     {
       id: "M0.17",
-      kind: "sql",
+      kind: "fn",
       desc: "pg_cron in pg_catalog, not re-created",
-      sql: "select extnamespace::regnamespace::text from pg_extension where extname = 'pg_cron'",
-      expect: "pg_catalog",
+      run: checks.m0PgCron,
       prereq: "H2",
     },
     {
@@ -787,6 +792,7 @@ export const GATES = {
       kind: "fn",
       desc: "no app attached: grep finds no '@musebook/content' under apps/",
       run: checks.m4NoAppImport,
+      supersededBy: "M6", // edge legitimately consumes @musebook/content from M6
     },
   ],
 
@@ -844,6 +850,7 @@ export const GATES = {
       kind: "fn",
       desc: "no app attached: grep finds no '@musebook/kernel' under apps/",
       run: checks.m5NoAppImport,
+      supersededBy: "M6", // edge wraps @musebook/kernel from M6
     },
     {
       id: "M5.10",
@@ -1444,6 +1451,83 @@ export const GATES = {
       run: checks.m11WorkerRouteless,
     },
   ],
+
+  // §16.6 M12 — launch hardening: every §17 gate asserted at once, against
+  // production, plus the four silent-death API reads.
+  M12: [
+    {
+      id: "M12.1",
+      kind: "fn",
+      desc: "every §17 gate green against production (incl. T5 live tier)",
+      run: checks.m12AllGatesGreen,
+    },
+    {
+      id: "M12.2",
+      kind: "fn",
+      desc: "one real mainnet settlement (tx + revenue_share_version + facilitator_url)",
+      run: checks.m12MainnetSettlement,
+    },
+    {
+      id: "M12.3",
+      kind: "fn",
+      desc: "facilitator /supported lists X402_NETWORK at x402Version 2",
+      run: checks.m12FacilitatorSupported,
+    },
+    {
+      id: "M12.4",
+      kind: "fn",
+      desc: "synthetic 402 live + fired + failure-path drilled",
+      run: checks.m12Synthetic402,
+    },
+    {
+      id: "M12.5",
+      kind: "fn",
+      desc: "nightly suite exists and is green twice consecutively",
+      run: checks.m12NightlyGreen,
+    },
+    {
+      id: "M12.6",
+      kind: "fn",
+      desc: "no preview holds a production route; preview unindexed",
+      run: checks.m12PreviewIsolation,
+    },
+    {
+      id: "M12.7",
+      kind: "fn",
+      desc: "origin still closed + PREVIOUS-first rotation drill recorded",
+      run: checks.m12OriginClosed,
+    },
+    {
+      id: "M12.8",
+      kind: "fn",
+      desc: "sealed buckets still sealed; cdn the only custom domain",
+      run: checks.m12R2Seal,
+    },
+    {
+      id: "M12.9",
+      kind: "fn",
+      desc: "kill-switch drill recorded with elapsed time",
+      run: checks.m12KillSwitchDrill,
+    },
+    {
+      id: "M12.10",
+      kind: "fn",
+      desc: "renew:true, zone active, NS pair, SSL strict — live API reads",
+      run: checks.m12ZoneHealth,
+    },
+    {
+      id: "M12.11",
+      kind: "fn",
+      desc: "no universal check skipping — every activeFrom ≤ M12 but G-ISO",
+      run: checks.m12NoUniversalSkipping,
+    },
+    {
+      id: "M12.12",
+      kind: "fn",
+      desc: "launch copy honest — both prices, Toll sentence, P2 as logged slate",
+      run: checks.m12LaunchCopy,
+    },
+  ],
 };
 
 export const MILESTONE_TITLES = {
@@ -1459,7 +1543,7 @@ export const MILESTONE_TITLES = {
   M9: "musebook-mcp",
   M10: "Postiz sidecar + distributor",
   M11: "Telemetry: AE write path + Postgres rollups",
-  M12: "x402 settlement verification + payouts",
+  M12: "Launch hardening",
   M13: "muse-mixer isolation + replay",
   M14: "Console + agent surface polish",
   M15: "Learned ranker v1.1",

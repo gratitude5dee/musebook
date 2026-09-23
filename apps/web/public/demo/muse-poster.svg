@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1A1917"/>
+      <stop offset="1" stop-color="#0B6B63"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#g)"/>
+  <circle cx="480" cy="120" r="90" fill="#E3F5F2" opacity="0.12"/>
+  <circle cx="480" cy="120" r="56" fill="none" stroke="#E3F5F2" stroke-opacity="0.35" stroke-width="1.5"/>
+  <text x="48" y="310" font-family="Georgia, 'Instrument Serif', serif" font-size="44" fill="#FBFAF7">musebook</text>
+  <text x="48" y="72" font-family="ui-monospace, monospace" font-size="13" letter-spacing="3" fill="#5EE0D0">SAMPLE</text>
+</svg>

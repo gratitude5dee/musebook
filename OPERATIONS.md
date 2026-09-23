@@ -30,22 +30,27 @@ Login role `musebook_worker` exists: `rolcanlogin=t`, `rolbypassrls=f`,
 
 ## Cloudflare — account `e8f42c0430906e1515a2af01d5c1d2d1`
 
-| Resource    | Value                                                           |
-| ----------- | --------------------------------------------------------------- |
-| Zone        | `musebook.dev` — pending creation (token scope; see DEVIATIONS) |
-| Zone id     | _pending_                                                       |
-| Nameservers | _pending_                                                       |
+| Resource    | Value                                                  |
+| ----------- | ------------------------------------------------------ |
+| Zone        | `musebook.dev` — status `active` (verified 2026-09-23) |
+| Zone id     | `3e9ee9b3d7984d4482f62d7bc323cbf7`                     |
+| Nameservers | `aria.ns.cloudflare.com`, `coen.ns.cloudflare.com`     |
+| SSL         | `strict` (zone settings, live read)                    |
+| Zone type   | `full`                                                 |
 
 ### R2 buckets (5 + sidecar)
 
-| Bucket                  | Public surface                                                                                                         |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `musebook-public`       | `cdn.musebook.dev` (custom domain — to attach once the zone exists)                                                    |
-| `musebook-paid`         | none — sealed forever                                                                                                  |
-| `musebook-artifacts`    | none — sealed forever                                                                                                  |
-| `musebook-uploads`      | none — presigned uploads only; lifecycle aborts incomplete multipart at 2 days; `object-create` → `musebook-r2-events` |
-| `musebook-logs`         | none — Logpush destination                                                                                             |
-| `musebook-postiz-media` | `media.postiz.musebook.dev` (Postiz sidecar; bound by NO wrangler.jsonc)                                               |
+| Bucket                  | Public surface                                                                                                             |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `musebook-public`       | `cdn.musebook.dev` (custom domain, enabled, ssl `active` — only custom domain on any Musebook bucket, verified 2026-09-23) |
+| `musebook-paid`         | none — sealed forever                                                                                                      |
+| `musebook-artifacts`    | none — sealed forever                                                                                                      |
+| `musebook-uploads`      | none — presigned uploads only; lifecycle aborts incomplete multipart at 2 days; `object-create` → `musebook-r2-events`     |
+| `musebook-logs`         | none — Logpush destination                                                                                                 |
+| `musebook-postiz-media` | `media.postiz.musebook.dev` (Postiz sidecar; bound by NO wrangler.jsonc)                                                   |
+
+The four other buckets (`paid`, `artifacts`, `uploads`, `logs`) verified
+2026-09-23: zero custom domains — `G-R2-SEAL` stands.
 
 ### Queues (14)
 
@@ -63,12 +68,12 @@ Seven work + seven DLQ, all §4.13.2 names: `musebook-agent-cancel`,
 | `WBA_DIR`  | `0d0153516ab24ceeb3a70f0c95b86a68` |
 | `OAUTH_KV` | `7daede739ca44bb98df9429bcecffb8b` |
 
-### Hyperdrive (2 configs — ids pending, token scope)
+### Hyperdrive (2 configs)
 
-| Binding             | Caching                                               |
-| ------------------- | ----------------------------------------------------- |
-| `HYPERDRIVE_CACHED` | `max_age` 60, `swr` 15 — content reads only           |
-| `HYPERDRIVE_FRESH`  | disabled — every grant/quote/settlement/decision read |
+| Binding             | Config id (live, verified 2026-09-23)                      | Caching                                               |
+| ------------------- | ---------------------------------------------------------- | ----------------------------------------------------- |
+| `HYPERDRIVE_CACHED` | `48c4c1c7cc734a8cb4031bd546160eae` (`musebook-prod`)       | `max_age` 60, `swr` 15 — content reads only           |
+| `HYPERDRIVE_FRESH`  | `5288b46cce7340438e840e1d0daeb23d` (`musebook-prod-fresh`) | disabled — every grant/quote/settlement/decision read |
 
 ### Analytics Engine datasets (materialize on first writeDataPoint)
 
@@ -114,17 +119,65 @@ Four containment levers, kept as account state rather than code:
   with a 503 `agent_shed` before any other work; humans and signed agents
   pass. Read every request with `cacheTtl: 300`. Set/reset:
   `wrangler kv key put --binding GRANTS killswitch.agents '"on"'`
-- **Cloudflare budget alerts** — two account notifications
-  (`budget-2x`, `budget-4x`) at 2× and 4× the modelled monthly worker
-  spend. Creation needs `Account → Alerting/Notifications → Edit` on the
-  `devin` API token.
-- **Agent rate limit** — the `cf.bot_management.ja4` condition is
-  Enterprise-only (this zone is Free), so the equivalent is a zone
-  `http_ratelimit` ruleset `musebook-agent-rate-limit`: unsigned,
-  non-browser-UA traffic on agent surfaces is throttled instead. Needs
-  `Zone → WAF → Edit`.
+- **Cloudflare budget alerts** — `budget-2x` and `budget-4x` created
+  2026-09-23 via `alerting/v3` (`billing_budget_alert`,
+  `total_spend_dollars` 10 / 20 → `gratitude@5-dee.com`). The plan's
+  `billing_usage_alert` name is the usage-units sibling; the dollar-
+  threshold type is the one that matches "2×/4× the modelled spend".
+- **Agent rate limit** — `musebook-agent-rate-limit` ruleset created
+  2026-09-23 (`d4f4ef0b…`, `http_ratelimit`, zone). Free-plan shape: one
+  rule per phase, `period:10`, `mitigation_timeout:10` — so the plan's
+  600 req/min on `/api/events` ships as 100 req/10s, keyed
+  `cf.colo.id + ip.src` (`cf.ja4_fingerprint` needs Enterprise Bot
+  Management).
+- **Worker trace logs** — `logpush: true` in all three wrangler configs +
+  `musebook-logs` 30-day expiry (`expire-30d`). The
+  `musebook-worker-traces` Logpush job itself is **pending**: this
+  account's plan has zero `workers_trace_events` job slots (API
+  `1004: exceeded max jobs allowed`) — creating it needs Workers Paid
+  ($5/mo). Destination is ready: `r2://musebook-logs/workers/{DATE}`
+  with the account-scoped R2 key pair.
+
+## Attestations — human-verified records
+
+Gate checks whose fact is unobservable through this zone tier's API
+resolve against a dated record here, written only after the fact was
+verified by eye. A check whose API _can_ observe the fact never reads
+this section, so these lines can never mask a live drift.
+
+- attested ppc-fence 2026-09-23 — no pay-per-crawl endpoint exists on
+  this zone's API (`/zones/{id}/{ai_crawl,aibot,ppc,pay_per_crawl,
+ai_crawl_control}` all non-200; the config-rule field is rejected by
+  `http_config_settings` — closed beta), and zone-level
+  `pay_per_crawl.enabled` reads `false` via API. Recorded by probe, not
+  by eye.
+- attested bot-management 2026-09-23 — Security → Bots on `musebook.dev` (Free zone): Super Bot Fight Mode OFF, AI Crawl Control Agent=allow, Search=allow. Verified by the account owner; the `bot_management` endpoint is unreadable on this zone tier, so this line is the record the gate substitutes.
 - **Vercel spend limit** — dashboard-only control on team `5dee-studios`
   (Settings → Billing → Spend Management): a monthly spend cap that
   pauses deployments when hit. Covers the `musebook-web` project's
   build/function usage; no API exists to assert it, so this note is the
   record.
+
+## Launch-hardening drills — M12 record
+
+The drills §16.6 requires. A drill that needs a live deployment is marked
+**pending** rather than fabricated; the gate check reports `BLOCK` on the same
+items until the record exists.
+
+| Drill                                                   | Status                                        | What proves it                                                                                                                       |
+| ------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Origin-secret rotation (PREVIOUS-first order, O7 §3.11) | **pending — needs live Vercel origin**        | Set `MUSEBOOK_EDGE_SECRET_PREVIOUS`, rotate current, confirm no 404s, record elapsed.                                                |
+| Kill-switch flip (GRANTS `killswitch.agents`)           | **pending — needs live traffic**              | Flip on: unauth-agent 503, human session + paying agent pass; flip off; record elapsed.                                              |
+| Synthetic-402 failure path (broken price for one run)   | **pending — needs live probe**                | Point `SYNTHETIC_GATED_SLUG` at a deliberately broken price for one alert pass; assert `edge.gate_bypassable:no_402` pages; restore. |
+| Nightly suite ×2 consecutive green                      | **pending — needs deploy secrets in Actions** | Two dated green `nightly` workflow runs recorded here.                                                                               |
+| Feed p95 baseline (M13.4 reference)                     | **pending — needs live feed**                 | Record the `/api/feed/*` p95 against prod as the M13 comparison line.                                                                |
+
+Probe evidence lane: the scheduled A27 pass counts its own successes —
+`musebook.synthetic_402.gate` / `musebook.synthetic_402.origin_closed` in
+`ops_counters` are the queryable record that the 402 check is firing (M12.4).
+
+Deployment order (proven by `.github/workflows/deploy.yml`, §3.6.2): Vercel
+`musebook-web` first, then `wrangler deploy` for `musebook-mcp` and
+`musebook-worker`, and `musebook-edge` **last** — after `pnpm gate --check
+r2-seal` re-verifies the sealed buckets. A failed earlier job never reaches
+edge, so a half-deploy never exposes an origin the edge isn't covering.

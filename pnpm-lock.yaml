@@ -210,8 +210,8 @@ catalogs:
       specifier: 4.1.11
       version: 4.1.11
     wrangler:
-      specifier: 4.136.1
-      version: 4.136.1
+      specifier: 4.137.0
+      version: 4.137.0
 
 patchedDependencies:
   postgres@3.4.9: e2b63e9bc3a10a3cf391ebc758e49dada7baa07bb5386ada125e187675c8c776
@@ -288,7 +288,7 @@ importers:
         version: 4.1.11(@types/node@26.6.2)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
       wrangler:
         specifier: 'catalog:'
-        version: 4.136.1(@cloudflare/workers-types@5.20260921.1)(@types/node@26.6.2)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+        version: 4.137.0(@cloudflare/workers-types@5.20260921.1)(@types/node@26.6.2)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
 
   apps/edge:
     dependencies:
@@ -361,7 +361,7 @@ importers:
         version: 4.1.11(@types/node@26.6.2)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
       wrangler:
         specifier: 'catalog:'
-        version: 4.136.1(@cloudflare/workers-types@5.20260921.1)(@types/node@26.6.2)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+        version: 4.137.0(@cloudflare/workers-types@5.20260921.1)(@types/node@26.6.2)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
 
   apps/mcp:
     dependencies:
@@ -413,7 +413,7 @@ importers:
         version: 4.1.11(@types/node@26.6.2)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
       wrangler:
         specifier: 'catalog:'
-        version: 4.136.1(@cloudflare/workers-types@5.20260921.1)(@types/node@26.6.2)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+        version: 4.137.0(@cloudflare/workers-types@5.20260921.1)(@types/node@26.6.2)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
 
   apps/web:
     dependencies:
@@ -574,7 +574,7 @@ importers:
         version: 4.1.11(@types/node@26.6.2)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
       wrangler:
         specifier: 'catalog:'
-        version: 4.136.1(@cloudflare/workers-types@5.20260921.1)(@types/node@26.6.2)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+        version: 4.137.0(@cloudflare/workers-types@5.20260921.1)(@types/node@26.6.2)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
 
   packages/artifacts:
     dependencies:
@@ -7190,8 +7190,8 @@ packages:
       '@cloudflare/workers-types':
         optional: true
 
-  wrangler@4.136.1:
-    resolution: {integrity: sha512-xGdBeGMbdFJ7KgndpFyXsncg+kSQ46pD378LTFvyEGUnVvHGAF5ka1shqMpQIrg8n5AFmqajoTxi4E7w7FfEwQ==}
+  wrangler@4.137.0:
+    resolution: {integrity: sha512-vq2JmxkvwOjnsMUejQwd89/EK6u1d20OMlGUVVmb55gVi2zSBKp2rvmxUiPqrSEntK8NwzpTF3DQ/S2I9/TLsg==}
     engines: {node: '>=22.0.0'}
     hasBin: true
     peerDependencies:
@@ -15170,7 +15170,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  wrangler@4.136.1(@cloudflare/workers-types@5.20260921.1)(@types/node@26.6.2)(bufferutil@4.1.0)(utf-8-validate@5.0.10):
+  wrangler@4.137.0(@cloudflare/workers-types@5.20260921.1)(@types/node@26.6.2)(bufferutil@4.1.0)(utf-8-validate@5.0.10):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.5.0
       '@cloudflare/unenv-preset': 2.16.2(unenv@2.0.0-rc.24)(workerd@1.20260921.1)

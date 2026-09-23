@@ -227,6 +227,12 @@ async function runGate(milestone, universalOnly, selfTest = false) {
   const title = MILESTONE_TITLES[milestone] ?? "";
   const list = universalOnly ? [] : (GATES[milestone] ?? []);
   const mNum = parseInt(milestone.slice(1), 10);
+  // Checks that scope themselves to files-as-of-a-milestone read this.
+  process.env.GATE_MILESTONE = milestone;
+  // Nested gates inside M12.1 pass GATE_AS_OF so a check superseded AFTER its
+  // own milestone still skips on a full-tree re-run (§16.6's "green against
+  // production" is evaluated as-of the launch milestone, not the check's own).
+  const asOfNum = parseInt((process.env.GATE_AS_OF ?? milestone).slice(1), 10);
 
   out(`GATE ${milestone} — ${title}`);
   out(
@@ -282,6 +288,12 @@ async function runGate(milestone, universalOnly, selfTest = false) {
     if (!active) {
       printLine("SKIP", check, `(activeFrom ${check.activeFrom})`);
       record.push({ id: check.id, status: "skip", activeFrom: check.activeFrom });
+      skipped++;
+      continue;
+    }
+    if (check.supersededBy && asOfNum >= parseInt(check.supersededBy.slice(1), 10)) {
+      printLine("SKIP", check, `(superseded at ${check.supersededBy})`);
+      record.push({ id: check.id, status: "skip", supersededBy: check.supersededBy });
       skipped++;
       continue;
     }

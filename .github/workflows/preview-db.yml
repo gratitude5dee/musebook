@@ -37,13 +37,18 @@ jobs:
         run: supabase db push --experimental
 
   teardown:
-    if: github.event.action == 'closed'
+    if: >-
+      github.event.action == 'closed' &&
+      contains(github.event.pull_request.labels.*.name, 'preview-db')
     runs-on: ubuntu-24.04
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
     steps:
+      - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
         with:
           version: 2.117.0
+      - name: Link
+        run: supabase link --project-ref ${{ vars.SUPABASE_PROJECT_REF }}
       - name: Delete the branch
         run: supabase branches delete "pr-${{ github.event.pull_request.number }}" --experimental
