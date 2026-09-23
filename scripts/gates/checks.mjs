@@ -519,8 +519,8 @@ export function m2TypesGen() {
   let r = attempt();
   // gen types connects while a nested gate's db reset may still be restarting
   // postgres — retry through the restart window on the transient auth failure.
-  for (let i = 0; i < 3 && r.code !== 0 && /password authentication failed/.test(r.out); i++) {
-    run("sleep 20");
+  for (let i = 0; i < 5 && r.code !== 0 && /password authentication failed/.test(r.out); i++) {
+    run("sleep 25");
     r = attempt();
   }
   return {
