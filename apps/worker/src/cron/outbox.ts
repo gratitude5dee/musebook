@@ -11,6 +11,7 @@ const QUEUE_FOR: Readonly<Record<string, (env: Env) => Queue>> = {
   media: (env) => env.Q_MEDIA,
   media_finalize: (env) => env.Q_MEDIA_FINALIZE,
   agent_cancel: (env) => env.Q_AGENT_CANCEL,
+  dsar: (env) => env.Q_DSAR,
 };
 
 /** sendBatch caps at 100 messages OR 256 KB, whichever comes first — the

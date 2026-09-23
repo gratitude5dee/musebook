@@ -66,6 +66,13 @@ function expandIPv6(input: string): string[] | null {
   return [...head, ...Array<string>(fill).fill("0"), ...tail].map(pad);
 }
 
+/** The single site allowed to read the raw client IP (§13.11 check 7): any
+ *  caller that needs the address at all goes through here, and what leaves
+ *  this file is truncated or hashed — never the header value itself. */
+export function rawClientIp(headers: Headers): string {
+  return headers.get("cf-connecting-ip") ?? headers.get("x-forwarded-for") ?? "";
+}
+
 /** sha256( HMAC(dailySalt, plane) || '|' || subnet ), first 128 bits as hex.
  *  The per-plane HMAC is what makes a human row and an agent row from the same
  *  subnet unjoinable on the same day (§13.6.1). */
@@ -74,7 +81,7 @@ export async function hashClientIp(
   env: Env,
   plane: Plane,
 ): Promise<string | null> {
-  const subnet = truncateIp(request.headers.get("CF-Connecting-IP") ?? "");
+  const subnet = truncateIp(rawClientIp(request.headers));
   if (subnet === null) return null;
 
   const salt = await getDailySalt(env); // Buffer, 32 bytes

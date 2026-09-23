@@ -11,7 +11,7 @@
 import { bound, fresh } from "./db/client.js";
 
 export type JobKind =
-  "classify" | "embed" | "distribute" | "media" | "media_finalize" | "agent_cancel";
+  "classify" | "embed" | "distribute" | "media" | "media_finalize" | "agent_cancel" | "dsar";
 
 const PAYLOAD_CAP = 128 * 1024;
 
@@ -23,6 +23,7 @@ const QUEUE_FOR: Readonly<Record<JobKind, (env: Env) => Queue>> = {
   media: (env) => bound(env.Q_MEDIA, "Q_MEDIA"),
   media_finalize: (env) => bound(env.Q_MEDIA_FINALIZE, "Q_MEDIA_FINALIZE"),
   agent_cancel: (env) => bound(env.Q_AGENT_CANCEL, "Q_AGENT_CANCEL"),
+  dsar: (env) => bound(env.Q_DSAR, "Q_DSAR"),
 };
 
 export async function enqueueJob(

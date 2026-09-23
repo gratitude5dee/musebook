@@ -1102,7 +1102,9 @@ insert into public.action_events
 select v.id, c.epoch + (v.n || ' seconds')::interval, 'agent'::actor_plane,
        '33333333-3333-4333-8333-000000000002'::uuid, v.pid, v.action::action_kind,
        'crawl', '11111111-1111-4111-8111-111111111111'::uuid, 0,
-       'none', 'reverse_chron', '{"ua":"SeedCrawler/1.0"}'::jsonb, 'seed-agent-' || v.n
+       'none', 'reverse_chron',
+       '{"ua":"SeedCrawler/1.0","evidence":"verified_crawler_rdns"}'::jsonb,
+       'seed-agent-' || v.n
 from (values
   ('99999999-9999-4999-8999-00000000001f'::uuid, 31, '44444444-4444-4444-8444-000000000001'::uuid, 'agent_crawl'),
   ('99999999-9999-4999-8999-000000000020'::uuid, 32, '44444444-4444-4444-8444-000000000002'::uuid, 'agent_crawl'),

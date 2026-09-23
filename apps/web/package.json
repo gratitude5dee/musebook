@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/check-legal-review.mjs && next build",
     "start": "next start",
     "typecheck": "tsc --build --pretty",
     "lint": "eslint . --max-warnings 0",
@@ -24,6 +24,8 @@
     "geist": "1.7.2",
     "jose": "catalog:",
     "next": "16.3.5",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1",
     "next-themes": "0.4.6",
     "react": "catalog:",
     "react-dom": "catalog:",

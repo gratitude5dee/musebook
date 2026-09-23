@@ -42,8 +42,8 @@ export default tseslint.config(
       // at "off" rather than omitted, so that turning one on at its milestone
       // is a one-word diff on a line that already exists, and so that a reader
       // can see all five rules in one place.
-      //   M11 (§13): flip to "error" — no action_events write on a serve path.
-      "musebook/no-action-events-at-serve-time": "off",
+      //   M11 (§13): on — no action_events write on a serve path.
+      "musebook/no-action-events-at-serve-time": "error",
       //   M16 (§11): flip to "error" — no node: native binding in a Worker.
       "musebook/no-node-native-in-worker": "off",
       //   M16 (§11): flip to "error" — artifacts never share the page origin.
