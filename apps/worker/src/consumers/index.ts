@@ -90,7 +90,6 @@ async function consume(
  *  retried explicitly; nothing falls off the end of a batch. */
 export async function dispatch(batch: MessageBatch, env: Env): Promise<void> {
   const handlers: Record<string, (m: JobMessage) => Promise<void>> = {
-
     "musebook-distribute": (m) => {
       // A message with no job_id is the Postiz webhook's raw reconcile hint
       // (§12.2.6): no outbox row exists for it, so it cannot be claimed — and

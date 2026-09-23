@@ -39,10 +39,7 @@ export const POST_BATTERY_FLAT: FlatBattery = {
     },
     {
       ...Object.fromEntries(
-        Object.keys(LEAF_TO_PATH).map((leaf) => [
-          leaf,
-          `Path: ${LEAF_TO_PATH[leaf]!.join(" > ")}`,
-        ]),
+        Object.keys(LEAF_TO_PATH).map((leaf) => [leaf, `Path: ${LEAF_TO_PATH[leaf]!.join(" > ")}`]),
       ),
       none_of_these: "None of the leaves above describes this post.",
     },
@@ -69,12 +66,8 @@ async function batteryResult(
     if (!isQuestionSetError(err)) throw err;
     // §8.4 question-count fallback: same 28 answers, two smaller requests.
     const [labels, tags] = await Promise.all([
-      client
-        .systemOne({ state: state as never, questions: POST_BATTERY_LABELS })
-        .withResponse(),
-      client
-        .systemOne({ state: state as never, questions: POST_BATTERY_TAGS })
-        .withResponse(),
+      client.systemOne({ state: state as never, questions: POST_BATTERY_LABELS }).withResponse(),
+      client.systemOne({ state: state as never, questions: POST_BATTERY_TAGS }).withResponse(),
     ]);
     record.inputTokens += labels.data.usage.input_tokens + tags.data.usage.input_tokens;
     record.requestIds.push(labels.requestId, tags.requestId);
@@ -110,9 +103,10 @@ export async function classifyOne(
 
   let taxonomy: TaxonomyResult;
   if (flat) {
-    const leafAnswer = (answers as BatteryAnswers & Record<string, { choice?: string; probabilities?: Record<string, number> }>)[
-      FLAT_LEAF_QUESTION
-    ];
+    const leafAnswer = (
+      answers as BatteryAnswers &
+        Record<string, { choice?: string; probabilities?: Record<string, number> }>
+    )[FLAT_LEAF_QUESTION];
     const leaf = leafAnswer?.choice;
     const path = leaf && leaf !== "none_of_these" ? LEAF_TO_PATH[leaf] : undefined;
     const prob = leaf ? (leafAnswer?.probabilities?.[leaf] ?? 0) : 0;
@@ -122,9 +116,7 @@ export async function classifyOne(
   } else {
     const l1 = answers.taxonomy_l1;
     const rootLabel =
-      l1.choice && l1.choice !== "none_of_these" && MUSEBOOK_TAXONOMY[l1.choice]
-        ? l1.choice
-        : null;
+      l1.choice && l1.choice !== "none_of_these" && MUSEBOOK_TAXONOMY[l1.choice] ? l1.choice : null;
     const rootProbability = l1.choice ? (l1.probabilities?.[l1.choice] ?? 0) : 0;
     taxonomy = await walkTaxonomy(client, state, rootLabel, rootProbability);
     // walkTaxonomy does not withResponse() — its usage is not separately metered;

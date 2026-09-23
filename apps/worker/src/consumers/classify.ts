@@ -54,7 +54,9 @@ export async function classifyQueue(batch: MessageBatch, env: Env): Promise<void
       // app.* fns enter the role inside the call — a sibling
       // (select ...) is permission-checked at plan time, BEFORE set local role
       // can execute, so the enter must live inside the function itself.
-      const { rows: [used] } = await db.query<{ tokens: string | number }>(
+      const {
+        rows: [used],
+      } = await db.query<{ tokens: string | number }>(
         `select app.classify_input_tokens_24h() as tokens`,
       );
       const tokens = Number(used?.tokens ?? 0);
@@ -98,9 +100,9 @@ export async function classifyQueue(batch: MessageBatch, env: Env): Promise<void
     // to damp. 'rate_limited' is excluded because a 429 is the provider
     // telling us to slow down, which the per-message retryAfterMs already
     // does — counting it would open the circuit on correct behaviour.
-    const { rows: [breaker] } = await db.query<{ errors: number }>(
-      `select app.classify_errors_5m() as errors`,
-    );
+    const {
+      rows: [breaker],
+    } = await db.query<{ errors: number }>(`select app.classify_errors_5m() as errors`);
     const open = (breaker?.errors ?? 0) >= CIRCUIT_ERRORS;
 
     // When the circuit is open, let exactly one message through as a probe and
@@ -109,7 +111,9 @@ export async function classifyQueue(batch: MessageBatch, env: Env): Promise<void
     const work = open ? batch.messages.slice(0, 1) : batch.messages;
     if (open) for (const m of batch.messages.slice(1)) m.retry({ delaySeconds: 300 });
 
-    await pool(work, open ? 1 : CONCURRENCY, (msg) => handleOne(db, jev, env, msg as Message<ClassifyMsg>));
+    await pool(work, open ? 1 : CONCURRENCY, (msg) =>
+      handleOne(db, jev, env, msg as Message<ClassifyMsg>),
+    );
   } finally {
     await db.end();
   }
@@ -146,7 +150,9 @@ async function handleOne(
     // classified at this question set, taxonomy and model" or "not a
     // classifiable post". A redelivery after a successful run therefore costs
     // one round trip and zero API calls.
-    const { rows: [s] } = await db.query<{ state: PostState | null }>(
+    const {
+      rows: [s],
+    } = await db.query<{ state: PostState | null }>(
       `select app.classification_state($1,$2,$3,$4,$5) as state`,
       [
         hash,

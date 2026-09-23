@@ -7,7 +7,10 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const MIGRATION = fileURLToPath(
-  new URL("../../../supabase/migrations/20261103090000_classification_battery.sql", import.meta.url),
+  new URL(
+    "../../../supabase/migrations/20261103090000_classification_battery.sql",
+    import.meta.url,
+  ),
 );
 
 const sql = readFileSync(MIGRATION, "utf8");

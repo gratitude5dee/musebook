@@ -52,9 +52,7 @@ describe("battery contract (§8.4)", () => {
       if (q.type === "choice") {
         const criteria = q.criteria as Record<string, string>;
         // Escape hatch is mandatory: none_of_these, or an other/none label.
-        expect(
-          "none_of_these" in criteria || "other" in criteria || "none" in criteria,
-        ).toBe(true);
+        expect("none_of_these" in criteria || "other" in criteria || "none" in criteria).toBe(true);
       } else if (q.type === "score") {
         expect(q.criteria).toHaveLength(4);
       }

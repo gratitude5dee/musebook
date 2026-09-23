@@ -270,9 +270,8 @@ grant execute on function app.finish_job(bigint, job_state, text, text, text, js
 -- publishes even if the enqueue failed" true rather than aspirational.
 --
 -- pg_cron, not a Cron Worker: pure SQL, no external service, no Hyperdrive
--- round trip, no Queues operation billed. There is no pgmq.send here, and
--- there is no pgmq extension on this database (4.1). Guarded like ops.sql:
--- pg_cron is absent on the local image.
+-- round trip, no Queues operation billed, and no queue extension on this
+-- database (4.1). Guarded like ops.sql: pg_cron is absent on the local image.
 -- --------------------------------------------------------------------------
 do $$
 begin

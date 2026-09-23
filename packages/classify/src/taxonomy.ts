@@ -54,7 +54,9 @@ export const MUSEBOOK_TAXONOMY: Record<string, TaxonomyNode> = {
         label: "An autonomous or semi-autonomous software agent.",
         children: {
           chat_agent: leaf("A conversational assistant a person talks to."),
-          workflow_agent: leaf("An agent that executes a multi-step task on a schedule or trigger."),
+          workflow_agent: leaf(
+            "An agent that executes a multi-step task on a schedule or trigger.",
+          ),
           mcp_server: leaf("An MCP server exposing tools or resources to other agents."),
           trading_agent: leaf("An agent that transacts, trades or manages funds."),
         },

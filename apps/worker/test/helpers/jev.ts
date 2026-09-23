@@ -18,7 +18,7 @@ export function stubJev(
         ? input
         : input instanceof URL
           ? input.href
-          : (input as { url?: string }).url ?? "";
+          : ((input as { url?: string }).url ?? "");
     if (!url.includes("/v1/systemone")) {
       // Anything else on the wire (embeddings et al.) gets an empty success —
       // classify suites never exercise it.

@@ -66,8 +66,7 @@ export const POST_BATTERY = {
   medium: choice(
     {
       task: "Which single medium best describes the primary payload?",
-      tie_break:
-        "Prefer the payload the post is about over decoration or thumbnails.",
+      tie_break: "Prefer the payload the post is about over decoration or thumbnails.",
     },
     {
       video: "A moving-image file is the main payload.",
@@ -96,35 +95,29 @@ export const POST_BATTERY = {
     other: "None of the above registers.",
   }),
 
-  language: choice(
-    "What is the dominant natural language of the title, summary and body?",
-    {
-      en: null,
-      es: null,
-      pt: null,
-      fr: null,
-      de: null,
-      it: null,
-      ja: null,
-      ko: null,
-      zh: null,
-      hi: null,
-      ar: null,
-      ru: null,
-      other: "A natural language not listed above.",
-      none: "No natural-language text at all.",
-    },
-  ),
+  language: choice("What is the dominant natural language of the title, summary and body?", {
+    en: null,
+    es: null,
+    pt: null,
+    fr: null,
+    de: null,
+    it: null,
+    ja: null,
+    ko: null,
+    zh: null,
+    hi: null,
+    ar: null,
+    ru: null,
+    other: "A natural language not listed above.",
+    none: "No natural-language text at all.",
+  }),
 
   // ---- ordered rubrics: the `score` return value is a usable continuous feature ----
   audience_level: score(
     "How much prior domain knowledge does a reader need to follow this post?",
     AUDIENCE_LEVELS,
   ),
-  quality: score(
-    "How well made is this post on its own terms?",
-    QUALITY_LEVELS,
-  ),
+  quality: score("How well made is this post on its own terms?", QUALITY_LEVELS),
   agent_value: score(
     {
       task: "How useful would this post be to an autonomous agent that paid to crawl it?",
@@ -141,22 +134,16 @@ export const POST_BATTERY = {
     true: "Explicit sexual content or graphic gore.",
     false: "Nothing a general audience would need warned about.",
   }),
-  brand_unsafe: noul(
-    "Would a mainstream advertiser refuse to appear beside this post?",
-    {
-      true: "Hate, graphic violence, adult content, hard drugs, gambling, or sustained abuse of a person.",
-      false: "Ordinary content an advertiser would tolerate.",
-    },
-  ),
+  brand_unsafe: noul("Would a mainstream advertiser refuse to appear beside this post?", {
+    true: "Hate, graphic violence, adult content, hard drugs, gambling, or sustained abuse of a person.",
+    false: "Ordinary content an advertiser would tolerate.",
+  }),
   toxic: noul("Does the post attack, demean or harass a person or a group?"),
   spam: noul("Is this engagement bait, an unsolicited advertisement, or a scam?"),
-  commercial_intent: noul(
-    "Is the post trying to make the reader buy or sign up for something?",
-  ),
+  commercial_intent: noul("Is the post trying to make the reader buy or sign up for something?"),
   ai_generated: noul("Was the primary media or prose produced by a generative model?", {
     true: "Synthesised media or prose, including heavy model assistance.",
-    false:
-      "Captured, drawn, written or performed by a person without generative synthesis.",
+    false: "Captured, drawn, written or performed by a person without generative synthesis.",
   }),
   discloses_ai: noul("Does the post itself state that it is AI-generated?"),
   contains_pii: noul(
@@ -165,44 +152,17 @@ export const POST_BATTERY = {
 
   // ---- topic tags: one noul per vocabulary entry (Jev has no multi-label type) ----
   tag_ai_ml: tag("ai_ml", "machine learning models, training, or AI research"),
-  tag_agents_tooling: tag(
-    "agents_tooling",
-    "autonomous agents, MCP, or agent tooling",
-  ),
-  tag_web3_crypto: tag(
-    "web3_crypto",
-    "blockchains, tokens, or onchain applications",
-  ),
-  tag_software_dev: tag(
-    "software_dev",
-    "writing, shipping or operating software",
-  ),
-  tag_design_ux: tag(
-    "design_ux",
-    "visual design, interface design or user experience",
-  ),
+  tag_agents_tooling: tag("agents_tooling", "autonomous agents, MCP, or agent tooling"),
+  tag_web3_crypto: tag("web3_crypto", "blockchains, tokens, or onchain applications"),
+  tag_software_dev: tag("software_dev", "writing, shipping or operating software"),
+  tag_design_ux: tag("design_ux", "visual design, interface design or user experience"),
   tag_music_audio: tag("music_audio", "music, sound design or audio production"),
-  tag_film_video: tag(
-    "film_video",
-    "film, video production or moving image work",
-  ),
+  tag_film_video: tag("film_video", "film, video production or moving image work"),
   tag_visual_art: tag("visual_art", "illustration, photography or visual art"),
-  tag_writing_publishing: tag(
-    "writing_publishing",
-    "writing craft, publishing or newsletters",
-  ),
-  tag_games_interactive: tag(
-    "games_interactive",
-    "games or interactive experiences",
-  ),
-  tag_science_research: tag(
-    "science_research",
-    "scientific research or published findings",
-  ),
-  tag_business_creator: tag(
-    "business_creator",
-    "business, markets or the creator economy",
-  ),
+  tag_writing_publishing: tag("writing_publishing", "writing craft, publishing or newsletters"),
+  tag_games_interactive: tag("games_interactive", "games or interactive experiences"),
+  tag_science_research: tag("science_research", "scientific research or published findings"),
+  tag_business_creator: tag("business_creator", "business, markets or the creator economy"),
 } as const;
 
 /** Compile-time guard: every TOPIC_TAGS entry has a matching question. */

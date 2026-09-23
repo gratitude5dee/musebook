@@ -52,9 +52,10 @@ describe("classify consumer", () => {
     expect(m1.retry).not.toHaveBeenCalled();
 
     const { rows: before } = await withDb((c) =>
-      c.query(`select row_to_json(t) as row from public.post_classifications t where content_hash = $1`, [
-        job.contentHash,
-      ]),
+      c.query(
+        `select row_to_json(t) as row from public.post_classifications t where content_hash = $1`,
+        [job.contentHash],
+      ),
     );
     expect(before).toHaveLength(1);
     const row = before[0].row as Record<string, unknown>;
@@ -71,9 +72,10 @@ describe("classify consumer", () => {
     expect(m2.retry).not.toHaveBeenCalled();
 
     const { rows: after } = await withDb((c) =>
-      c.query(`select row_to_json(t) as row from public.post_classifications t where content_hash = $1`, [
-        job.contentHash,
-      ]),
+      c.query(
+        `select row_to_json(t) as row from public.post_classifications t where content_hash = $1`,
+        [job.contentHash],
+      ),
     );
     expect(after).toHaveLength(1);
     expect(after[0].row).toEqual(before[0].row);

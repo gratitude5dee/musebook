@@ -53,7 +53,7 @@ beforeEach(() => {
         ? input
         : input instanceof URL
           ? input.href
-          : (input as { url?: string }).url ?? "";
+          : ((input as { url?: string }).url ?? "");
     return url.includes("/v1/systemone") ? jevFetch(input, init) : embedFetch(input, init);
   });
 });
