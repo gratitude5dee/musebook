@@ -120,7 +120,7 @@ export async function handleInboundPost(
     // the canonical one; a replay returns the stored body untouched.
     const { rows: idem } = await db.query<{ applied: boolean; response_body: unknown }>(
       "select * from app.idempotent_record('inbound.posts', $1, $2, $3::jsonb)",
-      [idemKey, actor.delegationId, JSON.stringify(responseBody)],
+      [idemKey, actor.delegationId, responseBody],
     );
     const stored = idem[0];
     if (stored !== undefined && stored.applied === false) {

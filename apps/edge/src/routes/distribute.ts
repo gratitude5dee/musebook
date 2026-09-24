@@ -229,12 +229,12 @@ async function editVariant(
 
     const { rows: saved } = await db.query<{
       result: { variant_id: string; is_valid: boolean } | null;
-    }>("select app.save_edited_variant($1::uuid, $2::uuid, $3, $4::jsonb, $5::jsonb) as result", [
+    }>("select app.save_edited_variant($1::uuid, $2::uuid, $3, ($4::text)::jsonb, $5::jsonb) as result", [
       postVersionId,
       channelId,
       body,
       JSON.stringify(threadParts),
-      JSON.stringify(report),
+      report,
     ]);
     const out = saved[0]?.result;
     if (out === null || out === undefined) return json({ error: "save_failed" }, 500);

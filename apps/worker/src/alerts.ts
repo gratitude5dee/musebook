@@ -91,7 +91,7 @@ async function foldIntoOpsCounters(env: Env, rows: Array<Record<string, string>>
         };
         await db.query(
           `select public.bump_ops_counter('musebook.paywall.outcome', $1::jsonb, $2)`,
-          [JSON.stringify(labels), Number(r.n) || 0],
+          [labels, Number(r.n) || 0],
         );
         if (r.breaker === "open") {
           await db.query(
@@ -115,12 +115,12 @@ async function bumpQueueGauges(env: Env, name: string, m: QueueMetrics): Promise
       : 0;
     await jobsTx(db, async () => {
       await db.query(`select public.bump_ops_counter('musebook.queue.backlog', $1::jsonb, $2)`, [
-        JSON.stringify({ queue: name }),
+        { queue: name },
         m.backlogCount,
       ]);
       await db.query(
         `select public.bump_ops_counter('musebook.queue.oldest_age_ms', $1::jsonb, $2)`,
-        [JSON.stringify({ queue: name }), ageMs],
+        [{ queue: name }, ageMs],
       );
     });
   } finally {

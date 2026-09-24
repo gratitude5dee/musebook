@@ -3,7 +3,11 @@ import { describe, expect, it } from "vitest";
 import { MuseScorer } from "../src/muse/scorers/muse_scorer.js";
 import { RankingScorer } from "../src/muse/scorers/ranking_scorer.js";
 import { WatchTimeScorer } from "../src/muse/scorers/watch_time_scorer.js";
-import { HeuristicMuseRanker } from "../src/muse/rankers/heuristic.js";
+import {
+  HeuristicMuseRanker,
+  HEURISTIC_V1_COEFFICIENTS,
+} from "../src/muse/rankers/heuristic.js";
+import { LearnedMuseRanker } from "../src/muse/rankers/learned.js";
 import { memoryCtx, memoryWeightsLoader } from "../src/adapters/memory/index.js";
 import { makeQuery, makeCandidate } from "./factories.js";
 import type { MuseCandidate } from "../src/muse/candidate.js";
@@ -21,6 +25,9 @@ describe("candidate isolation (spine invariant 2)", () => {
   // is exactly the bug this gate exists to stop.
   const stages = [
     new MuseScorer(new HeuristicMuseRanker()),
+    // The learned ranker is a second MuseScorer stage, not a new scorer shape —
+    // G-ISO must hold for the model that shadow week promotes (§16 M15.5).
+    new MuseScorer(new LearnedMuseRanker("v1.model-learned", HEURISTIC_V1_COEFFICIENTS)),
     new RankingScorer(memoryWeightsLoader()),
     new WatchTimeScorer(),
   ] as const;

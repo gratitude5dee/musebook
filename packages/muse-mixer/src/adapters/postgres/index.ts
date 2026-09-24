@@ -555,7 +555,7 @@ class PgSlates implements SlatePort {
        select s.id, v.position, v.post_id::uuid, v.source,
               v.action_scores::jsonb, v.weighted_score, v.score
          from s
-         cross join lateral jsonb_to_recordset($10::jsonb) as v(
+         cross join lateral jsonb_to_recordset(($10::text)::jsonb) as v(
            position integer, post_id text, source text,
            action_scores jsonb, weighted_score float8, score float8)`,
       [
@@ -566,19 +566,19 @@ class PgSlates implements SlatePort {
         row.weightsVersion,
         row.modelVersion,
         row.items.length,
-        JSON.stringify(row.params),
+        row.params,
         row.expiresAt.toISOString(),
         // jsonb_to_recordset maps by column name — snake keys for the wire.
-        JSON.stringify(
-          row.items.map((it) => ({
-            position: it.position,
-            post_id: it.postId,
-            source: it.source,
-            action_scores: it.actionScores,
-            weighted_score: it.weightedScore,
-            score: it.score,
-          })),
-        ),
+        // ($N::text)::jsonb + JSON.stringify — the only dual-driver form for
+        // arrays (ingest.ts uses the same for ingest_action_events).
+        JSON.stringify(row.items.map((it) => ({
+          position: it.position,
+          post_id: it.postId,
+          source: it.source,
+          action_scores: it.actionScores,
+          weighted_score: it.weightedScore,
+          score: it.score,
+        }))),
       ],
     );
   }
@@ -683,7 +683,7 @@ class PgBloom implements BloomPort {
     await this.cached.query(
       `insert into public.viewer_seen_bloom
          (viewer_user_id, iso_week, filter_json, recent_ids)
-       values ($1, $2, $3::jsonb, $4::uuid[])
+       values ($1, $2, ($3::text)::jsonb, $4::uuid[])
        on conflict (viewer_user_id) do update set
          prev_filter_json = case
            when viewer_seen_bloom.iso_week <> excluded.iso_week

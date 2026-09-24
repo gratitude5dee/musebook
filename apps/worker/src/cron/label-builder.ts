@@ -27,12 +27,12 @@ export async function deriveNotDwelledLabels(env: Env): Promise<number> {
     const { rows } = await db.query<{ n: string }>(
       `with ins as (
        insert into public.action_events
-         (occurred_at, actor_plane, viewer_user_id, actor_agent_id, post_id,
+         (occurred_at, actor_plane, viewer_user_id, anon_id, actor_agent_id, post_id,
           action, surface, slate_id, position, weights_version, model_version,
           dwell_ms, client, ip_hash, request_id,
           view_session_id, content_hash, outcome)
        select i.occurred_at + ($1 || ' minutes')::interval,
-              i.actor_plane, i.viewer_user_id, null::uuid,
+              i.actor_plane, i.viewer_user_id, i.anon_id, null::uuid,
               i.post_id, 'not_dwelled'::action_kind, i.surface, i.slate_id,
               i.position, i.weights_version, i.model_version,
               null, i.client, i.ip_hash, i.request_id,
