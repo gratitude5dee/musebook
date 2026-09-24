@@ -152,6 +152,43 @@ export default {
         : handleMeRequestStatus(request, env, ctx, dsarMatch[1]);
     }
 
+    // §7.17's cite_passage backing route. The handler is Vercel's; the actor
+    // resolution and the access decision are the Worker's (§13.5.1 names
+    // /api/cite a twin route) — a denied read never reaches the origin.
+    if (url.pathname === "/api/cite" && request.method === "POST") {
+      const db = fresh(env);
+      try {
+        const ports = portsFor(request, env, ctx, { actorUserId: null }, db);
+        const kernel = createKernel(ports);
+        const actor = await actorOrResponse(asIdentityEnv(env), ctx, request);
+        if (actor instanceof Response) return actor;
+
+        // post_id + content_hash are read here only to pick the Resource the
+        // decision runs on; the origin re-validates the binding before writing.
+        const body = (await request.clone().json().catch(() => null)) as {
+          post_id?: unknown;
+          content_hash?: unknown;
+        } | null;
+        if (typeof body?.post_id !== "string" || typeof body?.content_hash !== "string") {
+          return Response.json({ error: "bad_request" }, { status: 400 });
+        }
+        const row = await ports.resources.loadRowByPostId(body.post_id);
+        if (row === null || row.content_hash !== body.content_hash) return notFound();
+        const resource = loadResource(row);
+        const decision = await kernel.resolveAccess(resource, actor);
+        if (!decision.allow) {
+          const rendered = await kernel.renderResource(resource, "json", decision);
+          return withSettlement(
+            applyCacheHeaders(renderedToResponse(rendered), decision, env, true),
+            decision,
+          );
+        }
+        return await toOrigin(request, env, { actor, resource });
+      } finally {
+        release(ctx, db);
+      }
+    }
+
     // The crawl surface. §7.10.1 owns this table; the handlers render IN THE
     // WORKER and the response is never charged — the whole point, because
     // /llms.txt and /llms-full.txt carry the price signal built from
@@ -300,6 +337,17 @@ async function toOrigin(
   if (ctx !== undefined) {
     req.headers.set("x-mb-plane", ctx.actor.plane);
     req.headers.set("x-mb-access-badge", toAccessBadge(ctx.resource).kind);
+    // §7.17: the resolved actor's identity projection — the only legitimate way
+    // a Vercel route attributes an agent-plane write (§13.5.1 forbids a second
+    // resolver). Trustworthy because (1) stripped inbound, (2) hop-authenticated.
+    req.headers.set(
+      "x-mb-actor",
+      JSON.stringify({
+        plane: ctx.actor.plane,
+        userId: ctx.actor.userId,
+        agentIdentityId: ctx.actor.plane === "agent" ? ctx.actor.agentIdentityId : null,
+      }),
+    );
   }
 
   // `global_fetch_strictly_public` is NOT enabled: the default same-zone route

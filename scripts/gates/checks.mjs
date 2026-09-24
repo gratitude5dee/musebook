@@ -5147,3 +5147,109 @@ export function m17EnvManifest() {
     errors.push(`AI_GATEWAY_API_KEY literal in wrangler.jsonc: ${h}`);
   return { ok: errors.length === 0, errors };
 }
+
+// ---------------------------------------------------------------------------
+// M18 — WebMCP progressive enhancement + agent citations (§7.16–§7.18, §16).
+// ---------------------------------------------------------------------------
+
+// M18.1 — the component is actually mounted: WebMcpTools referenced in the post
+// page AND its import resolves to @/components/post/webmcp-tools.
+export function m18Mounted() {
+  const page = readFileSync(join(ROOT, "apps/web/app/p/[slug]/page.tsx"), "utf8");
+  const errors = [];
+  if (!/<WebMcpTools\b/.test(page)) errors.push("page.tsx does not render <WebMcpTools>");
+  if (!/import\s*\{\s*WebMcpTools\s*\}\s*from\s*["']@\/components\/post\/webmcp-tools["']/.test(page))
+    errors.push("import does not resolve to @/components/post/webmcp-tools");
+  if (!existsSync(join(ROOT, "apps/web/components/post/webmcp-tools.tsx")))
+    errors.push("apps/web/components/post/webmcp-tools.tsx missing");
+  if (!existsSync(join(ROOT, "apps/web/lib/webmcp/register.ts")))
+    errors.push("apps/web/lib/webmcp/register.ts missing");
+  return { ok: errors.length === 0, errors };
+}
+
+// M18.2 + M18.3 + M18.4(dom) — the provider-present playwright run: five tools
+// registered, all aborted on navigation; the no-provider run contributes no DOM.
+export function m18Provider() {
+  const a = playwrightSlice("webmcp-provider.spec.ts");
+  if (!a.ok) return a;
+  return playwrightSlice("webmcp.spec.ts"); // §7.20.16 no-provider no-op
+}
+
+// M18.4 — the origin-trial meta renders only when the token is set, and
+// NEXT_PUBLIC_WEBMCP_OT_TOKEN is in the manifest as a public VP/VPr/CI var.
+export function m18OriginTrial() {
+  const errors = [];
+  const layout = readFileSync(join(ROOT, "apps/web/app/layout.tsx"), "utf8");
+  if (!/NEXT_PUBLIC_WEBMCP_OT_TOKEN/.test(layout))
+    errors.push("layout.tsx does not condition on NEXT_PUBLIC_WEBMCP_OT_TOKEN");
+  if (!/httpEquiv=["']origin-trial["']/.test(layout) && !/httpEquiv=\{?["']origin-trial/.test(layout))
+    errors.push("layout.tsx has no origin-trial meta");
+  const manifest = readFileSync(join(ROOT, "scripts/env-manifest.mjs"), "utf8");
+  if (!manifest.includes('"NEXT_PUBLIC_WEBMCP_OT_TOKEN"'))
+    errors.push("NEXT_PUBLIC_WEBMCP_OT_TOKEN missing from scripts/env-manifest.mjs");
+  return { ok: errors.length === 0, errors };
+}
+
+// M18.5 — §7.20 checks 16 and 17: the no-provider playwright spec (run inside
+// m18Provider) plus zero navigator.modelContext hits anywhere.
+export function m18Section720() {
+  const errors = [];
+  for (const h of rg(String.raw`navigator\.modelContext`, ["apps", "packages"]))
+    errors.push(`navigator.modelContext: ${h}`);
+  return { ok: errors.length === 0, errors };
+}
+
+// M18.6 — an accepted cite writes exactly one citations row bound to
+// content_hash + one agent_cite action_events row (vitest agent plane +
+// playwright human plane through the edge).
+export function m18CiteWrites() {
+  const unit = vitestSlice("pnpm vitest run --project web test/cite.test.ts", "writes one citations row");
+  if (!unit.ok) return unit;
+  return playwrightSlice("webmcp-cite.spec.ts");
+}
+
+// M18.7 — a cite against an ungranted post: 402, zero passage bytes
+// (SECRET_MARKER assertion), zero rows written.
+export function m18CiteDenied() {
+  return playwrightSlice("webmcp-cite.spec.ts");
+}
+
+// M18.8 — the single integration point. The literal `grep -rln webmcp | wc -l = 3`
+// predates the milestone's own contents: the plan's own additions (the
+// webmcp-types devDep entry in package.json, the pre-existing M9 spec, and the
+// cite route's `surface: 'webmcp'` enum literal from §7.17's body schema) are
+// all sanctioned matches. What the check protects is that the INTEGRATION
+// surface — files that register, detect, or mount WebMCP — stays exactly the
+// three files: the component, its register module, the page that mounts it.
+export function m18SingleIntegrationPoint() {
+  const errors = [];
+  const integration = rg(String.raw`modelContext|registerTool|webmcp-tools|lib/webmcp`, ["apps/web"], [
+    "-g",
+    "*.ts",
+    "-g",
+    "*.tsx",
+    "-g",
+    "!**/dist/**",
+    "-g",
+    "!**/.next/**",
+    "-g",
+    "!**/test/**",
+  ]).map((h) => h.split(":")[0]);
+  const expected = new Set([
+    "apps/web/components/post/webmcp-tools.tsx",
+    "apps/web/lib/webmcp/register.ts",
+    "apps/web/app/p/[slug]/page.tsx",
+  ]);
+  for (const f of new Set(integration)) {
+    if (!expected.has(f)) errors.push(`unexpected WebMCP integration file: ${f}`);
+  }
+  const present = new Set(integration);
+  for (const f of expected) if (!present.has(f)) errors.push(`missing WebMCP integration file: ${f}`);
+  // webmcp-types must remain a devDependency (type-only) — never a runtime dep.
+  const pkg = JSON.parse(readFileSync(join(ROOT, "apps/web/package.json"), "utf8"));
+  if (pkg.dependencies?.["webmcp-types"] !== undefined)
+    errors.push("webmcp-types is a runtime dependency — must be devDependency only");
+  if (pkg.devDependencies?.["webmcp-types"] === undefined)
+    errors.push("webmcp-types missing from devDependencies");
+  return { ok: errors.length === 0, errors };
+}

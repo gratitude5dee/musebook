@@ -3,10 +3,12 @@
 // (§14.4.2). It reads x-mb-plane/x-mb-access-badge off the forwarded headers
 // and gets body+license+access off the JSON twin.
 import type { Metadata } from "next";
+import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { loadPostView } from "@/lib/db/posts";
 import { PostViewTracker } from "@/components/post/post-view-tracker";
+import { WebMcpTools } from "@/components/post/webmcp-tools";
 
 /** A direct `/p/{slug}` open was not served from a slate — the all-zero uuid
  *  keeps spine invariant 3's non-null columns honest while saying exactly that. */
@@ -68,7 +70,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
       ) : null}
       {post.title !== null ? <h1 className="mb-2 text-3xl font-semibold">{post.title}</h1> : null}
       <p className="mb-8 text-sm text-muted-foreground">
-        <a href={`/@${post.authorHandle}`}>{post.authorDisplayName}</a>
+        <Link href={`/@${post.authorHandle}`}>{post.authorDisplayName}</Link>
         {post.publishedAt !== null ? ` · ${post.publishedAt.slice(0, 10)}` : ""}
       </p>
       <PostViewTracker
@@ -86,6 +88,9 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         />
       ) : null}
       {void h}
+      {/* §7.16: last child. Renders nothing; registers the five in-page tools
+          and aborts them on navigation. */}
+      <WebMcpTools post={post} />
     </main>
   );
 }

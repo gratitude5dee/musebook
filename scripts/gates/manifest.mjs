@@ -1778,6 +1778,56 @@ export const GATES = {
       run: checks.m17EnvManifest,
     },
   ],
+  M18: [
+    {
+      id: "M18.1",
+      kind: "fn",
+      desc: "WebMcpTools mounted as last child of /p/[slug]; import resolves @/components/post/webmcp-tools",
+      run: checks.m18Mounted,
+    },
+    {
+      id: "M18.2",
+      kind: "fn",
+      desc: "provider-present playwright: five post tools registered, all aborted on navigation",
+      run: checks.m18Provider,
+    },
+    {
+      id: "M18.3",
+      kind: "fn",
+      desc: "no provider: component contributes zero DOM (byte-identical by construction)",
+      run: checks.m18Provider,
+    },
+    {
+      id: "M18.4",
+      kind: "fn",
+      desc: "origin-trial meta renders only when NEXT_PUBLIC_WEBMCP_OT_TOKEN set; var in manifest on Vercel scope",
+      run: checks.m18OriginTrial,
+    },
+    {
+      id: "M18.5",
+      kind: "fn",
+      desc: "§7.20 checks 16+17: no-provider playwright green; zero navigator.modelContext hits",
+      run: checks.m18Section720,
+    },
+    {
+      id: "M18.6",
+      kind: "fn",
+      desc: "cite_passage writes exactly one citations row bound to content_hash + one agent_cite action_events row",
+      run: checks.m18CiteWrites,
+    },
+    {
+      id: "M18.7",
+      kind: "fn",
+      desc: "cite against ungranted post: 402, zero passage bytes (SECRET_MARKER), zero rows",
+      run: checks.m18CiteDenied,
+    },
+    {
+      id: "M18.8",
+      kind: "fn",
+      desc: "exactly one WebMCP integration point: component + register + mount only (set-equality)",
+      run: checks.m18SingleIntegrationPoint,
+    },
+  ],
 };
 
 export const MILESTONE_TITLES = {
@@ -1799,6 +1849,6 @@ export const MILESTONE_TITLES = {
   M15: "Learned ranker v1.1",
   M16: "Artifacts surface + sandbox",
   M17: "LLM reformat pass + remaining channels",
-  M18: "WebMCP + agent citations",
+  M18: "WebMCP progressive enhancement + agent citations",
   M19: "Media generation",
 };

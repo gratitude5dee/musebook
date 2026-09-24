@@ -30,7 +30,7 @@ const x402PayToVar = process.env.X402_PAY_TO
 
 // The local service key is the supabase CLI's own output — never a literal in
 // the repo (push protection scans for the sb_secret_ shape).
-const supabaseSecret = (): string => {
+export const supabaseSecret = (): string => {
   if (process.env.SUPABASE_SECRET_KEY) return process.env.SUPABASE_SECRET_KEY;
   const out = execSync("pnpm exec supabase status -o env", {
     cwd: REPO_ROOT,
