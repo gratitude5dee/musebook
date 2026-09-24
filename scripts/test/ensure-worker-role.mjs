@@ -58,6 +58,12 @@ export default async function setup() {
   await client.connect();
   try {
     await client.query("alter role musebook_worker password 'postgres'");
+    // pg_cron is absent on the local/CI image, so the daily partition
+    // schedule never fires — a fresh stack carries only the two bootstrap
+    // leaves (20260922/23) and every now()-dated action_events write fails
+    // ExecFindPartition. Hosted prod keeps 7 days ahead via the cron job;
+    // the test harness asserts the same headroom once per run.
+    await client.query("select app.ensure_action_event_partitions(7)");
   } finally {
     await client.end();
   }
