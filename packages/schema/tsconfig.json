@@ -6,6 +6,10 @@
     // bundler resolution and extensionless internal imports (D28).
     "module": "ESNext",
     "moduleResolution": "bundler",
+    // WebWorker for Headers/URL/WebCrypto globals; node types for node:crypto
+    // (internal-signature.ts runs on both runtimes — §15.5.3).
+    "lib": ["ES2023", "WebWorker"],
+    "types": ["node"],
     "rootDir": "./src",
     "outDir": "./dist",
     "tsBuildInfoFile": "./dist/.tsbuildinfo"

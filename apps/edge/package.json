@@ -13,6 +13,7 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
+    "@musebook/artifacts": "workspace:*",
     "@musebook/connectors": "workspace:*",
     "@musebook/content": "workspace:*",
     "@musebook/distributor": "workspace:*",

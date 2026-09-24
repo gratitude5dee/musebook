@@ -35,5 +35,10 @@ declare global {
     /** §8.1 — TypeSafe Jev API key for the classify consumer. Worker secret;
      *  absent ⇒ deploy still succeeds, TypeSafeError throws at first use. */
     TYPESAFE_API_KEY?: string;
+
+    /** §15.5.3 — Ed25519 PKCS#8 base64 signing key for the signed internal
+     *  POSTs (§11.12 step 3's artifact ingest, §15.5's media provenance).
+     *  Worker secret; MB_INTERNAL_KEY_ID/PUBLIC_KEYS are the vars pair. */
+    MB_INTERNAL_SIGNING_KEY?: string;
   }
 }

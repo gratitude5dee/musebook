@@ -27,6 +27,9 @@ declare global {
      *  the webhook secret is carried in the URL path, unsigned (§12.2.6). */
     POSTIZ_API_KEY?: string;
     POSTIZ_WEBHOOK_SECRET?: string;
+
+    /** §11.18 — Ed25519 PKCS#8 PEM minting the /t/{ticket}/ URLs; secret. */
+    ARTIFACT_TICKET_SIGNING_KEY?: string;
   }
 
   /** musebook-worker's SlateBuilder entrypoint over the MIXER service binding

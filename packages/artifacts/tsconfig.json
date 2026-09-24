@@ -1,6 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    // Consumed as TS source by bundlers only (exports -> src/index.ts), same
+    // convention as @musebook/schema (D28).
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    // WebWorker globals for ticket.ts/version.ts (workerd); node types for
+    // src/node/* (apps/web's Node runtime).
+    "lib": ["ES2023", "WebWorker"],
+    "types": ["node"],
     "rootDir": "./src",
     "outDir": "./dist",
     "tsBuildInfoFile": "./dist/.tsbuildinfo"

@@ -9,7 +9,7 @@ const WARNING_SUBSTRING = "fingerprint";
 
 test("edit-after-grant warns about the changed fingerprint", async ({ page, context }) => {
   await context.addCookies([
-    { name: "mb_session", value: SEED_COOKIE.split("=")[1] ?? "", url: "http://127.0.0.1" },
+    { name: "__Host-mb_session", value: SEED_COOKIE.split("=")[1] ?? "", url: "http://127.0.0.1" },
   ]);
   await page.goto(`/compose/${POST_ID}`);
   const editor = page.getByPlaceholder("Write, or ask your agent to.");
