@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-09-24T04:32:22.053Z",
+  "ranAt": "2026-09-24T04:37:29.020Z",
   "model": "anthropic/claude-sonnet-5",
   "cases": [
     {
@@ -13,7 +13,9 @@
       },
       "deterministic": {
         "ok": false,
-        "failures": ["6 images, maximum 4"]
+        "failures": [
+          "6 images, maximum 4"
+        ]
       }
     },
     {
@@ -27,7 +29,9 @@
       },
       "deterministic": {
         "ok": false,
-        "failures": ["x accepts images OR one video, never both"]
+        "failures": [
+          "x accepts images OR one video, never both"
+        ]
       }
     },
     {

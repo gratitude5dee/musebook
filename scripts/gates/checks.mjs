@@ -5056,6 +5056,7 @@ export function m17Comparison() {
   if (!res.ok) return res;
   const p = join(ROOT, ".gate/m17-comparison.json");
   if (!existsSync(p)) return { ok: false, errors: [".gate/m17-comparison.json missing"] };
+  run(`pnpm exec prettier --write ${JSON.stringify(p)}`);
   const j = JSON.parse(readFileSync(p, "utf8"));
   const ageDays = (Date.now() - Date.parse(j.ranAt ?? 0)) / 86400_000;
   if (!(ageDays < 1)) return { ok: false, errors: [`comparison ranAt ${j.ranAt} is stale`] };
