@@ -3,10 +3,7 @@ import { describe, expect, it } from "vitest";
 import { MuseScorer } from "../src/muse/scorers/muse_scorer.js";
 import { RankingScorer } from "../src/muse/scorers/ranking_scorer.js";
 import { WatchTimeScorer } from "../src/muse/scorers/watch_time_scorer.js";
-import {
-  HeuristicMuseRanker,
-  HEURISTIC_V1_COEFFICIENTS,
-} from "../src/muse/rankers/heuristic.js";
+import { HeuristicMuseRanker, HEURISTIC_V1_COEFFICIENTS } from "../src/muse/rankers/heuristic.js";
 import { LearnedMuseRanker } from "../src/muse/rankers/learned.js";
 import { memoryCtx, memoryWeightsLoader } from "../src/adapters/memory/index.js";
 import { makeQuery, makeCandidate } from "./factories.js";

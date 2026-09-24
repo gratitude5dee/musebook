@@ -112,4 +112,3 @@ describe("shadowScoreEffect (§9.18)", () => {
     expect(shadow.calls).toHaveLength(0);
   });
 });
-

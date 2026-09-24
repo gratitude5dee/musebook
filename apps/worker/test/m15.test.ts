@@ -39,10 +39,9 @@ async function dropLearnedRow(): Promise<void> {
   await withDb(async (c) => {
     await c.query(`delete from public.model_registry where model_version = $1`, [LEARNED]);
     await c.query(`delete from public.ranking_weights where weights_version = $1`, [LEARNED]);
-    await c.query(
-      `update public.model_registry set status = 'active' where model_version = $1`,
-      [HEURISTIC],
-    );
+    await c.query(`update public.model_registry set status = 'active' where model_version = $1`, [
+      HEURISTIC,
+    ]);
   });
 }
 
@@ -269,9 +268,7 @@ describe("reels slate ≠ feed slate for the same viewer (M15.6)", () => {
     expect(feedItems.length).toBeGreaterThan(0);
     // Sorted-by-post_id multisets: equality here is a permutation, which is
     // the failure M15.6 names — the surfaces must differ beyond ordering.
-    expect(reelsItems.map((i) => i.post_id)).not.toEqual(
-      feedItems.map((i) => i.post_id),
-    );
+    expect(reelsItems.map((i) => i.post_id)).not.toEqual(feedItems.map((i) => i.post_id));
     // …and the reels universe is the kind-restricted one (video/audio only —
     // the pipeline's own source restriction, not a parameterisation of the
     // home scorer's): every reels item is a media kind while the feed slate

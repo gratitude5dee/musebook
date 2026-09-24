@@ -571,14 +571,16 @@ class PgSlates implements SlatePort {
         // jsonb_to_recordset maps by column name — snake keys for the wire.
         // ($N::text)::jsonb + JSON.stringify — the only dual-driver form for
         // arrays (ingest.ts uses the same for ingest_action_events).
-        JSON.stringify(row.items.map((it) => ({
-          position: it.position,
-          post_id: it.postId,
-          source: it.source,
-          action_scores: it.actionScores,
-          weighted_score: it.weightedScore,
-          score: it.score,
-        }))),
+        JSON.stringify(
+          row.items.map((it) => ({
+            position: it.position,
+            post_id: it.postId,
+            source: it.source,
+            action_scores: it.actionScores,
+            weighted_score: it.weightedScore,
+            score: it.score,
+          })),
+        ),
       ],
     );
   }
