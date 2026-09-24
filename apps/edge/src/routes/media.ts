@@ -27,8 +27,7 @@ const JSON_HEADERS = { "content-type": "application/json" } as const;
 const json = (data: unknown, status = 200): Response =>
   new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** media_models + the delegation cap, read under the worker login. */
 export function edgeMediaModelStore(db: ReturnType<typeof fresh>): MediaModelStore {
@@ -92,7 +91,10 @@ export async function handleMediaGenerate(
   const raw = (await request.json().catch(() => null)) as unknown;
   const parsed = generateRequestSchema.safeParse(raw);
   if (!parsed.success) {
-    return json({ error: "invalid_request", issues: parsed.error.issues.map((i) => i.message) }, 400);
+    return json(
+      { error: "invalid_request", issues: parsed.error.issues.map((i) => i.message) },
+      400,
+    );
   }
   const req = parsed.data;
 
@@ -124,30 +126,27 @@ export async function handleMediaGenerate(
       media_job_id: string | null;
       job_id: number | null;
       reservation_id: string | null;
-    }>(
-      `select * from public.submit_media_job($1,$2,$3,$4,$5,$6,$7,$8,($9::text)::jsonb)`,
-      [
-        delegationId,
-        actor.userId,
-        req.kind,
-        model.modelId,
-        req.prompt,
-        promptSha256,
-        estimate,
-        scopedKey,
-        JSON.stringify({
-          aspectRatio: req.aspectRatio,
-          quality: req.quality,
-          maxCostAtomic: req.maxCostAtomic,
-          ...(req.negativePrompt !== undefined ? { negativePrompt: req.negativePrompt } : {}),
-          ...(req.durationSeconds !== undefined ? { durationSeconds: req.durationSeconds } : {}),
-          ...(req.referenceImageUrl !== undefined
-            ? { referenceImageUrl: req.referenceImageUrl }
-            : {}),
-          ...(req.seed !== undefined ? { seed: req.seed } : {}),
-        }),
-      ],
-    );
+    }>(`select * from public.submit_media_job($1,$2,$3,$4,$5,$6,$7,$8,($9::text)::jsonb)`, [
+      delegationId,
+      actor.userId,
+      req.kind,
+      model.modelId,
+      req.prompt,
+      promptSha256,
+      estimate,
+      scopedKey,
+      JSON.stringify({
+        aspectRatio: req.aspectRatio,
+        quality: req.quality,
+        maxCostAtomic: req.maxCostAtomic,
+        ...(req.negativePrompt !== undefined ? { negativePrompt: req.negativePrompt } : {}),
+        ...(req.durationSeconds !== undefined ? { durationSeconds: req.durationSeconds } : {}),
+        ...(req.referenceImageUrl !== undefined
+          ? { referenceImageUrl: req.referenceImageUrl }
+          : {}),
+        ...(req.seed !== undefined ? { seed: req.seed } : {}),
+      }),
+    ]);
     const r = rows[0];
     if (!r) throw new Error("submit_media_job returned no row");
 
@@ -223,11 +222,13 @@ export async function handleMediaWebhook(
       }
       // first-seen bookkeeping; retries do not bump webhook_delivery_count —
       // the finalize conditional UPDATE does, once, on success.
-      await db.query(
-        `update public.media_jobs set webhook_first_seen_at = coalesce(webhook_first_seen_at, now())
+      await db
+        .query(
+          `update public.media_jobs set webhook_first_seen_at = coalesce(webhook_first_seen_at, now())
           where id = $1::uuid`,
-        [mediaJobId],
-      ).catch(() => undefined);
+          [mediaJobId],
+        )
+        .catch(() => undefined);
     }
     return new Response(null, { status: 202 });
   } finally {

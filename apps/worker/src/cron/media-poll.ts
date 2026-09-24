@@ -3,7 +3,12 @@
 // deep-safety valve for webhook never arrives / provider dead-lettered the
 // request / outbox lost the finalize row. Rows that sat 'queued' >30 minutes
 // (submit-side never landed) fail 'provider_timeout' and release the hold.
-import { backendByName, createBackends, type BackendName, type GenerateJobRef } from "@musebook/media";
+import {
+  backendByName,
+  createBackends,
+  type BackendName,
+  type GenerateJobRef,
+} from "@musebook/media";
 import { audit } from "../lib/audit.js";
 import { pgFreshJobs } from "../db.js";
 import { mediaModelStore, type MediaJobRow } from "../consumers/media.js";
@@ -14,7 +19,13 @@ const MAX_POLL_BATCH = 50;
 /** Which client-side failures end the job (vs. keep polling). */
 function isClient(err: unknown): boolean {
   const e = err as { httpStatus?: number };
-  return e.httpStatus !== undefined && e.httpStatus >= 400 && e.httpStatus < 500 && e.httpStatus !== 408 && e.httpStatus !== 429;
+  return (
+    e.httpStatus !== undefined &&
+    e.httpStatus >= 400 &&
+    e.httpStatus < 500 &&
+    e.httpStatus !== 408 &&
+    e.httpStatus !== 429
+  );
 }
 
 export async function mediaPoll(env: Env): Promise<void> {
@@ -38,10 +49,13 @@ export async function mediaPoll(env: Env): Promise<void> {
         // the second trigger a no-op when the first is merely slow.
         if (job.status === "queued" && job.provider_request_id === null) {
           if (Date.parse(job.created_at) < Date.now() - 30 * 60_000) {
-            await db.query(`select * from public.fail_media_job($1,'failed'::media_job_status,$2)`, [
-              job.id,
-              `provider_timeout: queued ${Math.round((Date.now() - Date.parse(job.created_at)) / 60_000)}m`,
-            ]);
+            await db.query(
+              `select * from public.fail_media_job($1,'failed'::media_job_status,$2)`,
+              [
+                job.id,
+                `provider_timeout: queued ${Math.round((Date.now() - Date.parse(job.created_at)) / 60_000)}m`,
+              ],
+            );
             continue;
           }
           const { rows: ins } = await db.query<{ id: string }>(
@@ -92,10 +106,10 @@ export async function mediaPoll(env: Env): Promise<void> {
               await env.Q_MEDIA_FINALIZE?.send({ job_id: ins[0]!.id, media_job_id: job.id });
             }
           } else {
-            await db.query(`select * from public.fail_media_job($1,'failed'::media_job_status,$2)`, [
-              job.id,
-              `poll:${result.error.slice(0, 120)}`,
-            ]);
+            await db.query(
+              `select * from public.fail_media_job($1,'failed'::media_job_status,$2)`,
+              [job.id, `poll:${result.error.slice(0, 120)}`],
+            );
           }
           await audit(env, {
             action: "media.poll",

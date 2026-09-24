@@ -5,7 +5,7 @@
 // production extraction runs inside the pinned `MEDIA_SANDBOX_IMAGE` Vercel
 // Sandbox (networkPolicy 'deny-all'), reached from the provenance endpoint;
 // local dev/tests fall back to the system ffmpeg binary via fluent-ffmpeg.
-import { perceptualHash } from "./provenance.js";
+import { perceptualHash } from "./provenance";
 
 export interface VideoFrameEnv {
   /** Pinned sandbox image with ffmpeg baked in; unset → local ffmpeg. */
@@ -104,8 +104,13 @@ async function extractVideoFramesSandbox(
     const probe = await sandbox.runCommand({
       cmd: "ffprobe",
       args: [
-        "-v", "error", "-show_entries", "format=duration",
-        "-of", "csv=p=0", `/vercel/sandbox/input.${EXT[mimeType] ?? "mp4"}`,
+        "-v",
+        "error",
+        "-show_entries",
+        "format=duration",
+        "-of",
+        "csv=p=0",
+        `/vercel/sandbox/input.${EXT[mimeType] ?? "mp4"}`,
       ],
     });
     if (probe.exitCode !== 0) return [];
@@ -119,9 +124,16 @@ async function extractVideoFramesSandbox(
       const run = await sandbox.runCommand({
         cmd: "ffmpeg",
         args: [
-          "-y", "-ss", String(duration * f), "-i",
+          "-y",
+          "-ss",
+          String(duration * f),
+          "-i",
           `/vercel/sandbox/input.${EXT[mimeType] ?? "mp4"}`,
-          "-frames:v", "1", "-vf", "scale=512:-1", `/vercel/sandbox/${name}`,
+          "-frames:v",
+          "1",
+          "-vf",
+          "scale=512:-1",
+          `/vercel/sandbox/${name}`,
         ],
       });
       if (run.exitCode !== 0) continue;

@@ -1,9 +1,9 @@
 // packages/media/src/replicate.ts — §11.4, spec shape completed.
 // Replicate is the failover and the home of models fal does not carry —
 // a strictly smaller surface: submit, poll, cancel, verify.
-import type { GenerateJobRef, MediaBackend, PollResult } from "./backend.js";
-import { priceFor, type MediaModelStore } from "./registry.js";
-import { verifyReplicateWebhook } from "./webhook/replicate.js";
+import type { GenerateJobRef, MediaBackend, PollResult } from "./backend";
+import { priceFor, type MediaModelStore } from "./registry";
+import { verifyReplicateWebhook } from "./webhook/replicate";
 
 const REPLICATE_API = "https://api.replicate.com/v1";
 
@@ -42,7 +42,10 @@ export function createReplicateBackend(
     "Content-Type": "application/json",
   });
 
-  const estimate = async (req: Parameters<MediaBackend["estimateCostAtomic"]>[0], modelId: string) => {
+  const estimate = async (
+    req: Parameters<MediaBackend["estimateCostAtomic"]>[0],
+    modelId: string,
+  ) => {
     const rows = await store.listModels(req.kind);
     const model = rows.find((r) => r.backend === "replicate" && r.modelId === modelId);
     if (!model) throw new Error(`no_price_for_model: ${modelId}`);

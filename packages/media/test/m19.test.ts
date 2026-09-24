@@ -24,24 +24,48 @@ import {
 
 const MODELS: MediaModelRow[] = [
   {
-    backend: "fal", modelId: "fal-ai/nano-banana-pro", kind: "image", slot: "default",
-    priceAtomic: "40000", priceUnit: "per_asset", maxDurationS: null,
-    preferenceRank: 10, enabled: true,
+    backend: "fal",
+    modelId: "fal-ai/nano-banana-pro",
+    kind: "image",
+    slot: "default",
+    priceAtomic: "40000",
+    priceUnit: "per_asset",
+    maxDurationS: null,
+    preferenceRank: 10,
+    enabled: true,
   },
   {
-    backend: "fal", modelId: "fal-ai/z-image/turbo", kind: "image", slot: "cheap",
-    priceAtomic: "3000", priceUnit: "per_asset", maxDurationS: null,
-    preferenceRank: 30, enabled: true,
+    backend: "fal",
+    modelId: "fal-ai/z-image/turbo",
+    kind: "image",
+    slot: "cheap",
+    priceAtomic: "3000",
+    priceUnit: "per_asset",
+    maxDurationS: null,
+    preferenceRank: 30,
+    enabled: true,
   },
   {
-    backend: "replicate", modelId: "owner/model:abc", kind: "image", slot: "default",
-    priceAtomic: "20000", priceUnit: "per_asset", maxDurationS: null,
-    preferenceRank: 50, enabled: true,
+    backend: "replicate",
+    modelId: "owner/model:abc",
+    kind: "image",
+    slot: "default",
+    priceAtomic: "20000",
+    priceUnit: "per_asset",
+    maxDurationS: null,
+    preferenceRank: 50,
+    enabled: true,
   },
   {
-    backend: "fal", modelId: "fal-ai/disabled", kind: "image", slot: "premium",
-    priceAtomic: "999999", priceUnit: "per_asset", maxDurationS: null,
-    preferenceRank: 5, enabled: false,
+    backend: "fal",
+    modelId: "fal-ai/disabled",
+    kind: "image",
+    slot: "premium",
+    priceAtomic: "999999",
+    priceUnit: "per_asset",
+    maxDurationS: null,
+    preferenceRank: 5,
+    enabled: false,
   },
 ];
 
@@ -70,8 +94,10 @@ describe("M19: generateRequestSchema", () => {
         .success,
     ).toBe(false);
     expect(
-      generateRequestSchema.safeParse({ ...REQ, referenceImageUrl: "https://cdn.musebook.dev/m/a.png" })
-        .success,
+      generateRequestSchema.safeParse({
+        ...REQ,
+        referenceImageUrl: "https://cdn.musebook.dev/m/a.png",
+      }).success,
     ).toBe(true);
   });
 });

@@ -50,7 +50,8 @@ interface SubmitError extends Error {
 /** §11.4 step 4: 5xx, 408/429, a connection error, or a 20s timeout. */
 function isServerSide(err: unknown): boolean {
   const e = err as SubmitError;
-  if (e.httpStatus !== undefined) return e.httpStatus >= 500 || e.httpStatus === 408 || e.httpStatus === 429;
+  if (e.httpStatus !== undefined)
+    return e.httpStatus >= 500 || e.httpStatus === 408 || e.httpStatus === 429;
   return e instanceof TypeError || e.name === "AbortError" || e.name === "TimeoutError";
 }
 
@@ -139,9 +140,7 @@ async function pickRow(
 ): Promise<MediaModelRow | null> {
   if (job.model_id && !exclude) {
     const rows = await store.listModels(job.kind);
-    const named = rows.find(
-      (r) => r.modelId === job.model_id && r.enabled && bound(r.backend),
-    );
+    const named = rows.find((r) => r.modelId === job.model_id && r.enabled && bound(r.backend));
     if (named) return named;
   }
   return pickModel(store, req, { backendBound: bound }, job.delegation_id, exclude);
@@ -156,10 +155,9 @@ async function pickRow(
 export async function runMediaSubmit(env: Env, mediaJobId: string): Promise<void> {
   const db = await pgFreshJobs(env);
   try {
-    const { rows } = await db.query<MediaJobRow>(
-      `select * from public.media_jobs where id = $1`,
-      [mediaJobId],
-    );
+    const { rows } = await db.query<MediaJobRow>(`select * from public.media_jobs where id = $1`, [
+      mediaJobId,
+    ]);
     const job = rows[0];
     if (!job || job.status !== "queued") return; // replay or already transitioned
 
@@ -208,7 +206,12 @@ export async function runMediaSubmit(env: Env, mediaJobId: string): Promise<void
         seen.length ? seen[seen.length - 1] : undefined,
       );
       if (!model) {
-        await failJob(db, job.id, "failed", attempt === 1 ? "no_price_for_model" : "no_failover_model");
+        await failJob(
+          db,
+          job.id,
+          "failed",
+          attempt === 1 ? "no_price_for_model" : "no_failover_model",
+        );
         return;
       }
       const backend = backendByName(backends, model.backend);
@@ -255,7 +258,12 @@ export async function runMediaSubmit(env: Env, mediaJobId: string): Promise<void
           },
         });
         if (seen.length >= 2 || !isServerSide(err)) {
-          await failJob(db, job.id, "failed", `submit_failed:${(err as Error).message.slice(0, 120)}`);
+          await failJob(
+            db,
+            job.id,
+            "failed",
+            `submit_failed:${(err as Error).message.slice(0, 120)}`,
+          );
           return;
         }
       }

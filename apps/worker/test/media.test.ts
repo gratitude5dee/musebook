@@ -17,12 +17,22 @@ const PROMPT_SHA = "559aead08264d5795d3909718cdd05abd49572e84fe55590eef31a88a08f
 async function submitJob(idem: string, kind = "image", modelId = "fal-ai/nano-banana-pro") {
   return await withDb(async (c) => {
     const { rows } = await c.query<{
-      allowed: boolean; reason: string; media_job_id: string | null;
-      job_id: number | null; reservation_id: string | null;
-    }>(
-      `select * from public.submit_media_job($1,$2,$3,$4,$5,$6,$7::numeric,$8,$9::jsonb)`,
-      [DELEGATION, OWNER, kind, modelId, "a river at dusk", PROMPT_SHA, "40000", idem, "{}"],
-    );
+      allowed: boolean;
+      reason: string;
+      media_job_id: string | null;
+      job_id: number | null;
+      reservation_id: string | null;
+    }>(`select * from public.submit_media_job($1,$2,$3,$4,$5,$6,$7::numeric,$8,$9::jsonb)`, [
+      DELEGATION,
+      OWNER,
+      kind,
+      modelId,
+      "a river at dusk",
+      PROMPT_SHA,
+      "40000",
+      idem,
+      "{}",
+    ]);
     return rows[0]!;
   });
 }
@@ -32,14 +42,16 @@ const deliver = async (queue: string, body: unknown) => {
   await worker.queue(
     {
       queue,
-      messages: [{
-        id: `m-${crypto.randomUUID().slice(0, 8)}`,
-        timestamp: new Date(),
-        body,
-        attempts: 1,
-        ack: vi.fn(),
-        retry: vi.fn(),
-      }],
+      messages: [
+        {
+          id: `m-${crypto.randomUUID().slice(0, 8)}`,
+          timestamp: new Date(),
+          body,
+          attempts: 1,
+          ack: vi.fn(),
+          retry: vi.fn(),
+        },
+      ],
       ackAll: vi.fn(),
       retryAll: vi.fn(),
     },
@@ -96,7 +108,11 @@ afterAll(() => vi.unstubAllGlobals());
 function stubFetch(router: (url: string, init?: RequestInit) => Response | Promise<Response>) {
   vi.stubGlobal("fetch", async (input: unknown, init?: RequestInit) => {
     const url =
-      typeof input === "string" ? input : input instanceof URL ? input.href : (input as Request).url;
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.href
+          : (input as Request).url;
     return router(url, init);
   });
 }
@@ -122,7 +138,9 @@ describe("M19: submit + finalize pipeline", () => {
   it("M19.3 fal 503 fails over to Replicate; the reservation stays singular", async () => {
     // Turn the seeded Replicate placeholder on for the failover window.
     await withDb((c) =>
-      c.query(`update public.media_models set enabled=true where model_id='UNVERIFIED-replicate-image-default'`),
+      c.query(
+        `update public.media_models set enabled=true where model_id='UNVERIFIED-replicate-image-default'`,
+      ),
     );
     try {
       const job = await submitJob("test-m19-failover");
@@ -161,7 +179,8 @@ describe("M19: submit + finalize pipeline", () => {
       const res = await withDb((c) =>
         c.query<{ n: string; state: string }>(
           `select count(*)::text n, min(state) state from public.agent_spend_reservations
-             where external_ref=$1`, [job.media_job_id],
+             where external_ref=$1`,
+          [job.media_job_id],
         ),
       );
       expect(res.rows[0]!.n).toBe("1");
@@ -181,10 +200,14 @@ describe("M19: submit + finalize pipeline", () => {
         `update public.media_jobs
             set status='running', backend='replicate', model_id='UNVERIFIED-replicate-image-default',
                 provider_request_id='pred-final-1', started_at=now()
-          where id=$1`, [job.media_job_id]),
+          where id=$1`,
+        [job.media_job_id],
+      ),
     );
 
-    const png = await (await import("node:buffer")).Buffer.from(
+    const png = await (
+      await import("node:buffer")
+    ).Buffer.from(
       "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
       "base64",
     );
@@ -206,9 +229,16 @@ describe("M19: submit + finalize pipeline", () => {
       if (url.includes("/api/internal/media/provenance")) {
         return new Response(
           JSON.stringify({
-            phash: "0".repeat(64), phashFrames: null, thumbnailBase64: null,
-            frameBase64s: null, signedBase64: null, sidecarBase64: null,
-            width: 1, height: 1, durationMs: null, manifestJson: null,
+            phash: "0".repeat(64),
+            phashFrames: null,
+            thumbnailBase64: null,
+            frameBase64s: null,
+            signedBase64: null,
+            sidecarBase64: null,
+            width: 1,
+            height: 1,
+            durationMs: null,
+            manifestJson: null,
           }),
           { status: 200, headers: { "content-type": "application/json" } },
         );
@@ -222,16 +252,18 @@ describe("M19: submit + finalize pipeline", () => {
     // the postgres superuser's plane memberships are admin-only, not set.
     for (let i = 0; i < 10; i++) {
       await withWorkerDb((c) =>
-        c.query(
-          `select app.enqueue_job('media_finalize', $1, ($2::text)::jsonb, null)`,
-          [job.media_job_id, JSON.stringify({ media_job_id: job.media_job_id, provider: "replicate" })],
-        ),
+        c.query(`select app.enqueue_job('media_finalize', $1, ($2::text)::jsonb, null)`, [
+          job.media_job_id,
+          JSON.stringify({ media_job_id: job.media_job_id, provider: "replicate" }),
+        ]),
       );
     }
     const { rows: outboxRows } = await withDb((c) =>
       c.query<{ n: string }>(
         `select count(*)::text n from public.job_outbox
-          where kind='media_finalize' and dedupe_key=$1`, [job.media_job_id!]),
+          where kind='media_finalize' and dedupe_key=$1`,
+        [job.media_job_id!],
+      ),
     );
     expect(outboxRows[0]!.n).toBe("1");
 
@@ -256,7 +288,8 @@ describe("M19: submit + finalize pipeline", () => {
     const { rows: assets } = await withDb((c) =>
       c.query<{ n: string; storage: string; key: string }>(
         `select count(*)::text n, min(storage::text) storage, min(object_key) key
-           from public.assets where source_kind='generated'`, [],
+           from public.assets where source_kind='generated'`,
+        [],
       ),
     );
     expect(assets[0]!.n).toBe("1");
@@ -265,7 +298,9 @@ describe("M19: submit + finalize pipeline", () => {
     const { rows: resv } = await withDb((c) =>
       c.query<{ state: string; n: string }>(
         `select state, count(*)::text n from public.agent_spend_reservations
-          where external_ref=$1 group by state`, [job.media_job_id!]),
+          where external_ref=$1 group by state`,
+        [job.media_job_id!],
+      ),
     );
     expect(resv.length).toBe(1);
     expect(resv[0]!.state).toBe("settled");
@@ -287,7 +322,9 @@ describe("M19: submit + finalize pipeline", () => {
     const after = await (env.PUBLIC_MEDIA as R2Bucket).list({ prefix: "m/" });
     expect(after.objects.length).toBeLessThanOrEqual(1); // never double-stored
     const { rows: assets2 } = await withDb((c) =>
-      c.query<{ n: string }>(`select count(*)::text n from public.assets where source_kind='generated'`),
+      c.query<{ n: string }>(
+        `select count(*)::text n from public.assets where source_kind='generated'`,
+      ),
     );
     expect(assets2[0]!.n).toBe("1");
   });

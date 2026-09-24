@@ -123,7 +123,7 @@ alter table public.assets
 create index assets_phash_idx on public.assets (phash) where phash is not null;
 create index assets_generator_idx on public.assets (generator) where generator is not null;
 
-alter table public.media_jobs   enable row level security;  -- musebook_worker only
+alter table public.media_jobs   enable row level security;  -- jobs plane only
 alter table public.media_models enable row level security;
 alter table public.media_jobs   force row level security;   -- CF-spine §2: rolbypassrls
 alter table public.media_models force row level security;
@@ -137,16 +137,13 @@ create trigger media_models_set_updated_at before update on public.media_models
 -- Worker-plane grants (§16.8.2's posture): the jobs plane writes media_jobs
 -- inside the consumers and reads the registry for model picks; the kernel
 -- plane reads its own rows for the owner-scoped status route.
-grant select on public.media_models to musebook_worker, musebook_jobs, musebook_kernel;
+grant select on public.media_models to musebook_jobs, musebook_kernel;
 grant select, insert, update on public.media_jobs to musebook_jobs;
-grant select, update on public.media_jobs to musebook_worker;
 grant select on public.media_jobs to musebook_kernel;
-create policy media_models_worker_read on public.media_models
-  for select to musebook_worker, musebook_jobs, musebook_kernel using (true);
+create policy media_models_planes_read on public.media_models
+  for select to musebook_jobs, musebook_kernel using (true);
 create policy media_jobs_jobs_all on public.media_jobs
   for all to musebook_jobs using (true) with check (true);
-create policy media_jobs_worker_all on public.media_jobs
-  for all to musebook_worker using (true) with check (true);
 create policy media_jobs_kernel_read on public.media_jobs
   for select to musebook_kernel using (true);
 
@@ -452,17 +449,27 @@ grant execute on function public.media_job_approved(uuid)
 -- Replicate rows are version-hash ids and stay enabled=false behind
 -- MEDIA_BACKEND_REPLICATE_ENABLED=false until H18's token exists.
 insert into public.media_models
-  (backend, model_id, kind, slot, price_atomic, price_unit, max_duration_s, preference_rank, enabled, notes)
+  (id, backend, model_id, kind, slot, price_atomic, price_unit, max_duration_s, preference_rank, enabled, notes,
+   created_at, updated_at)
 values
-  ('fal','fal-ai/nano-banana-pro','image','default',40000,'per_asset',null,10,true,'Nano Banana Pro — strong typography and realism'),
-  ('fal','fal-ai/flux-2/flash','image','fast',12000,'per_asset',null,20,true,'FLUX.2 flash — draft tier'),
-  ('fal','fal-ai/z-image/turbo','image','cheap',3000,'per_asset',null,30,true,'Z-Image Turbo — lowest cost per image'),
-  ('fal','fal-ai/bytedance/seedance/v1.5/pro/text-to-video','video','default',60000,'per_second',20,10,true,'Seedance 1.5 Pro text-to-video'),
-  ('fal','bytedance/seedance-2.0/text-to-video','video','premium',120000,'per_second',20,20,true,'Seedance 2.0'),
-  ('fal','bytedance/seedance-2.0/fast/text-to-video','video','fast',20000,'per_second',20,30,true,'Seedance 2.0 fast — draft tier'),
+  ('dddddddd-dddd-4ddd-8ddd-000000000001','fal','fal-ai/nano-banana-pro','image','default',40000,'per_asset',null,10,true,'Nano Banana Pro — strong typography and realism',
+   timestamptz '2026-09-23 00:00:00+00',timestamptz '2026-09-23 00:00:00+00'),
+  ('dddddddd-dddd-4ddd-8ddd-000000000002','fal','fal-ai/flux-2/flash','image','fast',12000,'per_asset',null,20,true,'FLUX.2 flash — draft tier',
+   timestamptz '2026-09-23 00:00:00+00',timestamptz '2026-09-23 00:00:00+00'),
+  ('dddddddd-dddd-4ddd-8ddd-000000000003','fal','fal-ai/z-image/turbo','image','cheap',3000,'per_asset',null,30,true,'Z-Image Turbo — lowest cost per image',
+   timestamptz '2026-09-23 00:00:00+00',timestamptz '2026-09-23 00:00:00+00'),
+  ('dddddddd-dddd-4ddd-8ddd-000000000004','fal','fal-ai/bytedance/seedance/v1.5/pro/text-to-video','video','default',60000,'per_second',20,10,true,'Seedance 1.5 Pro text-to-video',
+   timestamptz '2026-09-23 00:00:00+00',timestamptz '2026-09-23 00:00:00+00'),
+  ('dddddddd-dddd-4ddd-8ddd-000000000005','fal','bytedance/seedance-2.0/text-to-video','video','premium',120000,'per_second',20,20,true,'Seedance 2.0',
+   timestamptz '2026-09-23 00:00:00+00',timestamptz '2026-09-23 00:00:00+00'),
+  ('dddddddd-dddd-4ddd-8ddd-000000000006','fal','bytedance/seedance-2.0/fast/text-to-video','video','fast',20000,'per_second',20,30,true,'Seedance 2.0 fast — draft tier',
+   timestamptz '2026-09-23 00:00:00+00',timestamptz '2026-09-23 00:00:00+00'),
   -- i2v: no verified price → price_atomic null disables it structurally.
-  ('fal','fal-ai/kling-video/v3/pro/image-to-video','video','i2v',null,'per_second',20,40,false,'Kling v3 Pro image-to-video — disabled until priced'),
+  ('dddddddd-dddd-4ddd-8ddd-000000000007','fal','fal-ai/kling-video/v3/pro/image-to-video','video','i2v',null,'per_second',20,40,false,'Kling v3 Pro image-to-video — disabled until priced',
+   timestamptz '2026-09-23 00:00:00+00',timestamptz '2026-09-23 00:00:00+00'),
   -- Replicate failover rows: enabled=false until MEDIA_BACKEND_REPLICATE_ENABLED.
-  ('replicate','UNVERIFIED-replicate-image-default','image','default',40000,'per_asset',null,50,false,'replicate image default — placeholder version hash, enable after live reconcile'),
-  ('replicate','UNVERIFIED-replicate-video-default','video','default',60000,'per_second',20,50,false,'replicate video default — placeholder version hash, enable after live reconcile')
+  ('dddddddd-dddd-4ddd-8ddd-000000000008','replicate','UNVERIFIED-replicate-image-default','image','default',40000,'per_asset',null,50,false,'replicate image default — placeholder version hash, enable after live reconcile',
+   timestamptz '2026-09-23 00:00:00+00',timestamptz '2026-09-23 00:00:00+00'),
+  ('dddddddd-dddd-4ddd-8ddd-000000000009','replicate','UNVERIFIED-replicate-video-default','video','default',60000,'per_second',20,50,false,'replicate video default — placeholder version hash, enable after live reconcile',
+   timestamptz '2026-09-23 00:00:00+00',timestamptz '2026-09-23 00:00:00+00')
 on conflict (backend, model_id) do nothing;

@@ -1,16 +1,11 @@
 // packages/media/src/registry.ts — §11.4 backend pick + §11.8 scoped keys.
 // media_models is DATA (spine invariant 5): every price and endpoint id is a
 // row read per request, never a literal in the bundle.
-import type {
-  BackendName,
-  GenerateRequest,
-  MediaBackend,
-  MediaKind,
-} from "./backend.js";
-import { createFalBackend } from "./fal.js";
-import { createReplicateBackend } from "./replicate.js";
-import { verifyFalWebhook } from "./webhook/fal.js";
-import { verifyReplicateWebhook } from "./webhook/replicate.js";
+import type { BackendName, GenerateRequest, MediaBackend, MediaKind } from "./backend";
+import { createFalBackend } from "./fal";
+import { createReplicateBackend } from "./replicate";
+import { verifyFalWebhook } from "./webhook/fal";
+import { verifyReplicateWebhook } from "./webhook/replicate";
 
 export interface MediaModelRow {
   readonly backend: BackendName;
@@ -61,7 +56,8 @@ export async function pickModel(
   excludeBackend?: BackendName,
 ): Promise<MediaModelRow | null> {
   const cap = await store.perActionCapAtomic(delegationId);
-  const ceiling = cap === null ? BigInt(req.maxCostAtomic) : minBig(BigInt(req.maxCostAtomic), BigInt(cap));
+  const ceiling =
+    cap === null ? BigInt(req.maxCostAtomic) : minBig(BigInt(req.maxCostAtomic), BigInt(cap));
   const rows = (await store.listModels(req.kind)).filter(
     (r) =>
       r.enabled &&

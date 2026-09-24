@@ -4,8 +4,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { handleMediaWebhook } from "../src/routes/media.js";
 
-const SECRET =
-  "whsec_" + Buffer.from("0123456789abcdef0123456789abcdef").toString("base64");
+const SECRET = "whsec_" + Buffer.from("0123456789abcdef0123456789abcdef").toString("base64");
 
 function stubEnv() {
   const waits: Promise<unknown>[] = [];
@@ -26,11 +25,14 @@ function stubEnv() {
 }
 
 const post = (body: string, headers: Record<string, string> = {}): Request =>
-  new Request("https://musebook.dev/api/media/webhook/replicate?job=bbbbbbbb-bbbb-4bbb-8bbb-000000000002", {
-    method: "POST",
-    headers,
-    body,
-  });
+  new Request(
+    "https://musebook.dev/api/media/webhook/replicate?job=bbbbbbbb-bbbb-4bbb-8bbb-000000000002",
+    {
+      method: "POST",
+      headers,
+      body,
+    },
+  );
 
 describe("M19.5 — media webhook signature gate", () => {
   it("401s on an unsigned body and enqueues nothing", async () => {

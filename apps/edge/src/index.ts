@@ -139,17 +139,13 @@ export default {
     if (mediaWebhookMatch?.[1] !== undefined) {
       return handleMediaWebhook(request, env, ctx, mediaWebhookMatch[1]);
     }
-    const mediaJobMatch = url.pathname.match(
-      /^\/api\/media\/jobs\/([0-9a-f-]{36})(\/cancel)?$/,
-    );
+    const mediaJobMatch = url.pathname.match(/^\/api\/media\/jobs\/([0-9a-f-]{36})(\/cancel)?$/);
     if (mediaJobMatch?.[1] !== undefined) {
       return mediaJobMatch[2] === "/cancel"
         ? handleMediaJobCancel(request, env, ctx, mediaJobMatch[1])
         : handleMediaJobGet(request, env, ctx, mediaJobMatch[1]);
     }
-    const provenanceMatch = url.pathname.match(
-      /^\/api\/provenance\/([0-9a-f-]{36})$/,
-    );
+    const provenanceMatch = url.pathname.match(/^\/api\/provenance\/([0-9a-f-]{36})$/);
     if (provenanceMatch?.[1] !== undefined) {
       return handleProvenanceGet(request, env, provenanceMatch[1]);
     }

@@ -54,9 +54,7 @@ export async function verifyFalWebhook(
 
   const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", rawBody));
   const bodyHashHex = [...digest].map((b) => b.toString(16).padStart(2, "0")).join("");
-  const message = new TextEncoder().encode(
-    [requestId, userId, timestamp, bodyHashHex].join("\n"),
-  );
+  const message = new TextEncoder().encode([requestId, userId, timestamp, bodyHashHex].join("\n"));
 
   const sig = hexToBytes(signatureHex);
   if (!sig) return null;

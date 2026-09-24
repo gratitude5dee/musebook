@@ -24,9 +24,7 @@ export async function bufferAndHash(
 ): Promise<{ bytes: Uint8Array; sha256: string; byteLength: number }> {
   const raw = new Uint8Array(await res.arrayBuffer());
   const sum = await crypto.subtle.digest("SHA-256", raw);
-  const sha256 = [...new Uint8Array(sum)]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  const sha256 = [...new Uint8Array(sum)].map((b) => b.toString(16).padStart(2, "0")).join("");
   return { bytes: raw, sha256, byteLength: raw.byteLength };
 }
 

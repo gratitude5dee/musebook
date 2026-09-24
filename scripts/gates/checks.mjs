@@ -5301,10 +5301,11 @@ export function m19SubmitAndCollect() {
     errors.push("media.ts does not record backend/provider_request_id/status='running'");
   for (const h of rg(String.raw`status\s*=\s*'succeeded'`, ["apps", "packages"]))
     errors.push(`status='succeeded' written outside finalize_media_job: ${h}`);
-  for (const h of rg(String.raw`finalize_media_job\s*\(`, ["apps", "packages"], [
-    "-g", "*.ts",
-    "-g", "!**/test/**", "-g", "!**/dist/**", "-g", "!**/.next/**",
-  ])) {
+  for (const h of rg(
+    String.raw`finalize_media_job\s*\(`,
+    ["apps", "packages"],
+    ["-g", "*.ts", "-g", "!**/test/**", "-g", "!**/dist/**", "-g", "!**/.next/**"],
+  )) {
     if (!h.startsWith("apps/worker/src/consumers/media-finalize.ts:"))
       errors.push(`finalize_media_job called outside the finalize consumer: ${h}`);
   }

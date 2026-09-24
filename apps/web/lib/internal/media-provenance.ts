@@ -15,7 +15,10 @@ const requestSchema = z.object({
   title: z.string().max(200).default(""),
   modelId: z.string().max(200).default(""),
   backend: z.enum(["fal", "replicate"]).default("fal"),
-  promptSha256: z.string().regex(/^[0-9a-f]{64}$/).default("0".repeat(64)),
+  promptSha256: z
+    .string()
+    .regex(/^[0-9a-f]{64}$/)
+    .default("0".repeat(64)),
   authorKind: z.enum(["human", "agent"]).default("human"),
   authorWallet: z.string().max(200).default(""),
   authorDisplayName: z.string().max(200).default("creator"),
@@ -101,16 +104,11 @@ export async function handleMediaProvenance(req: Request): Promise<Response> {
         ? { MEDIA_SANDBOX_IMAGE: process.env.MEDIA_SANDBOX_IMAGE }
         : {}),
     });
-    const phashSource = await media.extractVideoFrames(
-      bytes,
-      input.mimeType,
-      [0.1, 0.5, 0.9],
-      {
-        ...(process.env.MEDIA_SANDBOX_IMAGE
-          ? { MEDIA_SANDBOX_IMAGE: process.env.MEDIA_SANDBOX_IMAGE }
-          : {}),
-      },
-    );
+    const phashSource = await media.extractVideoFrames(bytes, input.mimeType, [0.1, 0.5, 0.9], {
+      ...(process.env.MEDIA_SANDBOX_IMAGE
+        ? { MEDIA_SANDBOX_IMAGE: process.env.MEDIA_SANDBOX_IMAGE }
+        : {}),
+    });
     out.phashFrames = await media.videoPhashFrames(phashSource);
     if (input.wantFrames) {
       out.frameBase64s = safetyFrames.map((f) => f.toString("base64"));

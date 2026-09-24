@@ -5,7 +5,7 @@ import { Builder, LocalSigner, Reader } from "@contentauth/c2pa-node";
 import type { DestinationBufferAsset } from "@contentauth/c2pa-node";
 import type { Manifest } from "@contentauth/c2pa-types";
 import sharp from "sharp";
-import { dct2d } from "./dct.js"; // separable type-II DCT; no dependency needed
+import { dct2d } from "./dct"; // separable type-II DCT; no dependency needed
 
 export interface ProvenanceInput {
   readonly bytes: Buffer;

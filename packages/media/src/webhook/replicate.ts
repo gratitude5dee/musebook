@@ -17,13 +17,9 @@ export async function verifyReplicateWebhook(
   if (!Number.isFinite(ts) || Math.abs(Date.now() / 1000 - ts) > 300) return null;
 
   const raw = Uint8Array.from(atob(secretEnv.replace(/^whsec_/, "")), (c) => c.charCodeAt(0));
-  const key = await crypto.subtle.importKey(
-    "raw",
-    raw,
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["verify"],
-  );
+  const key = await crypto.subtle.importKey("raw", raw, { name: "HMAC", hash: "SHA-256" }, false, [
+    "verify",
+  ]);
 
   const prefix = new TextEncoder().encode(`${id}.${timestamp}.`);
   const signed = new Uint8Array(prefix.length + rawBody.byteLength);

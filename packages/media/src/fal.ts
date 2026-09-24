@@ -3,9 +3,9 @@
 // fal.run host. Auth is `Authorization: Key ${FAL_KEY}` — the literal word Key.
 // DEVIATION from the spec excerpt: estimateCostAtomic "reads media_models",
 // so the factory also takes the MediaModelStore — (falKey, store), not (falKey).
-import type { GenerateRequest, MediaBackend } from "./backend.js";
-import { priceFor, type MediaModelStore } from "./registry.js";
-import { verifyFalWebhook } from "./webhook/fal.js";
+import type { GenerateRequest, MediaBackend } from "./backend";
+import { priceFor, type MediaModelStore } from "./registry";
+import { verifyFalWebhook } from "./webhook/fal";
 
 const FAL_QUEUE = "https://queue.fal.run";
 
@@ -142,9 +142,7 @@ export function createFalBackend(
       if (json.video) {
         return {
           status: "succeeded",
-          assets: [
-            { url: json.video.url, mimeType: json.video.content_type ?? "video/mp4" },
-          ],
+          assets: [{ url: json.video.url, mimeType: json.video.content_type ?? "video/mp4" }],
         };
       }
       return { status: "failed", error: "fal returned no recognised asset field" };

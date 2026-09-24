@@ -93,7 +93,9 @@ export async function resetSeed(): Promise<void> {
          where idempotency_key like 'test-%'
             or asset_id in (select id from public.assets where object_key not like 'seed/%')`,
     );
-    await c.query(`delete from public.agent_spend_reservations where idempotency_key like 'test-%'`);
+    await c.query(
+      `delete from public.agent_spend_reservations where idempotency_key like 'test-%'`,
+    );
     // Everything except the six seeded r2_public media rows (object_key
     // 'seed/…') is test-fixture output (upload promotion, composer flows)
     // that survives resets and leaks into app.distribution_media's join on

@@ -78,6 +78,10 @@ export function thumbnailKey(sha256: string, width: number): string {
 /** `staging/{userId}/{uuid}/{filename}` — presigned upload staging in
  *  musebook-uploads. Sanitized: filename reduced to its basename. */
 export function stagingKey(userId: string, fileId: string, filename: string): string {
-  const base = filename.split("/").pop()?.replace(/[^a-zA-Z0-9._-]/g, "_") ?? "file";
+  const base =
+    filename
+      .split("/")
+      .pop()
+      ?.replace(/[^a-zA-Z0-9._-]/g, "_") ?? "file";
   return `staging/${userId}/${fileId}/${base}`;
 }

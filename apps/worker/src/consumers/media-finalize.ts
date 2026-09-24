@@ -199,10 +199,9 @@ async function callProvenance(
 export async function runMediaFinalize(env: Env, mediaJobId: string): Promise<void> {
   const db = await pgFreshJobs(env);
   try {
-    const { rows } = await db.query<MediaJobRow>(
-      `select * from public.media_jobs where id = $1`,
-      [mediaJobId],
-    );
+    const { rows } = await db.query<MediaJobRow>(`select * from public.media_jobs where id = $1`, [
+      mediaJobId,
+    ]);
     const job = rows[0];
     if (!job) return;
     // Terminal or already-final rows need no work — the outbox dedupe is the
@@ -269,28 +268,29 @@ export async function runMediaFinalize(env: Env, mediaJobId: string): Promise<vo
     // and returns thumbnails for gate 3. Over 25MB it returns phash=null and
     // thumbnailBase64=null rather than rejecting, per §11.10's bound.
     const ctx = await loadAuthorContext(db, job);
-    const prov = byteLength > PROVENANCE_MAX_BYTES
-      ? null // over the endpoint's bound — finalize proceeds without phash/signing
-      : await callProvenance(env, {
-      bytes,
-      mimeType: contentType,
-      title: `Musebook media job ${job.id}`,
-      modelId: job.model_id,
-      backend: job.backend,
-      promptSha256: job.prompt_sha256,
-      authorKind: ctx.authorKind,
-      authorWallet: ctx.authorWallet,
-      authorDisplayName: ctx.authorDisplayName,
-      connectorSlug: ctx.connectorSlug,
-      delegationId: job.delegation_id,
-      postUrl: ctx.postUrl,
-    }).catch((e) => {
-      // The endpoint is best-effort: a provenance outage must not strand a
-      // paid generation. phash/signing fields come back null and the finalize
-      // proceeds without them (C2PA_SIGNING_ENABLED=false is the default anyway).
-      console.warn("provenance_unavailable", (e as Error).message);
-      return null;
-    });
+    const prov =
+      byteLength > PROVENANCE_MAX_BYTES
+        ? null // over the endpoint's bound — finalize proceeds without phash/signing
+        : await callProvenance(env, {
+            bytes,
+            mimeType: contentType,
+            title: `Musebook media job ${job.id}`,
+            modelId: job.model_id,
+            backend: job.backend,
+            promptSha256: job.prompt_sha256,
+            authorKind: ctx.authorKind,
+            authorWallet: ctx.authorWallet,
+            authorDisplayName: ctx.authorDisplayName,
+            connectorSlug: ctx.connectorSlug,
+            delegationId: job.delegation_id,
+            postUrl: ctx.postUrl,
+          }).catch((e) => {
+            // The endpoint is best-effort: a provenance outage must not strand a
+            // paid generation. phash/signing fields come back null and the finalize
+            // proceeds without them (C2PA_SIGNING_ENABLED=false is the default anyway).
+            console.warn("provenance_unavailable", (e as Error).message);
+            return null;
+          });
 
     // Gate 3 — the vision pass over thumbnails. Blocked bytes are never
     // stored: this runs BEFORE any R2 put (§11.9).
@@ -326,9 +326,7 @@ export async function runMediaFinalize(env: Env, mediaJobId: string): Promise<vo
     const key = objectKey(tier, sha256, contentType);
     const sideKey = sidecarKey(key);
     const bucket: MediaBucketLike =
-      tier === "paid"
-        ? (env.PAID_MEDIA as MediaBucketLike)
-        : (env.PUBLIC_MEDIA as MediaBucketLike);
+      tier === "paid" ? (env.PAID_MEDIA as MediaBucketLike) : (env.PUBLIC_MEDIA as MediaBucketLike);
     const objectBytes = prov?.signedBase64 ? fromB64(prov.signedBase64) : bytes;
     await putBytes(bucket, key, objectBytes, contentType);
     if (prov?.sidecarBase64) {

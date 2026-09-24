@@ -35,26 +35,60 @@ describe("M19: provenance round-trip", () => {
     // end-entity but accepts a leaf that chains to a (self-signed) root CA.
     // §11.9.6's dev fallback; prod carries a real CA-issued cert.
     execFileSync("openssl", [
-      "req", "-x509", "-newkey", "ec", "-pkeyopt", "ec_paramgen_curve:P-256",
-      "-keyout", join(dir, "ca-key.pem"), "-out", join(dir, "ca-cert.pem"),
-      "-nodes", "-subj", "/CN=Musebook Test Root CA", "-days", "1",
-      "-addext", "basicConstraints=critical,CA:TRUE",
-      "-addext", "keyUsage=critical,keyCertSign,cRLSign",
+      "req",
+      "-x509",
+      "-newkey",
+      "ec",
+      "-pkeyopt",
+      "ec_paramgen_curve:P-256",
+      "-keyout",
+      join(dir, "ca-key.pem"),
+      "-out",
+      join(dir, "ca-cert.pem"),
+      "-nodes",
+      "-subj",
+      "/CN=Musebook Test Root CA",
+      "-days",
+      "1",
+      "-addext",
+      "basicConstraints=critical,CA:TRUE",
+      "-addext",
+      "keyUsage=critical,keyCertSign,cRLSign",
     ]);
     execFileSync("openssl", [
-      "req", "-newkey", "ec", "-pkeyopt", "ec_paramgen_curve:P-256",
-      "-keyout", join(dir, "leaf-key.pem"), "-out", join(dir, "leaf.csr"),
-      "-nodes", "-subj", "/CN=Musebook Test Signer",
+      "req",
+      "-newkey",
+      "ec",
+      "-pkeyopt",
+      "ec_paramgen_curve:P-256",
+      "-keyout",
+      join(dir, "leaf-key.pem"),
+      "-out",
+      join(dir, "leaf.csr"),
+      "-nodes",
+      "-subj",
+      "/CN=Musebook Test Signer",
     ]);
     writeFileSync(
       join(dir, "leaf-ext.cnf"),
       "basicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature\nextendedKeyUsage=emailProtection\n",
     );
     execFileSync("openssl", [
-      "x509", "-req", "-in", join(dir, "leaf.csr"),
-      "-CA", join(dir, "ca-cert.pem"), "-CAkey", join(dir, "ca-key.pem"),
-      "-CAcreateserial", "-days", "1", "-extfile", join(dir, "leaf-ext.cnf"),
-      "-out", join(dir, "leaf-cert.pem"),
+      "x509",
+      "-req",
+      "-in",
+      join(dir, "leaf.csr"),
+      "-CA",
+      join(dir, "ca-cert.pem"),
+      "-CAkey",
+      join(dir, "ca-key.pem"),
+      "-CAcreateserial",
+      "-days",
+      "1",
+      "-extfile",
+      join(dir, "leaf-ext.cnf"),
+      "-out",
+      join(dir, "leaf-cert.pem"),
     ]);
     // Signing cert = leaf + CA bundle so the chain resolves.
     certPem =
@@ -63,7 +97,9 @@ describe("M19: provenance round-trip", () => {
     keyPem = execFileSync("cat", [join(dir, "leaf-key.pem")], { encoding: "utf8" });
     INPUT.bytes = await sharp({
       create: { width: 64, height: 64, channels: 3, background: { r: 40, g: 120, b: 200 } },
-    }).png().toBuffer();
+    })
+      .png()
+      .toBuffer();
   });
 
   it("signs (real manifest) and reads it back; phash is a 64-bit hexable string", async () => {
