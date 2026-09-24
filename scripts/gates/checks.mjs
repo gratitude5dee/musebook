@@ -3118,7 +3118,7 @@ export function m10AgplDockerfile() {
 // M10.3 — thirteen platforms, every one with non-null non-'unverified' limits_source.
 export function m10PlatformSeed() {
   const errors = [];
-  const count = sqlCheck("select count(*) from public.platforms", "13");
+  const count = sqlCheck("select count(*) >= 13 from public.platforms", "t");
   if (count.blocked) return count;
   if (!count.ok) errors.push(...count.errors);
   const unverified = sqlCheck(
@@ -5023,3 +5023,118 @@ export function m16LintRules() {
 export function m16ArtifactsSealed() {
   return r2Seal();
 }
+
+// ---------------------------------------------------------------------------
+// M17 — the LLM reformat pass, gated like every other dependency (§12.4).
+// ---------------------------------------------------------------------------
+
+const M17_PROBE = "pnpm --filter musebook-worker exec tsx scripts/m17-comparison.mts";
+
+function m17Probe(sub, expectPrefix) {
+  const r = run(`${M17_PROBE} ${sub}`, { timeout: 600_000 });
+  const line =
+    (r.out + "")
+      .trim()
+      .split("\n")
+      .filter((l) => /OK|FAIL|BLOCKED/.test(l))
+      .pop() ?? "";
+  if (!line.startsWith(expectPrefix))
+    return {
+      ok: false,
+      errors: [`${sub}: expected '${expectPrefix}', got '${line || r.out.slice(-400)}'`],
+    };
+  return { ok: true, errors: [], line };
+}
+
+// M17.1 — the held-out comparison, recorded with date. The model has to beat
+// the deterministic pass by a real margin on cases the fallback cannot satisfy
+// (media subsets, alt text, titles) — it does not have to beat it everywhere.
+export function m17Comparison() {
+  if (!process.env.AI_GATEWAY_API_KEY)
+    return { ok: false, errors: [], blocked: "AI_GATEWAY_API_KEY unset (H15)" };
+  const res = m17Probe("comparison", "COMPARISON_OK");
+  if (!res.ok) return res;
+  const p = join(ROOT, ".gate/m17-comparison.json");
+  if (!existsSync(p)) return { ok: false, errors: [".gate/m17-comparison.json missing"] };
+  const j = JSON.parse(readFileSync(p, "utf8"));
+  const ageDays = (Date.now() - Date.parse(j.ranAt ?? 0)) / 86400_000;
+  if (!(ageDays < 1)) return { ok: false, errors: [`comparison ranAt ${j.ranAt} is stale`] };
+  if (!(j.llm?.pass > j.deterministic?.pass))
+    return {
+      ok: false,
+      errors: [`model ${j.llm?.pass}/${j.llm?.n} did not beat deterministic ${j.deterministic?.pass}/${j.deterministic?.n}`],
+    };
+  return { ok: true, errors: [] };
+}
+
+// M17.2 — the validator still gates the model output: a violating proposal is
+// rejected identically, and a proposal that never validates ends deterministic.
+export function m17ValidatorGates() {
+  return vitestSlice(`${DG} test/m17.test.ts`, "validator gates model output");
+}
+
+// M17.3 — gateway 503 -> deterministic variant + release_agent_spend returns
+// the reservation.
+export function m17GatewayDown() {
+  const slice = vitestSlice(`${DG} test/m17.test.ts`, "gateway down");
+  if (!slice.ok) return slice;
+  return m17Probe("release", "RELEASE_OK");
+}
+
+// M17.4 — provenance: zero unverified/null limits_source, and every row's
+// limits_checked_at inside the freshness window.
+export function m17Provenance() {
+  const errors = [];
+  const unverified = sqlCheck(
+    "select count(*) from public.platforms where limits_source is null or limits_source = 'unverified'",
+    "0",
+  );
+  if (unverified.blocked) return unverified;
+  if (!unverified.ok) errors.push(...unverified.errors);
+  const stale = sqlCheck(
+    "select count(*) from public.platforms where limits_checked_at < now() - interval '90 days'",
+    "0",
+  );
+  if (stale.blocked) return stale;
+  if (!stale.ok) errors.push(...stale.errors);
+  return { ok: errors.length === 0, errors };
+}
+
+// M17.5 — the counter-parity property re-run across the widened platform set
+// (every seeded row, live from the DB).
+export function m17CounterParity() {
+  return m17Probe("parity", "PARITY_OK");
+}
+
+// M17.6 — the new channels' deterministic variants are still full ports, and
+// the fan-out review surface restates the unpaywalled-copy consequence.
+export function m17FullPorts() {
+  const ports = m17Probe("ports", "PORTS_OK");
+  if (!ports.ok) return ports;
+  const errors = [];
+  if (rg("full post, not a teaser", ["apps/web"]).length === 0)
+    errors.push("distribute page no longer states the full-port consequence");
+  if (rg("public and free to read", ["packages/ui"]).length === 0)
+    errors.push("variant card no longer states the unpaywalled-copy consequence");
+  return { ok: errors.length === 0, errors };
+}
+
+// M17.7 — REFORMAT_MODEL/REFORMAT_MAX_REPAIRS are wrangler [vars] and the
+// manifest, AI_GATEWAY_API_KEY is a manifest secret and is never a var.
+export function m17EnvManifest() {
+  const errors = [];
+  const manifest = readFileSync(join(ROOT, "scripts/env-manifest.mjs"), "utf8");
+  for (const name of ["REFORMAT_MODEL", "REFORMAT_MAX_REPAIRS", "AI_GATEWAY_API_KEY"]) {
+    if (!manifest.includes(`"${name}"`))
+      errors.push(`${name} missing from scripts/env-manifest.mjs`);
+  }
+  const w = readJsonc(join(ROOT, "apps/worker/wrangler.jsonc"));
+  const vars = Object.keys(w?.vars ?? {});
+  if (!vars.includes("REFORMAT_MODEL")) errors.push("REFORMAT_MODEL missing from wrangler vars");
+  if (vars.includes("AI_GATEWAY_API_KEY"))
+    errors.push("AI_GATEWAY_API_KEY is a wrangler var — it must be a secret");
+  for (const h of rg("AI_GATEWAY_API_KEY", ["apps/worker/wrangler.jsonc"]))
+    errors.push(`AI_GATEWAY_API_KEY literal in wrangler.jsonc: ${h}`);
+  return { ok: errors.length === 0, errors };
+}
+

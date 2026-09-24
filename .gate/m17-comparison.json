@@ -1,0 +1,131 @@
+{
+  "ranAt": "2026-09-24T04:28:56.764Z",
+  "model": "anthropic/claude-sonnet-5",
+  "cases": [
+    {
+      "name": "x-6-images",
+      "platform": "x",
+      "llm_should_win": true,
+      "llm": {
+        "generated_by": "llm",
+        "ok": true,
+        "failures": []
+      },
+      "deterministic": {
+        "ok": false,
+        "failures": [
+          "6 images, maximum 4"
+        ]
+      }
+    },
+    {
+      "name": "x-image-plus-video",
+      "platform": "x",
+      "llm_should_win": true,
+      "llm": {
+        "generated_by": "llm",
+        "ok": true,
+        "failures": []
+      },
+      "deterministic": {
+        "ok": false,
+        "failures": [
+          "x accepts images OR one video, never both"
+        ]
+      }
+    },
+    {
+      "name": "pinterest-no-alt",
+      "platform": "pinterest",
+      "llm_should_win": true,
+      "llm": {
+        "generated_by": "llm",
+        "ok": true,
+        "failures": []
+      },
+      "deterministic": {
+        "ok": true,
+        "failures": []
+      }
+    },
+    {
+      "name": "youtube-tiny-body",
+      "platform": "youtube",
+      "llm_should_win": true,
+      "llm": {
+        "generated_by": "llm",
+        "ok": true,
+        "failures": []
+      },
+      "deterministic": {
+        "ok": true,
+        "failures": []
+      }
+    },
+    {
+      "name": "x-plain",
+      "platform": "x",
+      "llm_should_win": false,
+      "llm": {
+        "generated_by": "llm",
+        "ok": true,
+        "failures": []
+      },
+      "deterministic": {
+        "ok": true,
+        "failures": []
+      }
+    },
+    {
+      "name": "threads-long",
+      "platform": "threads",
+      "llm_should_win": false,
+      "llm": {
+        "generated_by": "llm",
+        "ok": true,
+        "failures": []
+      },
+      "deterministic": {
+        "ok": true,
+        "failures": []
+      }
+    },
+    {
+      "name": "devto-essay",
+      "platform": "devto",
+      "llm_should_win": false,
+      "llm": {
+        "generated_by": "llm",
+        "ok": true,
+        "failures": []
+      },
+      "deterministic": {
+        "ok": true,
+        "failures": []
+      }
+    },
+    {
+      "name": "slack-note",
+      "platform": "slack",
+      "llm_should_win": false,
+      "llm": {
+        "generated_by": "llm",
+        "ok": true,
+        "failures": []
+      },
+      "deterministic": {
+        "ok": true,
+        "failures": []
+      }
+    }
+  ],
+  "llm": {
+    "n": 8,
+    "pass": 8
+  },
+  "deterministic": {
+    "n": 8,
+    "pass": 6
+  },
+  "verdict": true
+}
