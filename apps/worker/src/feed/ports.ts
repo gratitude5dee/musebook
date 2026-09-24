@@ -90,9 +90,7 @@ export async function insertAgentActions(
   }));
   // ($1::text)::jsonb + JSON.stringify — arrays don't survive `$1::jsonb`
   // under node-pg (array literal, not JSON); ingest.ts uses the same form.
-  await fresh.query("select app.ingest_action_events(($1::text)::jsonb)", [
-    JSON.stringify(events),
-  ]);
+  await fresh.query("select app.ingest_action_events(($1::text)::jsonb)", [JSON.stringify(events)]);
 }
 
 /** §9.23's `feedPorts(env)`: the whole DbHandles over both Hyperdrive
