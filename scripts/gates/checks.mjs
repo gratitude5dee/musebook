@@ -5158,7 +5158,9 @@ export function m18Mounted() {
   const page = readFileSync(join(ROOT, "apps/web/app/p/[slug]/page.tsx"), "utf8");
   const errors = [];
   if (!/<WebMcpTools\b/.test(page)) errors.push("page.tsx does not render <WebMcpTools>");
-  if (!/import\s*\{\s*WebMcpTools\s*\}\s*from\s*["']@\/components\/post\/webmcp-tools["']/.test(page))
+  if (
+    !/import\s*\{\s*WebMcpTools\s*\}\s*from\s*["']@\/components\/post\/webmcp-tools["']/.test(page)
+  )
     errors.push("import does not resolve to @/components/post/webmcp-tools");
   if (!existsSync(join(ROOT, "apps/web/components/post/webmcp-tools.tsx")))
     errors.push("apps/web/components/post/webmcp-tools.tsx missing");
@@ -5182,7 +5184,10 @@ export function m18OriginTrial() {
   const layout = readFileSync(join(ROOT, "apps/web/app/layout.tsx"), "utf8");
   if (!/NEXT_PUBLIC_WEBMCP_OT_TOKEN/.test(layout))
     errors.push("layout.tsx does not condition on NEXT_PUBLIC_WEBMCP_OT_TOKEN");
-  if (!/httpEquiv=["']origin-trial["']/.test(layout) && !/httpEquiv=\{?["']origin-trial/.test(layout))
+  if (
+    !/httpEquiv=["']origin-trial["']/.test(layout) &&
+    !/httpEquiv=\{?["']origin-trial/.test(layout)
+  )
     errors.push("layout.tsx has no origin-trial meta");
   const manifest = readFileSync(join(ROOT, "scripts/env-manifest.mjs"), "utf8");
   if (!manifest.includes('"NEXT_PUBLIC_WEBMCP_OT_TOKEN"'))
@@ -5203,7 +5208,10 @@ export function m18Section720() {
 // content_hash + one agent_cite action_events row (vitest agent plane +
 // playwright human plane through the edge).
 export function m18CiteWrites() {
-  const unit = vitestSlice("pnpm vitest run --project web test/cite.test.ts", "writes one citations row");
+  const unit = vitestSlice(
+    "pnpm vitest run --project web test/cite.test.ts",
+    "writes one citations row",
+  );
   if (!unit.ok) return unit;
   return playwrightSlice("webmcp-cite.spec.ts");
 }
@@ -5223,18 +5231,11 @@ export function m18CiteDenied() {
 // three files: the component, its register module, the page that mounts it.
 export function m18SingleIntegrationPoint() {
   const errors = [];
-  const integration = rg(String.raw`modelContext|registerTool|webmcp-tools|lib/webmcp`, ["apps/web"], [
-    "-g",
-    "*.ts",
-    "-g",
-    "*.tsx",
-    "-g",
-    "!**/dist/**",
-    "-g",
-    "!**/.next/**",
-    "-g",
-    "!**/test/**",
-  ]).map((h) => h.split(":")[0]);
+  const integration = rg(
+    String.raw`modelContext|registerTool|webmcp-tools|lib/webmcp`,
+    ["apps/web"],
+    ["-g", "*.ts", "-g", "*.tsx", "-g", "!**/dist/**", "-g", "!**/.next/**", "-g", "!**/test/**"],
+  ).map((h) => h.split(":")[0]);
   const expected = new Set([
     "apps/web/components/post/webmcp-tools.tsx",
     "apps/web/lib/webmcp/register.ts",
@@ -5244,7 +5245,8 @@ export function m18SingleIntegrationPoint() {
     if (!expected.has(f)) errors.push(`unexpected WebMCP integration file: ${f}`);
   }
   const present = new Set(integration);
-  for (const f of expected) if (!present.has(f)) errors.push(`missing WebMCP integration file: ${f}`);
+  for (const f of expected)
+    if (!present.has(f)) errors.push(`missing WebMCP integration file: ${f}`);
   // webmcp-types must remain a devDependency (type-only) — never a runtime dep.
   const pkg = JSON.parse(readFileSync(join(ROOT, "apps/web/package.json"), "utf8"));
   if (pkg.dependencies?.["webmcp-types"] !== undefined)

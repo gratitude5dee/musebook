@@ -165,7 +165,10 @@ export default {
 
         // post_id + content_hash are read here only to pick the Resource the
         // decision runs on; the origin re-validates the binding before writing.
-        const body = (await request.clone().json().catch(() => null)) as {
+        const body = (await request
+          .clone()
+          .json()
+          .catch(() => null)) as {
           post_id?: unknown;
           content_hash?: unknown;
         } | null;

@@ -1,8 +1,8 @@
 // apps/web/components/post/webmcp-tools.tsx  ('use client')
-'use client';
-import { useEffect } from 'react';
-import { registerPostTools } from '@/lib/webmcp/register';
-import type { PostView } from '@musebook/schema';
+"use client";
+import { useEffect } from "react";
+import { registerPostTools } from "@/lib/webmcp/register";
+import type { PostView } from "@musebook/schema";
 
 declare global {
   interface Window {
@@ -26,11 +26,7 @@ export function WebMcpTools({ post }: { post: PostView }) {
             ok: false,
           });
         }
-        const w = window.open(
-          `/pay/${postId}`,
-          'musebook-pay',
-          'width=520,height=720,popup=yes',
-        );
+        const w = window.open(`/pay/${postId}`, "musebook-pay", "width=520,height=720,popup=yes");
         if (w === null) {
           return Promise.resolve({
             message: `Open ${location.origin}/pay/${postId} to buy this article.`,
@@ -42,7 +38,7 @@ export function WebMcpTools({ post }: { post: PostView }) {
             if (w.closed) {
               clearInterval(t);
               resolve({
-                message: 'Checkout closed. Call read_article again to fetch the unlocked body.',
+                message: "Checkout closed. Call read_article again to fetch the unlocked body.",
               });
             }
           }, 500);
@@ -53,7 +49,7 @@ export function WebMcpTools({ post }: { post: PostView }) {
     const controller = new AbortController();
     void registerPostTools(post, controller.signal);
     return () => {
-      controller.abort();                 // AbortSignal is how WebMCP unregisters
+      controller.abort(); // AbortSignal is how WebMCP unregisters
       delete window.musebookCheckout;
     };
   }, [post.postId]);

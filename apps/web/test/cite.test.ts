@@ -77,7 +77,9 @@ describe("POST /api/cite", () => {
     const { data: events } = await db
       // eslint-disable-next-line musebook/no-action-events-at-serve-time -- asserting the M18.6 row the cite path wrote
       .from("action_events")
-      .select("action, actor_plane, actor_agent_id, viewer_user_id, mcp_tool, comment_id, content_hash")
+      .select(
+        "action, actor_plane, actor_agent_id, viewer_user_id, mcp_tool, comment_id, content_hash",
+      )
       .eq("comment_id", body.citation_id)
       .returns<
         {

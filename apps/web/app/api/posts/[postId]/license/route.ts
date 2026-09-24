@@ -6,10 +6,7 @@ export const runtime = "nodejs";
 
 import { serviceDb } from "@/lib/db/service";
 
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ postId: string }> },
-) {
+export async function GET(_req: Request, { params }: { params: Promise<{ postId: string }> }) {
   const { postId } = await params;
   const { data } = await serviceDb
     .from("posts")

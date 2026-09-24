@@ -47,7 +47,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     >
       <head>
         {/* §7.18: the origin-trial token renders only when present — absent is
-            a supported state, 'modelContext' in document is simply false. */}
+            a supported state; the provider surface is simply absent. */}
         {process.env.NEXT_PUBLIC_WEBMCP_OT_TOKEN ? (
           <meta httpEquiv="origin-trial" content={process.env.NEXT_PUBLIC_WEBMCP_OT_TOKEN} />
         ) : null}

@@ -13,10 +13,7 @@ const Body = z.object({
   question: z.string().min(1).max(1000),
 });
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ postId: string }> },
-) {
+export async function POST(req: Request, { params }: { params: Promise<{ postId: string }> }) {
   const originError = requireSameOrigin(req);
   if (originError) return originError;
 

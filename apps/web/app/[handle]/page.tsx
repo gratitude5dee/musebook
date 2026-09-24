@@ -25,7 +25,9 @@ type PostRow = {
   published_at: string | null;
 };
 
-async function loadProfile(handle: string): Promise<{ profile: ProfileRow; posts: PostRow[] } | null> {
+async function loadProfile(
+  handle: string,
+): Promise<{ profile: ProfileRow; posts: PostRow[] } | null> {
   const { data: profile } = await serviceDb
     .from("profiles")
     .select("user_id, handle, display_name, bio, website_url")
@@ -79,12 +81,16 @@ export default async function CreatorProfile({
 
   return (
     <main className="mx-auto max-w-[720px] px-4 py-10">
-      <h1 className="mb-1 text-3xl font-semibold">{profile.display_name ?? `@${profile.handle}`}</h1>
+      <h1 className="mb-1 text-3xl font-semibold">
+        {profile.display_name ?? `@${profile.handle}`}
+      </h1>
       <p className="mb-4 text-sm text-muted-foreground">@{profile.handle}</p>
       {profile.bio !== null ? <p className="mb-8 whitespace-pre-wrap">{profile.bio}</p> : null}
       {profile.website_url !== null ? (
         <p className="mb-8 text-sm">
-          <a href={profile.website_url} rel="me">{profile.website_url}</a>
+          <a href={profile.website_url} rel="me">
+            {profile.website_url}
+          </a>
         </p>
       ) : null}
       <h2 className="mb-3 text-lg font-medium">Posts</h2>
