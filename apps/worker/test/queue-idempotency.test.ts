@@ -36,6 +36,7 @@ beforeEach(resetSeed);
 beforeEach(() => {
   env.AI_GATEWAY_API_KEY = "test";
   env.TYPESAFE_API_KEY = "test";
+  env.CLASSIFY_PROVIDER = "typesafe"; // the stub answers /v1/systemone (Jev wire shape)
   env.CLASSIFY_DAILY_TOKEN_BUDGET = "0";
   const embedFetch = async (_input: unknown, init?: { body?: string }) =>
     new Response(

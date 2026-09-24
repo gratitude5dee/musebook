@@ -4523,8 +4523,15 @@ function m14Probe(sub, expectPrefix) {
 // is the one live-provider check in the suite: it bills real Jev tokens, so
 // without the H14 secret it BLOCKs rather than fakes a verdict.
 export function m14BatteryLive() {
-  if (!process.env.TYPESAFE_API_KEY)
-    return { ok: false, errors: [], blocked: "TYPESAFE_API_KEY unset (H14)" };
+  const provider = process.env.CLASSIFY_PROVIDER ?? "typesafe";
+  const missing =
+    provider === "gateway" ? !process.env.AI_GATEWAY_API_KEY : !process.env.TYPESAFE_API_KEY;
+  if (missing)
+    return {
+      ok: false,
+      errors: [],
+      blocked: `${provider === "gateway" ? "AI_GATEWAY_API_KEY" : "TYPESAFE_API_KEY"} unset (H14)`,
+    };
   return m14Probe("battery", "BATTERY_OK");
 }
 
