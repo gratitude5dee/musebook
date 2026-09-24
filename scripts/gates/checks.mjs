@@ -4627,3 +4627,150 @@ export async function m14DriftRole() {
   if (!grants.ok) return grants;
   return dbAssertRls();
 }
+
+// ---------------------------------------------------------------------------
+// M15 milestone checks — §16 "GATE M15", verbatim where the plan gives one.
+// The event-count trigger (M15.1) and the shadow-week window (M15.2) are
+// time-and-traffic conditions, so on a dev DB they report BLOCK with the
+// mechanism proven rather than faking a verdict — the same convention M14.1
+// uses for the live-provider check. The m15 vitest file holds the working
+// machinery assertions (ranker resolution, flips, shadow layout, labels,
+// slate non-permutation); these checks add the data-plane SQL around them.
+// ---------------------------------------------------------------------------
+
+const M15_TEST = "pnpm vitest run --project worker test/m15.test.ts";
+
+// M15.1 — §9.15's five-part promotion query, verbatim, over the human plane
+// and a 30-day window. All five must be true; the trigger may never open and
+// that is an acceptable outcome (the reverse-chron slate is a correct
+// product), so a corpus that cannot satisfy it BLOCKs with the counts shown.
+export function m15EventCountTrigger() {
+  const sql = `select
+    count(*) >= 2000000 as enough_events,
+    count(distinct slate_id) >= 50000 as enough_slates,
+    count(*) filter (where action in ('like','comment','repost','bookmark','share',
+                                      'remix','fork_app','install_app','tip','x402_pay'))
+      >= 40000 as enough_positives,
+    count(*) filter (where action in ('not_interested','mute_creator',
+                                      'block_creator','report','not_dwelled'))
+      >= 4000 as enough_negatives,
+    count(distinct viewer_user_id) >= 5000 as enough_viewers
+  from public.action_events_human
+  where occurred_at >= now() - interval '30 days'`;
+  const r = sqlRun(sql.replace(/\s+/g, " "));
+  if (r.code !== 0) return { ok: false, errors: [`promotion query failed: ${r.out.slice(-300)}`] };
+  const out = r.out.trim();
+  if (out === "t|t|t|t|t") return { ok: true, errors: [] };
+  const counts = sqlRun(
+    `select count(*)::text || ' events, ' || count(distinct slate_id)::text || ' slates, ' || count(*) filter (where action in ('like','comment','repost','bookmark','share','remix','fork_app','install_app','tip','x402_pay'))::text || ' positives, ' || count(*) filter (where action in ('not_interested','mute_creator','block_creator','report','not_dwelled'))::text || ' negatives, ' || count(distinct viewer_user_id)::text || ' viewers' from public.action_events_human where occurred_at >= now() - interval '30 days'`,
+  );
+  return {
+    ok: false,
+    errors: [],
+    blocked: `event-count trigger not met (dev corpus: ${counts.out.trim() || "unreadable"}) — expected; promotion stays gated until traffic reaches the §9.15 floor`,
+  };
+}
+
+// M15.2 — shadow week: the mechanism is gated-testable (a shadow row resolves
+// to a LearnedMuseRanker, every scored slate emits a muse.shadow_score point
+// with both scores and neither shown, the flip is a status change) — the
+// seven-consecutive-days part is a wall-clock condition the dev environment
+// cannot satisfy, so it blocks with the mechanism proven.
+export function m15ShadowWeek() {
+  const mech = vitestSlice(M15_TEST, "shadow");
+  if (!mech.ok) return mech;
+  const points = vitestSlice(M15_TEST, "writeShadowPoint");
+  if (!points.ok) return points;
+  const constraint = sqlCheck(
+    `select pg_get_constraintdef(oid) ~ 'shadow' from pg_constraint where conname = 'model_registry_status_allowed'`,
+    "t",
+  );
+  if (!constraint.ok) return constraint;
+  return {
+    ok: false,
+    errors: [],
+    blocked:
+      "shadow-week window pending — mechanism proven (shadow resolve + dual-score AE point + status-only flip), but seven consecutive days of production traffic is a wall-clock condition a dev DB cannot satisfy",
+  };
+}
+
+// M15.3 — flip reversibility: the test flips model_registry status back and
+// forth once and re-resolves; the served ranker (and therefore the served
+// slate's versions) changes both times, and the flip is an UPDATE, not a
+// deploy.
+export function m15FlipReversible() {
+  return vitestSlice(M15_TEST, "flips and flips back");
+}
+
+// M15.4 — attribution: slate rows always carry the versions of the ranker
+// that produced them. Every slates row has non-null weights_version AND
+// model_version; no scored slate carries the bootstrap sentinel
+// (weights_version 'none' pairs only with model_version 'reverse_chron').
+export function m15VersionAttribution() {
+  const nonNull = sqlCheck(
+    `select count(*)::int from public.slates where weights_version is null or model_version is null`,
+    "0",
+  );
+  if (!nonNull.ok) return nonNull;
+  const sentinel = sqlCheck(
+    `select count(*)::int from public.slates where weights_version = 'none' and model_version <> 'reverse_chron'`,
+    "0",
+  );
+  if (!sentinel.ok) return sentinel;
+  const test = vitestSlice(M15_TEST, "resolves the seeded active heuristic");
+  if (!test.ok) return test;
+  return vitestSlice(M15_TEST, "a shadow row resolves");
+}
+
+// M15.5 — G-ISO still green non-trivially: the learned ranker is registered
+// as a covered MuseScorer stage in isolation.test.ts, and both vitest tiers
+// re-run the isolation + isolation-bites suites (m13Iso re-run over the
+// widened stage list).
+export function m15Isolation() {
+  const registered = rg("LearnedMuseRanker", ["packages/muse-mixer/test/isolation.test.ts"]);
+  if (registered.length === 0)
+    return { ok: false, errors: ["LearnedMuseRanker not a G-ISO-covered stage"] };
+  return m13Iso();
+}
+
+// M15.6 — the reels scorer is its own scorer: the reels pipeline's source
+// list differs from the home pipeline's (CompletionTrending + Soundtrack are
+// reels-only), WatchTimeScorer enables only on surface 'reels', and the test
+// builds both slates for one viewer and asserts they are not permutations.
+export function m15ReelsOwnScorer() {
+  const ownSources = rg("CompletionTrendingSource|SoundtrackSource", [
+    "packages/muse-mixer/src/muse/pipelines/reels.ts",
+  ]);
+  if (ownSources.length < 2)
+    return { ok: false, errors: ["reels pipeline lacks its own source set"] };
+  const ownScorer = rg('q.surface === "reels"', [
+    "packages/muse-mixer/src/muse/scorers/watch_time_scorer.ts",
+  ]);
+  if (ownScorer.length === 0)
+    return { ok: false, errors: ["WatchTimeScorer not surface-gated to reels"] };
+  return vitestSlice(M15_TEST, "not permutations");
+}
+
+// M15.7 — not_dwelled is emitted and used: the label builder writes exactly
+// one row per settled impression (test), action_kind index 22 carries it
+// (§9.24), it is in the negative set the scorer weights, and the emitted
+// row lands in the table the nightly trainer reads.
+export function m15NotDwelled() {
+  const kind = sqlCheck(
+    `select count(*)::int from pg_enum e join pg_type t on t.oid = e.enumtypid where t.typname = 'action_kind' and e.enumlabel = 'not_dwelled'`,
+    "1",
+  );
+  if (!kind.ok) return kind;
+  const negative = rg('"not_dwelled"', ["packages/muse-mixer/src/muse/actions.ts"]);
+  const weighted = rg("not_dwelled", ["packages/muse-mixer/src/muse/rankers/heuristic.ts"]);
+  if (negative.length === 0 || weighted.length === 0)
+    return { ok: false, errors: ["not_dwelled missing from action index or negative weights"] };
+  return vitestSlice(M15_TEST, "not_dwelled");
+}
+
+// M15.8 — the request path is still one read: M6 gate 9 and M13 gate 3
+// re-run unchanged (no scoring import in apps/edge, one read_slate_doc call
+// site, read_slate EXECUTE restricted to kernel+jobs).
+export function m15ReadPathOneRead() {
+  return m13ReadNotScore();
+}

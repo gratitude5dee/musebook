@@ -275,6 +275,7 @@ const emptyClusters: ClusterPort = {
 
 const memoryTelemetry: TelemetryPort = {
   writeDataPoint() {},
+  writeShadowPoint() {},
   insertAgentActions() {
     return Promise.resolve();
   },

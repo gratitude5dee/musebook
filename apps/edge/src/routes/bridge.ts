@@ -287,7 +287,7 @@ async function recordOnce(
   await db.query("select * from app.bridge_result_once($1::text, $2::uuid, $3::jsonb)", [
     taskId,
     delegationId,
-    JSON.stringify(response),
+    response,
   ]);
 }
 

@@ -5,7 +5,7 @@
 // Bindings stay structural so the package has no @cloudflare/* dependency
 // entry even though the lint rule would allow it here.
 import type { ExecCtx, KvCache, ParamStore, StatsSink } from "../../framework/types.js";
-import type { DbHandles, TelemetryPort } from "../../framework/ports.js";
+import type { DbHandles, ShadowScorePoint, TelemetryPort } from "../../framework/ports.js";
 
 /** Analytics Engine dataset, structurally — `env.MUSEBOOK_AE.writeDataPoint`. */
 export interface AeDataset {
@@ -136,11 +136,29 @@ export function workersExecCtx(input: {
 export function workersTelemetry(
   ae: AeDataset | undefined,
   insertAgentActions: (rows: ReadonlyArray<Record<string, unknown>>) => Promise<void>,
+  /** The canonical §13.3.1 writer — injected from @musebook/telemetry by the
+   *  composing app, plus the effective sample rate for double3. Absent one,
+   *  shadow points degrade to the StatsSink slot map. */
+  shadow?: {
+    writePoint: (point: ShadowScorePoint & { sampleRate: number }) => void;
+    sampleRate: number;
+  },
 ): TelemetryPort {
   const stats = aeStats(ae);
   return {
     writeDataPoint(metric, value, tags) {
       stats.counter(metric, value, tags);
+    },
+    writeShadowPoint(point) {
+      if (shadow !== undefined) {
+        shadow.writePoint({ ...point, sampleRate: shadow.sampleRate });
+      } else {
+        stats.counter("muse.shadow_score", point.value, {
+          surface: point.surface,
+          stage: point.slateId,
+          outcome: point.modelVersion,
+        });
+      }
     },
     insertAgentActions,
   };

@@ -1628,6 +1628,56 @@ export const GATES = {
       run: checks.m14DriftRole,
     },
   ],
+  M15: [
+    {
+      id: "M15.1",
+      kind: "fn",
+      desc: "§9.15 five-part promotion query returns all true, 30-day window — honest BLOCK on a dev corpus below the floor",
+      run: checks.m15EventCountTrigger,
+    },
+    {
+      id: "M15.2",
+      kind: "fn",
+      desc: "shadow week: shadow ranker resolves, dual-score muse.shadow_score point per scored slate, flip = registry status change — 7-day window BLOCKs (wall-clock)",
+      run: checks.m15ShadowWeek,
+    },
+    {
+      id: "M15.3",
+      kind: "fn",
+      desc: "flip reversible in one statement — registry status UPDATEs flip and flip back, served ranker changes both times",
+      run: checks.m15FlipReversible,
+    },
+    {
+      id: "M15.4",
+      kind: "fn",
+      desc: "attribution: every slates row carries non-null weights_version + model_version of the ranker that produced it",
+      run: checks.m15VersionAttribution,
+    },
+    {
+      id: "M15.5",
+      kind: "fn",
+      desc: "G-ISO still green non-trivially — LearnedMuseRanker registered as a covered stage, isolation + isolation-bites green both tiers",
+      run: checks.m15Isolation,
+    },
+    {
+      id: "M15.6",
+      kind: "fn",
+      desc: "reels scorer is its own scorer — own source set + surface-gated WatchTimeScorer; one viewer's two slates are not permutations",
+      run: checks.m15ReelsOwnScorer,
+    },
+    {
+      id: "M15.7",
+      kind: "fn",
+      desc: "not_dwelled emitted and used — exactly one row per settled impression, index 22, in the scorer's negative set",
+      run: checks.m15NotDwelled,
+    },
+    {
+      id: "M15.8",
+      kind: "fn",
+      desc: "request path still one read — M6 gate 9 + M13 gate 3 re-run unchanged",
+      run: checks.m15ReadPathOneRead,
+    },
+  ],
 };
 
 export const MILESTONE_TITLES = {

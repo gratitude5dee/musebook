@@ -654,7 +654,7 @@ export const GROUPS = [
     title: "Telemetry and analytics",
     vars: [
       { name: "TELEMETRY_ENABLED", scope: ["E", "M", "J"], kind: "var", local: "true" },
-      { name: "TELEMETRY_IMPRESSION_SAMPLE", scope: ["E"], kind: "var", local: "1.0" },
+      { name: "TELEMETRY_IMPRESSION_SAMPLE", scope: ["E", "J"], kind: "var", local: "1.0" },
       { name: "TELEMETRY_BATCH_MAX_EVENTS", scope: ["E"], kind: "var", local: "16" },
       { name: "TELEMETRY_IDLE_FLUSH_MS", scope: ["VP", "E"], kind: "var", local: "5000" },
       { name: "TELEMETRY_CLOCK_SKEW_MAX_MS", scope: ["E"], kind: "var", local: "21600000" },

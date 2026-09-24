@@ -51,7 +51,7 @@ export async function handleChannelsSync(
   const db = fresh(env);
   try {
     const { rows } = await db.query<{ result: SyncResult }>(
-      "select app.sync_postiz_channels($1::uuid, $2::jsonb) as result",
+      "select app.sync_postiz_channels($1::uuid, ($2::text)::jsonb) as result",
       [owner, JSON.stringify(items)],
     );
     const result = rows[0]?.result;
@@ -73,7 +73,7 @@ export async function handleChannelsSync(
           channel_id,
           maxLength,
           rules,
-          JSON.stringify(settings),
+          settings,
         ]);
       }),
     );

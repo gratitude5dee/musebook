@@ -66,7 +66,7 @@ function capturedStats() {
 async function build(surface: string, viewerId: string | null, stats?: StatsSink) {
   const { cached, fresh, close } = await clients();
   try {
-    const ports = feedPorts({ cached, fresh });
+    const ports = feedPorts({ cached, fresh, telemetrySampleRate: 1 });
     const base = workersExecCtx({ env: ENV, db: ports });
     const loader = new PostgresWeightsLoader(cached);
     const query = buildQuery({ surface, actorUserId: viewerId, actorAgentId: null }, base);

@@ -35,6 +35,7 @@ export type {
   BloomPort,
   ClusterPort,
   TelemetryPort,
+  ShadowScorePoint,
 } from "./framework/ports.js";
 export { withTimeout, mergePerCandidate } from "./framework/merge.js";
 export {
@@ -84,9 +85,11 @@ export { DiversityScorer } from "./muse/scorers/diversity_scorer.js";
 export {
   HeuristicMuseRanker,
   HEURISTIC_V1_COEFFICIENTS,
+  evaluateLogistic,
   type LogisticHead,
   type HeuristicCoefficients,
 } from "./muse/rankers/heuristic.js";
+export { LearnedMuseRanker, type LearnedCoefficients } from "./muse/rankers/learned.js";
 export { TopKScoreSelector } from "./muse/selectors/top_k_score_selector.js";
 
 export * from "./muse/queryHydrators/index.js";

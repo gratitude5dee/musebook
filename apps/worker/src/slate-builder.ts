@@ -14,7 +14,6 @@ import {
   buildQuery,
   cohortKeyFor,
   execute,
-  HeuristicMuseRanker,
   musePipeline,
   reelsPipeline,
   slateRowFor,
@@ -23,6 +22,7 @@ import { PostgresWeightsLoader } from "@musebook/muse-mixer/adapters/pg";
 import { workersExecCtx } from "@musebook/muse-mixer/adapters/workers";
 import { pgCachedJobs, pgFreshJobs } from "./db.js";
 import { feedPorts } from "./feed/ports.js";
+import { resolveMuseRankers } from "./lib/rankers.js";
 
 export interface SlateRequest {
   surface: string;
@@ -55,7 +55,15 @@ export async function buildSlateCore(
   const cached = await pgCachedJobs(env);
   const fresh = await pgFreshJobs(env);
   try {
-    const ports = feedPorts({ cached, fresh, ae: env.TELEMETRY });
+    const ports = feedPorts({
+      cached,
+      fresh,
+      ae: env.TELEMETRY,
+      telemetrySampleRate: Math.min(
+        Math.max(Number(envRecord(env)["TELEMETRY_IMPRESSION_SAMPLE"] ?? 1), 0),
+        1,
+      ),
+    });
     const minRemainingSeconds = Number(envRecord(env)["MUSE_SLATE_TTL_SECONDS"] ?? 900) / 3;
     if (
       !(await ports.slates.needsBuild(
@@ -87,6 +95,11 @@ export async function buildSlateCore(
       },
       baseCtx,
     );
+    // §9.15: the registry picks the ranker, not a deploy-time var. The
+    // resolved active row's version stamps the slate and every downstream
+    // event; a shadow row scores alongside and serves nothing.
+    const rankers = await resolveMuseRankers(fresh);
+    query.modelVersion = rankers.activeVersion;
     let gates: Record<string, number | boolean> = {};
     try {
       gates = (await loader.load(cohortKeyFor(query, baseCtx))).gates;
@@ -101,8 +114,9 @@ export async function buildSlateCore(
     });
 
     const pipelineOpts = {
-      ranker: new HeuristicMuseRanker(),
+      ranker: rankers.active,
       weightsLoader: loader,
+      ...(rankers.shadow === null ? {} : { shadowRanker: rankers.shadow }),
     };
     const pipeline =
       req.surface === "reels" ? reelsPipeline(pipelineOpts) : musePipeline(pipelineOpts);

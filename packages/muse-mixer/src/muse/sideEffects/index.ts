@@ -6,6 +6,11 @@
 import type { ExecCtx, SideEffect, SideEffectInput } from "../../framework/types.js";
 import type { MuseFeedQuery } from "../query.js";
 import type { MuseCandidate } from "../candidate.js";
+import type { MuseRanker } from "../scorers/muse_scorer.js";
+import type { WeightsLoader } from "../weights.js";
+import { candidateFeatures, viewerContextFor } from "../scorers/muse_scorer.js";
+import { computeWeightedScore } from "../scorers/ranking_scorer.js";
+import { cohortKeyFor } from "../weights.js";
 import { SeenBloom, bloomParams } from "../bloom.js";
 import { weightsRowVersion } from "../build.js";
 
@@ -94,6 +99,52 @@ export function slateImpressionsEffect(): SideEffect<MuseFeedQuery, MuseCandidat
       }
       // Human impressions are written by the edge ingest path on /api/events —
       // the build only persists the slate itself.
+    },
+  };
+}
+
+/**
+ * 5 — §9.18's shadow scoring. When `model_registry` holds a `shadow` row the
+ * candidate ranker scores every built slate and serves nothing: one
+ * `muse.shadow_score` Analytics Engine point per selected candidate, carrying
+ * the shadow model's OWN weighted score (its predictions re-weighted by the
+ * same resolved ActionWeights the incumbent's RankingScorer used) — never the
+ * incumbent's score relabeled. It writes no table: section 4 is canonical and
+ * AE retains the week the comparison needs.
+ */
+export function shadowScoreEffect(
+  shadow: MuseRanker,
+  weightsLoader: WeightsLoader,
+): SideEffect<MuseFeedQuery, MuseCandidate> {
+  return {
+    name: "ShadowScore",
+    async run(input: In, ctx: ExecCtx): Promise<void> {
+      const q = input.query;
+      if (input.selected.length === 0) return;
+      const vc = q.viewerContext ?? viewerContextFor(q, ctx);
+      const w = await weightsLoader.load(cohortKeyFor(q, ctx));
+      const weightsVersion = weightsRowVersion(`${w.version}/${w.cohort}`);
+      const feats = input.selected.map((c) => candidateFeatures(c, q, vc, ctx));
+      const preds = await shadow.predict(vc, feats);
+      input.selected.forEach((c, i) => {
+        const pr = preds[i];
+        if (pr === undefined) return;
+        const shadowScore = computeWeightedScore(
+          { ...c, actionScores: pr.discrete, continuousPreds: pr.continuous },
+          q,
+          w,
+        );
+        ctx.db.telemetry.writeShadowPoint({
+          postId: c.postId,
+          slateId: q.slateId,
+          surface: q.surface,
+          weightsVersion,
+          modelVersion: shadow.modelVersion,
+          plane: q.agentId !== null ? "agent" : "human",
+          position: i,
+          value: shadowScore,
+        });
+      });
     },
   };
 }
