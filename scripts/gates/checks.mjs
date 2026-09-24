@@ -4824,7 +4824,7 @@ export function m16SandboxAttr() {
     // Comments naming the forbidden token are documentation, not a grant —
     // only a hit on a non-comment line is a violation.
     const b = rg(bad, ["packages/ui/src/ArtifactFrame.tsx"]).filter(
-      (h) => !h.split(":", 3).slice(2).join(":").trim().startsWith("//"),
+      (h) => !h.replace(/^(?:[^:]+:\d+:|\d+:)/, "").trim().startsWith("//"),
     );
     if (b.length) errors.push(`ArtifactFrame grants ${bad}: ${b.join(" | ")}`);
   }
@@ -4906,69 +4906,73 @@ export function m16NoSessionInFrame() {
 // through app.fork_artifact, assert transitive roots, roll back via RAISE so
 // re-runs are idempotent and the fixture never persists.
 export function m16RemixRoot() {
+  // Dollar-quoted DO blocks cannot survive the docker exec quoting layer
+  // (any $tag expands in the shell), so the fixture runs as plain statements:
+  // CTEs capture generated ids into a temp table, and the final SELECT folds
+  // the assertion and the cleanup into one statement — re-runnable, and the
+  // fixture deletes itself regardless of the outcome.
   const sql = `
-do $m16$
-declare
-  u uuid := '11111111-1111-4111-8111-000000000001';
-  v_post uuid; v_art uuid; v_child uuid; v_grand uuid;
-  root_of uuid;
-begin
-  insert into public.post_bodies (content_hash, canonical_markdown, byte_len)
-    values ('m16gate0000000000000000000000000000000000000000000000000000000000', '# m16 gate fixture', 18)
-    on conflict do nothing;
+delete from public.posts where slug in ('m16gate-base','m16gate-child','m16gate-grand');
+delete from public.post_bodies where content_hash in (
+  app.sha256_hex('# m16 gate fixture'),
+  app.sha256_hex('# m16 child'), app.sha256_hex('# m16 grand'));
+create temp table _m16ids(k text primary key, v uuid);
+insert into _m16ids select 'u', '11111111-1111-4111-8111-000000000002'::uuid;
+insert into public.post_bodies (content_hash, canonical_markdown, byte_len)
+  values (app.sha256_hex('# m16 gate fixture'),
+    '# m16 gate fixture', 18)
+  on conflict do nothing;
+with ins as (
   insert into public.posts (
       author_user_id, kind, status, publish_mode, slug, title,
       content_hash, license_spdx, published_at)
-    values (u, 'app'::post_kind, 'published'::post_status, 'free'::publish_mode,
-      'm16gate-base', 'm16 gate base', 'm16gate0000000000000000000000000000000000000000000000000000000000',
-      'CC-BY-4.0', now())
-    returning id into v_post;
-  insert into public.artifacts (post_id, kind, bundle_url, entry_path, sha256, byte_len,
-      current_version, status)
-    values (v_post, 'html_bundle', 'https://artifacts.musebook.dev/a/x/', 'index.html',
+    select v, 'app'::post_kind, 'published'::post_status, 'free'::publish_mode,
+      'm16gate-base', 'm16 gate base',
+      app.sha256_hex('# m16 gate fixture'),
+      'CC-BY-4.0', now() from _m16ids where k='u'
+    returning id)
+insert into _m16ids select 'pbase', id from ins;
+with ins as (
+  insert into public.artifacts (post_id, kind, bundle_url, entry_path, sha256,
+      byte_len, current_version, status)
+    select v, 'html_bundle', 'https://artifacts.musebook.dev/a/x/', 'index.html',
       'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 42,
-      '0123456789abcdef', 'live')
-    returning id into v_art;
-  insert into public.artifact_versions (
-      artifact_id, version, manifest, base_path, visibility, entry_path,
-      poster_url, total_bytes, file_count)
-    values (v_art, '0123456789abcdef', '{}'::jsonb, 'a/private/0123456789abcdef/', 'private',
-      'index.html', 'https://cdn.musebook.dev/t/m16gate.webp', 42, 1);
-
-  -- A non-fork artifact is its own root.
-  select remix_root_id into root_of from public.artifacts where id = v_art;
-  if root_of <> v_art then
-    raise exception 'non-fork artifact root is %, not self', root_of;
-  end if;
-
-  -- fork of the base → root = base.
-  select artifact_id into v_child
-    from app.fork_artifact(v_art, u, null, 'm16gate-child', 'm16 child', '# m16 child');
-  select remix_root_id into root_of from public.artifacts where id = v_child;
-  if root_of <> v_art then
-    raise exception 'first-order fork root is %, not base %', root_of, v_art;
-  end if;
-
-  -- fork of the fork → still the base (transitive root, not the parent).
-  select artifact_id into v_grand
-    from app.fork_artifact(v_child, u, null, 'm16gate-grand', 'm16 grand', '# m16 grand');
-  select remix_root_id into root_of from public.artifacts where id = v_grand;
-  if root_of <> v_art then
-    raise exception 'second-order fork root is %, not transitive base %', root_of, v_art;
-  end if;
-
-  -- Success path deletes the fixture in-place; an assertion raise aborts the
-  -- statement, rolling the fixture back with it.
-  delete from public.posts
-    where slug in ('m16gate-base', 'm16gate-child', 'm16gate-grand');
-  delete from public.post_bodies
-    where content_hash in (
-      'm16gate0000000000000000000000000000000000000000000000000000000000',
-      app.sha256_hex('# m16 child'),
-      app.sha256_hex('# m16 grand'));
-end $m16$;`;
+      '0123456789abcdef', 'live' from _m16ids where k='pbase'
+    returning id)
+insert into _m16ids select 'abase', id from ins;
+insert into public.artifact_versions (
+    artifact_id, version, manifest, base_path, visibility, entry_path,
+    poster_url, total_bytes, file_count)
+  select v, '0123456789abcdef', '{}'::jsonb, 'a/private/0123456789abcdef/',
+    'private', 'index.html', 'https://cdn.musebook.dev/t/m16gate.webp', 42, 1
+  from _m16ids where k='abase';
+with f as (
+  select artifact_id, post_id from app.fork_artifact(
+    (select v from _m16ids where k='abase'),
+    (select v from _m16ids where k='u'), null,
+    'm16gate-child', 'm16 child', '# m16 child'))
+insert into _m16ids select 'achild', artifact_id from f;
+with f as (
+  select artifact_id, post_id from app.fork_artifact(
+    (select v from _m16ids where k='achild'),
+    (select v from _m16ids where k='u'), null,
+    'm16gate-grand', 'm16 grand', '# m16 grand'))
+insert into _m16ids select 'agrand', artifact_id from f;
+with viol as (
+  select count(*)::int n from public.artifacts a
+  where a.id in (select v from _m16ids where k in ('abase','achild','agrand'))
+    and a.remix_root_id is distinct from (select v from _m16ids where k='abase')),
+  d1 as (delete from public.posts
+    where slug in ('m16gate-base','m16gate-child','m16gate-grand')),
+  d2 as (delete from public.post_bodies where content_hash in (
+    app.sha256_hex('# m16 gate fixture'),
+    app.sha256_hex('# m16 child'), app.sha256_hex('# m16 grand')))
+select n from viol;`;
   const r = sqlRun(sql);
   if (r.code !== 0) return { ok: false, errors: [r.out.slice(-2000)] };
+  const violations = r.out.trim().split(/\s+/).pop();
+  if (violations !== "0")
+    return { ok: false, errors: [`${violations} artifact(s) with wrong remix_root_id`] };
   return { ok: true, errors: [] };
 }
 

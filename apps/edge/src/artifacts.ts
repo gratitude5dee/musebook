@@ -112,8 +112,8 @@ async function privateArtifact(
     return notFound();
   }
 
-  const pem = env.ARTIFACT_TICKET_PUBLIC_KEY;
-  if (pem === undefined || pem === "") return notFound();
+  const pem: string | undefined = env.ARTIFACT_TICKET_PUBLIC_KEY;
+  if (!pem) return notFound();
   const publicKey = await importTicketPublicKey(pem);
   const claims = await verifyTicket(publicKey, ticket);
   if (claims === null || claims.a !== artifactId || claims.v !== version) {
