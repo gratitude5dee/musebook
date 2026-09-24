@@ -58,7 +58,7 @@ export function createReplicateBackend(
     const url = ref.resultUrl ?? `${REPLICATE_API}/predictions/${ref.providerRequestId}`;
     const res = await fetch(url, { headers: headers(), signal: AbortSignal.timeout(20_000) });
     if (!res.ok) return null;
-    return (await res.json());
+    return await res.json();
   };
 
   const toResult = (p: ReplicatePrediction): PollResult => {

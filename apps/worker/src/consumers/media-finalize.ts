@@ -326,8 +326,7 @@ export async function runMediaFinalize(env: Env, mediaJobId: string): Promise<vo
     const storage = storageFor(tier);
     const key = objectKey(tier, sha256, contentType);
     const sideKey = sidecarKey(key);
-    const bucket: MediaBucketLike =
-      tier === "paid" ? env.PAID_MEDIA : env.PUBLIC_MEDIA;
+    const bucket: MediaBucketLike = tier === "paid" ? env.PAID_MEDIA : env.PUBLIC_MEDIA;
     const objectBytes = prov?.signedBase64 ? fromB64(prov.signedBase64) : bytes;
     await putBytes(bucket, key, objectBytes, contentType);
     if (prov?.sidecarBase64) {

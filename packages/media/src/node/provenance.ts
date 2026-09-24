@@ -106,7 +106,7 @@ export async function readProvenance(
   mimeType: string,
 ): Promise<Record<string, unknown> | null> {
   const reader = await Reader.fromAsset({ buffer: bytes, mimeType });
-  return reader ? (reader.json()) : null;
+  return reader ? reader.json() : null;
 }
 
 /** 64-bit DCT pHash. Returns a 64-character '0'/'1' string for Postgres bit(64). */

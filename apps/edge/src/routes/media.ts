@@ -88,7 +88,7 @@ export async function handleMediaGenerate(
   // delegationId only exists on the agent class; a human submitter is null.
   const delegationId = actor.class === "owner_agent" ? actor.delegationId : null;
 
-  const raw = (await request.json().catch(() => null));
+  const raw = await request.json().catch(() => null);
   const parsed = generateRequestSchema.safeParse(raw);
   if (!parsed.success) {
     return json(
