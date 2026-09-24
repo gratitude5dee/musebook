@@ -12,7 +12,11 @@ then section 16 (build order and acceptance gates).
 
 ## Status
 
-Pre-implementation. The plan is complete and internally verified; no application code exists yet.
+Implementation in progress — milestones M1–M19 are landed behind per-milestone gates
+(`pnpm gate`). Latest: **M18** WebMCP progressive enhancement + agent citations
+(`document.modelContext` tools, `/api/cite` bound to `content_hash`) and **M19** media
+generation (submit-and-collect pipeline, fal+Replicate failover, C2PA provenance,
+x402-priced artifact tickets on the edge).
 
 ## Owner decisions already made
 
