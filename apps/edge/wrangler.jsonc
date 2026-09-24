@@ -9,55 +9,7 @@
   },
   "routes": [
     {
-      "pattern": "musebook.dev/",
-      "zone_name": "musebook.dev"
-    },
-    {
-      "pattern": "musebook.dev/p/*",
-      "zone_name": "musebook.dev"
-    },
-    {
-      "pattern": "musebook.dev/@*",
-      "zone_name": "musebook.dev"
-    },
-    {
-      "pattern": "musebook.dev/feed*",
-      "zone_name": "musebook.dev"
-    },
-    {
-      "pattern": "musebook.dev/api/*",
-      "zone_name": "musebook.dev"
-    },
-    {
-      "pattern": "musebook.dev/llms*.txt",
-      "zone_name": "musebook.dev"
-    },
-    {
-      "pattern": "musebook.dev/.well-known/*",
-      "zone_name": "musebook.dev"
-    },
-    {
-      "pattern": "musebook.dev/authors.md",
-      "zone_name": "musebook.dev"
-    },
-    {
-      "pattern": "musebook.dev/atom.xml",
-      "zone_name": "musebook.dev"
-    },
-    {
-      "pattern": "musebook.dev/robots.txt",
-      "zone_name": "musebook.dev"
-    },
-    {
-      "pattern": "musebook.dev/sitemap*.xml",
-      "zone_name": "musebook.dev"
-    },
-    {
-      "pattern": "musebook.dev/security.txt",
-      "zone_name": "musebook.dev"
-    },
-    {
-      "pattern": "musebook.dev/crawlers.json",
+      "pattern": "musebook.dev/*",
       "zone_name": "musebook.dev"
     },
     {
@@ -164,6 +116,7 @@
       }
     ]
   },
+
   "services": [
     {
       "binding": "MIXER",

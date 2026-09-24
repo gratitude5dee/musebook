@@ -5,7 +5,7 @@
 // resolveAccess settles it through ports.payments.settle → settleOnce. This
 // file contains no payment logic and never reads the mode.
 import type { McpServer } from "@modelcontextprotocol/server";
-import { resolveAccess, renderResource } from "@musebook/kernel";
+import { resolveAccess, renderResource, configureKernel } from "@musebook/kernel";
 import { asDb, cached, fresh, release } from "../db/client.js";
 import { loadPostByPostId, loadPostBySlug } from "../db/posts.js";
 import { loadResource } from "@musebook/kernel";
@@ -49,7 +49,6 @@ export function registerGetPost(server: McpServer, env: Env, ctx: ExecutionConte
         }
 
         // ports are per-call: configureKernel before each resolveAccess.
-        const { configureKernel } = await import("@musebook/kernel");
         configureKernel(portsFor(env, ctx, asDb(rw), actor.userId));
         const decision = await resolveAccess(resource, actor);
         const rendered = await renderResource(resource, "mcp", decision);
