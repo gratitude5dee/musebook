@@ -1,0 +1,287 @@
+{
+  "milestone": "M18",
+  "commit": "87670afc",
+  "branch": "m18-webmcp",
+  "started": "2026-09-24T06:21:01.591Z",
+  "finished": "2026-09-24T06:21:01.591Z",
+  "seed_hash": "3d898f7e614a7c4a",
+  "versions": {
+    "node": "v24.21.0",
+    "pnpm": "12.5.1",
+    "next": "0.0.0",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11",
+    "wrangler": "4.137.0",
+    "@cloudflare/vitest-plugin": "1.2.0",
+    "supabase_cli": "2.117.0"
+  },
+  "checks": [
+    {
+      "id": "M18.1",
+      "status": "pass",
+      "duration_s": 0,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M18.2",
+      "status": "pass",
+      "duration_s": 17.82,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M18.3",
+      "status": "pass",
+      "duration_s": 10.02,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M18.4",
+      "status": "pass",
+      "duration_s": 0,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M18.5",
+      "status": "pass",
+      "duration_s": 0.01,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M18.6",
+      "status": "pass",
+      "duration_s": 16.03,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M18.7",
+      "status": "pass",
+      "duration_s": 14.02,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "M18.8",
+      "status": "pass",
+      "duration_s": 0.01,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-BUILD",
+      "status": "pass",
+      "duration_s": 5.9,
+      "exit_code": 0,
+      "output": "packages/distributor build$ tsc --build --pretty\npackages/musebook-cli build$ tsc --build --pretty\npackages/schema build$ tsc --build --pretty\npackages/musebook-cli build: Done\npackages/schema build: Done\npackages/classify build$ tsc --build --pretty\npackages/connectors build$ tsc --build --pretty\npackages/content build$ tsc --build --pretty\npackages/distributor build: Done\npackages/media build$ tsc --build --pretty\npackages/classify build: Done\npackages/muse-mixer build$ tsc --build --pretty\npackages/connectors build: Done\npackages/telemetry build$ tsc --build --pretty\npackages/media build: Done\npackages/content build: Done\npackages/artifacts build$ tsc --build --pretty\npackages/kernel build$ tsc --build --pretty\npackages/muse-mixer build: Done\npackages/telemetry build: Done\npackages/kernel build: Done\npackages/x402 build$ tsc --build --pretty\npackages/artifacts build: Done\npackages/ui build$ tsc --build --pretty\npackages/x402 build: Done\napps/mcp build$ tsc --build --pretty\napps/worker build$ tsc --build --pretty\npackages/ui build: Done\napps/web build$ node scripts/check-legal-review.mjs && next build\napps/web build: check-legal-review: 7 DRAFT legal document(s) — preview/dev build continues\napps/mcp build: Done\napps/worker build: Done\napps/edge build$ tsc --build --pretty\napps/web build: ▲ Next.js 16.3.5 (Turbopack)\napps/web build: ✓ Running next.config.ts took 17ms\napps/web build: - Experiments (use with caution):\napps/web build:   · serverActions\napps/web build: \napps/web build:   Creating an optimized production build ...\napps/edge build: Done\napps/web build: ✓ Compiled successfully in 779ms\napps/web build:   Running TypeScript ...\napps/web build:   Finished TypeScript in 2.4s ...\napps/web build:   Collecting page data using 7 workers ...\napps/web build:   Generating static pages using 7 workers (0/26) ...\napps/web build:   Generating static pages using 7 workers (6/26) \napps/web build:   Generating static pages using 7 workers (12/26) \napps/web build:   Generating static pages using 7 workers (19/26) \napps/web build: ✓ Generating static pages using 7 workers (26/26) in 358ms\napps/web build:   Finalizing page optimization ...\napps/web build: \napps/web build: Route (app)\napps/web build: ┌ ƒ /\napps/web build: ├ ƒ /_not-found\napps/web build: ├ ƒ /[handle]\napps/web build: ├ ƒ /a/[id]\napps/web build: ├ ƒ /agents\napps/web build: ├ ƒ /api/agent/delegations\napps/web build: ├ ƒ /api/agent/delegations/[id]\napps/web build: ├ ƒ /api/auth/login\napps/web build: ├ ƒ /api/auth/logout\napps/web build: ├ ƒ /api/auth/me\napps/web build: ├ ƒ /api/auth/payload\napps/web build: ├ ƒ /api/auth/supabase-token\napps/web build: ├ ƒ /api/cite\napps/web build: ├ ƒ /api/internal/artifacts/ingest\napps/web build: ├ ƒ /api/internal/sandbox/build\napps/web build: ├ ƒ /api/posts/[postId]/license\napps/web build: ├ ƒ /api/posts/[postId]/questions\napps/web build: ├ ƒ /api/sandbox/render\napps/web build: ├ ƒ /artifacts\napps/web build: ├ ƒ /compose\napps/web build: ├ ƒ /compose/[postId]\napps/web build: ├ ƒ /compose/[postId]/distribute\napps/web build: ├ ƒ /feed\napps/web build: ├ ƒ /legal/[slug]\napps/web build: ├ ƒ /legal/oss\napps/web build: ├ ƒ /p/[slug]\napps/web build: ├ ƒ /pay/[postId]\napps/web build: ├ ƒ /reels\napps/web build: ├ ○ /robots.txt\napps/web build: ├ ƒ /settings/privacy\napps/web build: └ ƒ /studio\napps/web build: \napps/web build: \napps/web build: ƒ Proxy (Middleware)\napps/web build: \napps/web build: ○  (Static)   prerendered as static content\napps/web build: ƒ  (Dynamic)  server-rendered on demand\napps/web build: \napps/web build: Done"
+    },
+    {
+      "id": "G-TYPES",
+      "status": "pass",
+      "duration_s": 5.82,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-BOUND",
+      "status": "pass",
+      "duration_s": 0.02,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-FMT",
+      "status": "pass",
+      "duration_s": 4.49,
+      "exit_code": 0,
+      "output": "Checking formatting...\nAll matched files use Prettier code style!"
+    },
+    {
+      "id": "G-TEST",
+      "status": "pass",
+      "duration_s": 73.09,
+      "exit_code": 0,
+      "output": "\n RUN  v4.1.11 /home/ubuntu/repos/musebook\n\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260924\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260924\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-24 00:00:00+00') to ('2026-09-25 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260925\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260925\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-25 00:00:00+00') to ('2026-09-26 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260926\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260926\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-26 00:00:00+00') to ('2026-09-27 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260927\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260927\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-27 00:00:00+00') to ('2026-09-28 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260928\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260928\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-28 00:00:00+00') to ('2026-09-29 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260929\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260929\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-29 00:00:00+00') to ('2026-09-30 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260930\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260930\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-30 00:00:00+00') to ('2026-10-01 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20261001\" already exists, skipping',\n  whe"
+    },
+    {
+      "id": "G-CFTEST",
+      "status": "pass",
+      "duration_s": 57.07,
+      "exit_code": 0,
+      "output": "\n RUN  v4.1.11 /home/ubuntu/repos/musebook\n\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260924\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260924\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-24 00:00:00+00') to ('2026-09-25 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260925\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260925\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-25 00:00:00+00') to ('2026-09-26 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260926\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260926\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-26 00:00:00+00') to ('2026-09-27 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260927\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260927\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-27 00:00:00+00') to ('2026-09-28 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260928\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260928\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-28 00:00:00+00') to ('2026-09-29 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260929\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260929\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-29 00:00:00+00') to ('2026-09-30 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260930\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260930\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-30 00:00:00+00') to ('2026-10-01 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20261001\" already exists, skipping',\n  whe"
+    },
+    {
+      "id": "G-ENV",
+      "status": "pass",
+      "duration_s": 0.06,
+      "exit_code": 0,
+      "output": "G-ENV ok: 199 manifest names, both runtimes, generated files in sync"
+    },
+    {
+      "id": "G-ZOD",
+      "status": "pass",
+      "duration_s": 0.13,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-AGPL",
+      "status": "pass",
+      "duration_s": 0.05,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-LINT",
+      "status": "pass",
+      "duration_s": 2.65,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-LEGACY",
+      "status": "pass",
+      "duration_s": 0.01,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-VERCEL-DEAD",
+      "status": "pass",
+      "duration_s": 0.08,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-SKIP",
+      "status": "pass",
+      "duration_s": 0.04,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-CFDRY",
+      "status": "pass",
+      "duration_s": 1.97,
+      "exit_code": 0,
+      "output": "Scope: 4 of 19 workspace projects\napps/mcp cf:dry$ wrangler deploy --dry-run --outdir .wrangler/dry\napps/worker cf:dry$ wrangler deploy --dry-run --outdir .wrangler/dry\napps/mcp cf:dry: \napps/mcp cf:dry:  ⛅️ wrangler 4.137.0\napps/mcp cf:dry: ────────────────────\napps/worker cf:dry: \napps/worker cf:dry:  ⛅️ wrangler 4.137.0\napps/worker cf:dry: ────────────────────\napps/mcp cf:dry: Total Upload: 1664.23 KiB / gzip: 304.32 KiB\napps/mcp cf:dry: Your Worker has access to the following bindings:\napps/mcp cf:dry: Binding                                                                              Resource                      \napps/mcp cf:dry: env.OAUTH_KV (7daede739ca44bb98df9429bcecffb8b)                                      KV Namespace                  \napps/mcp cf:dry: env.GRANTS (f7f0e81c8e1f4eb190e366714ed6b0ad)                                        KV Namespace                  \napps/mcp cf:dry: env.Q_CLASSIFY (musebook-classify)                                                   Queue                         \napps/mcp cf:dry: env.Q_MEDIA (musebook-media)                                                         Queue                         \napps/mcp cf:dry: env.Q_MEDIA_FINALIZE (musebook-media-finalize)                                       Queue                         \napps/mcp cf:dry: env.Q_AGENT_CANCEL (musebook-agent-cancel)                                           Queue                         \napps/mcp cf:dry: env.HYPERDRIVE_CACHED (48c4c1c7cc734a8cb4031bd546160eae)                             Hyperdrive Config             \napps/mcp cf:dry: env.HYPERDRIVE_FRESH (5288b46cce7340438e840e1d0daeb23d)                              Hyperdrive Config             \napps/mcp cf:dry: env.PUBLIC_MEDIA (musebook-public)                                                   R2 Bucket                     \napps/mcp cf:dry: env.PAID_MEDIA (musebook-paid)                                                       R2 Bucket                     \napps/mcp cf:dry: env.TELEMETRY (musebook_telemetry)                                                   Analytics Engine Dataset      \napps/mcp cf:dry: env.MUSEBOOK_LOG_LEVEL (\"info\")                                                      Environment Variable          \napps/mcp cf:dry: env.MCP_ISSUER_URL (\"https://mcp.musebook.dev\")                                      Environment Variable          \napps/mcp cf:dry: env.MCP_AUTH_SERVER_URL (\"https://mcp.musebook.dev\")                                 Environment Variable          \napps/mcp cf:dry: env.MCP_OAUTH_ACCESS_TOKEN_TTL_S (\"3600\")                                            Environment Variable          \napps/mcp cf:dry: env.MCP_OAUTH_AUTH_CODE_TTL_S (\"600\")                                                Environment Variable          \napps/mcp cf:dry: env.PREVIEW_CHARS (\"400\")                                                            Environment Variable          \napps/mcp cf:dry: env.MB_RELEASE_SHA (\"\")                                                              Environment Variable          \napps/mcp cf:dry: env.MOLTBOOK_MODE (\"production\")                                                     Environment Variable          \napps/mcp cf:dry: env.MOLTBOOK_ALLOW_MOCK (\"false\")                                                    Environment Variable          \napps/mcp cf:dry: env.X402_MODE (\"shadow\")                                                             Environment Variable          \napps/mcp cf:dry: env.X402_NETWORK (\"eip155:84532\")                                                    Environment Variable          \napps/mcp cf:dry: env.X402_CHAIN_ID (\"84532\")                                                          Environment Variable          \napps/mcp cf:dry: env.X402_ASSET_ADDRESS (\"0x036CbD53842c5426634e7929541eC2318f3...\")                  Environment Variable          \napps/mcp cf:dry: env.X402_ASSET_EIP712_NAME (\"USDC\")                                                  Environment Variable          \napps/mcp cf:dry: env.X402_ASSET_DECIMALS (\"6\")                                                        Environment Variable          \napps/mcp c"
+    },
+    {
+      "id": "G-SEED",
+      "status": "pass",
+      "duration_s": 54.02,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-RLS",
+      "status": "pass",
+      "duration_s": 1.31,
+      "exit_code": 0,
+      "output": "/home/ubuntu/repos/musebook/supabase/tests/001_rls_matrix.test.sql .. ok\nAll tests successful.\nFiles=1, Tests=53,  0 wallclock secs ( 0.01 usr +  0.00 sys =  0.01 CPU)\nResult: PASS"
+    },
+    {
+      "id": "G-ROLE",
+      "status": "pass",
+      "duration_s": 0.27,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-DRIFT",
+      "status": "pass",
+      "duration_s": 4.12,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-BUNDLE",
+      "status": "pass",
+      "duration_s": 0.04,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-R2-SEAL",
+      "status": "pass",
+      "duration_s": 5.85,
+      "exit_code": 0,
+      "output": "",
+      "prereq": "H3"
+    },
+    {
+      "id": "G-COV",
+      "status": "pass",
+      "duration_s": 94.11,
+      "exit_code": 0,
+      "output": "\n RUN  v4.1.11 /home/ubuntu/repos/musebook\n      Coverage enabled with istanbul\n\npsql: error: connection to server on socket \"/run/postgresql/.s.PGSQL.5432\" failed: No such file or directory\n\tIs the server running locally and accepting connections on that socket?\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260924\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260924\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-24 00:00:00+00') to ('2026-09-25 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260925\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260925\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-25 00:00:00+00') to ('2026-09-26 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260926\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260926\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-26 00:00:00+00') to ('2026-09-27 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260927\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260927\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-27 00:00:00+00') to ('2026-09-28 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260928\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260928\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-28 00:00:00+00') to ('2026-09-29 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260929\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260929\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-29 00:00:00+00') to ('2026-09-30 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'parse_utilcmd.c',\n  line: '207',\n  routine: 'transformCreateStmt'\n}\n{\n  severity_local: 'NOTICE',\n  severity: 'NOTICE',\n  code: '42P07',\n  message: 'relation \"action_events_human_20260930\" already exists, skipping',\n  where: 'SQL statement \"create table if not exists public.action_events_human_20260930\\n' +\n    '           partition of public.action_events_human\\n' +\n    `           for values from ('2026-09-30 00:00:00+00') to ('2026-10-01 00:00:00+00')\"\\n` +\n    'PL/pgSQL function ensure_action_event_partitions(integer) line 6 at EXECUTE',\n  file: 'p"
+    },
+    {
+      "id": "G-GOLDEN",
+      "status": "pass",
+      "duration_s": 0.1,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-EDGE-ROUTES",
+      "status": "pass",
+      "duration_s": 0.02,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-PROXY",
+      "status": "pass",
+      "duration_s": 0.02,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-FRESH",
+      "status": "pass",
+      "duration_s": 0.01,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-AXE",
+      "status": "pass",
+      "duration_s": 23.03,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-FAKE-TX",
+      "status": "pass",
+      "duration_s": 0.01,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-X402-V1",
+      "status": "pass",
+      "duration_s": 0.01,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-PLANE-JOIN",
+      "status": "pass",
+      "duration_s": 0.01,
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "G-ISO",
+      "status": "pass",
+      "duration_s": 1.64,
+      "exit_code": 0,
+      "output": ""
+    }
+  ]
+}
