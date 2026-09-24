@@ -19,6 +19,7 @@ import { refreshChannelConstraints } from "./cron/refresh-channel-constraints.js
 import { runAeRollup } from "./cron/ae-rollup.js";
 import { backfillPostEmbeddings, recomputeUserEmbeddings } from "./cron/embed.js";
 import { runAlertPass, writeHeartbeat } from "./alerts.js";
+import { mediaPoll } from "./cron/media-poll.js";
 import { deriveNotDwelledLabels } from "./cron/label-builder.js";
 import { dispatch } from "./consumers/index.js";
 import { SlateBuilder } from "./slate-builder.js";
@@ -55,6 +56,10 @@ export default {
         // its own heartbeat (edge-alert-pass) inside itself.
         await distributeReconcile(env);
         beat("distribute-reconcile");
+        // §11.7.4: the media reconciler is the webhook's only fallback — polls
+        // every live media_jobs row and times out anything past deadline_at.
+        await mediaPoll(env);
+        beat("media-poll");
         await runAlertPass(env, ctx);
         return noop();
       case "0 * * * *": {

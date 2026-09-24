@@ -46,3 +46,42 @@ export function uploadExt(filename: string, contentType: string): string {
   const sub = contentType.split("/")[1]?.split(";")[0]?.trim().toLowerCase();
   return sub !== undefined && EXT_OK.test(sub) ? sub : "bin";
 }
+
+/** `pay` for posts with a price, `free` otherwise — the tier divider the
+ *  finalize consumer applies when choosing the object bucket. */
+export type MediaTier = "free" | "paid";
+
+export function storageFor(tier: MediaTier): AssetStorage {
+  return tier === "paid" ? "r2_paid" : "r2_public";
+}
+
+/** Generated-asset key: same content-addressed convention as uploads —
+ *  `m/{sha}.{ext}` free / `p/{sha}.{ext}` paid. `ext` comes from the
+ *  provider's returned content-type, never the request. */
+export function objectKey(tier: MediaTier, sha256: string, contentType: string): string {
+  const ext = uploadExt("", contentType);
+  return assetKey(storageFor(tier), sha256, ext);
+}
+
+/** `{object_key}.c2pa` — same bucket as the asset, always (§11.7.2). */
+export function sidecarKey(key: string): string {
+  return `${key}.c2pa`;
+}
+
+/** `t/{sha}/{width}.webp` — generated thumbnails. */
+export function thumbnailKey(sha256: string, width: number): string {
+  if (!/^[0-9a-f]{64}$/.test(sha256)) throw new Error("sha256 must be 64 hex chars");
+  if (!Number.isInteger(width) || width <= 0) throw new Error("width must be a positive int");
+  return `t/${sha256}/${width}.webp`;
+}
+
+/** `staging/{userId}/{uuid}/{filename}` — presigned upload staging in
+ *  musebook-uploads. Sanitized: filename reduced to its basename. */
+export function stagingKey(userId: string, fileId: string, filename: string): string {
+  const base =
+    filename
+      .split("/")
+      .pop()
+      ?.replace(/[^a-zA-Z0-9._-]/g, "_") ?? "file";
+  return `staging/${userId}/${fileId}/${base}`;
+}

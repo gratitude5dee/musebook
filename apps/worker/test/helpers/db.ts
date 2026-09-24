@@ -35,6 +35,21 @@ export async function withDb<T>(fn: (c: pg.Client) => Promise<T>): Promise<T> {
   }
 }
 
+/** The musebook_worker login — the ONLY session role that may SET ROLE into
+ *  the musebook planes (the postgres superuser's membership is admin-only,
+ *  not set). RPCs that call app.enter (enqueue_job, finish_job, the media
+ *  submit/finalize family) must go through this client, not withDb. */
+const WORKER_DB_URL = "postgres://musebook_worker:postgres@127.0.0.1:54322/postgres";
+export async function withWorkerDb<T>(fn: (c: pg.Client) => Promise<T>): Promise<T> {
+  const client = new pg.Client({ connectionString: WORKER_DB_URL });
+  await client.connect();
+  try {
+    return await fn(client);
+  } finally {
+    await client.end();
+  }
+}
+
 /** Deletes every row a gate test could have written — by test-only markers
  *  (dedupe_key 'test-%'/'sweep-%', idempotency_key 'test-%') and by the seed
  *  content hash on the effect tables. Seed rows themselves are never deleted. */
@@ -63,6 +78,24 @@ export async function resetSeed(): Promise<void> {
     ]);
     await c.query(`delete from public.channels where postiz_channel_id like 'test-%'`);
     await c.query(`delete from public.platforms where slug = 'testx'`);
+    // M19 test fixtures: media jobs + the reservations/holds they open.
+    // media_jobs must go FIRST: it FKs to agent_spend_reservations and
+    // assets with ON DELETE SET NULL — deleting either parent first leaves
+    // 'succeeded' jobs with null reservation/asset and trips
+    // media_jobs_succeeded_has_reservation / _has_asset.
+    await c.query(
+      `delete from public.job_outbox
+         where dedupe_key like 'media%' and payload->>'media_job_id' in
+               (select id::text from public.media_jobs where idempotency_key like 'test-%')`,
+    );
+    await c.query(
+      `delete from public.media_jobs
+         where idempotency_key like 'test-%'
+            or asset_id in (select id from public.assets where object_key not like 'seed/%')`,
+    );
+    await c.query(
+      `delete from public.agent_spend_reservations where idempotency_key like 'test-%'`,
+    );
     // Everything except the six seeded r2_public media rows (object_key
     // 'seed/…') is test-fixture output (upload promotion, composer flows)
     // that survives resets and leaks into app.distribution_media's join on

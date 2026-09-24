@@ -55,7 +55,7 @@ function opsEvent(
 ): Promise<unknown> {
   return db.query(
     `insert into public.ops_events (component, event_name, level, outcome, metadata)
-     values ('distributor', $1, $2, $3, $4::jsonb)`,
+     values ('distributor', $1, $2, $3, ($4::text)::jsonb)`,
     [event, level, event, JSON.stringify(detail)],
   );
 }
@@ -77,7 +77,7 @@ async function insertStageJobBare(
 ): Promise<number | null> {
   const { rows } = await db.query<{ id: string }>(
     `insert into public.job_outbox (kind, dedupe_key, payload)
-     values ('distribute', $1, $2::jsonb)
+     values ('distribute', $1, ($2::text)::jsonb)
      on conflict (kind, dedupe_key) do nothing
      returning id`,
     [dedupeKey, JSON.stringify(payload)],
@@ -165,7 +165,7 @@ async function runPlanStage(db: DbClient, p: PlanPayload): Promise<void> {
       await db.query(
         `insert into public.distribution_jobs
          (post_id, post_version_id, channel_id, idempotency_key, scheduled_for, request_payload)
-       values ($1::uuid, $2::uuid, $3::uuid, $4, $5::timestamptz, $6::jsonb)
+       values ($1::uuid, $2::uuid, $3::uuid, $4, $5::timestamptz, ($6::text)::jsonb)
        on conflict (idempotency_key) do nothing`,
         [
           p.post_id,
@@ -411,7 +411,7 @@ async function produceAndStoreVariant(db: DbClient, env: Env, m: VariantPayload)
       `insert into public.platform_variants
          (post_id, post_version_id, platform, body, media, thread_parts,
           generated_by, validator_report, is_valid)
-       values ($1::uuid, $2::uuid, $3, $4, $5::jsonb, $6::jsonb, $7, $8::jsonb, $9)
+       values ($1::uuid, $2::uuid, $3, $4, ($5::text)::jsonb, ($6::text)::jsonb, $7, ($8::text)::jsonb, $9)
        on conflict (post_version_id, platform) do update set
          body = excluded.body, media = excluded.media, thread_parts = excluded.thread_parts,
          generated_by = excluded.generated_by, validator_report = excluded.validator_report,
@@ -560,7 +560,7 @@ async function runSendStage(db: DbClient, env: Env, m: SendPayload): Promise<voi
     await jobsTx(db, async () => {
       await db.query(
         `update public.distribution_jobs dj
-            set state = 'failed', last_error = 'postiz 400', response_payload = $3::jsonb
+            set state = 'failed', last_error = 'postiz 400', response_payload = ($3::text)::jsonb
            from public.channels c
           where dj.channel_id = c.id and dj.post_version_id = $1::uuid
             and dj.scheduled_for = $2::timestamptz and c.platform = $4`,
@@ -596,7 +596,7 @@ async function runSendStage(db: DbClient, env: Env, m: SendPayload): Promise<voi
         await db.query(
           `update public.distribution_jobs
               set state = 'queued', last_error = 'postiz send failed',
-                  response_payload = $3::jsonb
+                  response_payload = ($3::text)::jsonb
             where post_version_id = $1::uuid and scheduled_for = $2::timestamptz
               and state = 'running' and postiz_post_id is null`,
           [m.postVersionId, m.scheduledFor, JSON.stringify(detail)],
@@ -614,7 +614,7 @@ async function runSendStage(db: DbClient, env: Env, m: SendPayload): Promise<voi
       await db.query(
         `update public.distribution_jobs
             set state = 'failed', last_error = 'postiz send exhausted',
-                response_payload = $3::jsonb
+                response_payload = ($3::text)::jsonb
           where post_version_id = $1::uuid and scheduled_for = $2::timestamptz
             and state = 'running' and postiz_post_id is null`,
         [m.postVersionId, m.scheduledFor, JSON.stringify(detail)],
@@ -638,7 +638,7 @@ async function runSendStage(db: DbClient, env: Env, m: SendPayload): Promise<voi
       if (job === undefined) continue;
       await db.query(
         `update public.distribution_jobs
-            set postiz_post_id = $2, response_payload = $3::jsonb
+            set postiz_post_id = $2, response_payload = ($3::text)::jsonb
           where id = $1::uuid`,
         [job.id, r.postId, JSON.stringify(r)],
       );
@@ -730,7 +730,7 @@ export async function reconcileJob(
       await db.query(
         `update public.distribution_jobs
             set state = 'succeeded', platform_post_url = $2,
-                response_payload = response_payload || $3::jsonb
+                response_payload = response_payload || ($3::text)::jsonb
           where id = $1::uuid`,
         [job.id, match.releaseURL ?? null, JSON.stringify({ reconcile: match })],
       );
@@ -742,7 +742,7 @@ export async function reconcileJob(
       await db.query(
         `update public.distribution_jobs
             set state = 'failed', last_error = $2,
-                response_payload = response_payload || $3::jsonb
+                response_payload = response_payload || ($3::text)::jsonb
           where id = $1::uuid`,
         [job.id, match.error ?? "postiz ERROR", JSON.stringify({ reconcile: match })],
       );

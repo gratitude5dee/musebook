@@ -589,13 +589,14 @@ describe("kernel ports and media conditionals (configure, payments, grants, medi
     await db(
       `insert into public.x402_settlements
          (id, post_id, content_hash, network, asset, payer, nonce,
-          amount_atomic, pay_to, transaction, status, facilitator_url, settled_at, revenue_share_version)
+          amount_atomic, pay_to, transaction, status, facilitator_url, settled_at, revenue_share_version, settle_response)
        select $1::uuid, p.id, p.content_hash, 'eip155:84532',
               '0x036cbd53842c5426634e7929541ec2318f3dcf7e', $2,
               '0x' || lpad(encode(gen_random_bytes(28), 'hex'), 56, '0') || '00c0e1ff',
               p.price_atomic, '0x0000000000000000000000000000000000000001',
               '0x' || lpad(encode(gen_random_bytes(28), 'hex'), 56, '0') || '00c0e1ee',
-              'settled'::settlement_status, 'https://x402.org/facilitator', now(), p.revenue_share_version
+              'settled'::settlement_status, 'https://x402.org/facilitator', now(), p.revenue_share_version,
+            '{"success":true}'::jsonb
          from public.posts p where p.id = $3::uuid`,
       [g.settlementId, g.payer, HFAP_POST],
     );
@@ -605,13 +606,14 @@ describe("kernel ports and media conditionals (configure, payments, grants, medi
     await db(
       `insert into public.x402_settlements
          (id, post_id, content_hash, network, asset, payer, nonce,
-          amount_atomic, pay_to, transaction, status, facilitator_url, settled_at, revenue_share_version)
+          amount_atomic, pay_to, transaction, status, facilitator_url, settled_at, revenue_share_version, settle_response)
        select $1::uuid, p.id, p.content_hash, 'eip155:84532',
               '0x036cbd53842c5426634e7929541ec2318f3dcf7e', $2,
               '0x' || lpad(encode(gen_random_bytes(28), 'hex'), 56, '0') || '00c0e1dd',
               p.price_atomic, '0x0000000000000000000000000000000000000001',
               '0x' || lpad(encode(gen_random_bytes(28), 'hex'), 56, '0') || '00c0e1cc',
-              'settled'::settlement_status, 'https://x402.org/facilitator', now(), p.revenue_share_version
+              'settled'::settlement_status, 'https://x402.org/facilitator', now(), p.revenue_share_version,
+            '{"success":true}'::jsonb
          from public.posts p where p.id = $3::uuid`,
       [secondSettlement, g.payer, HFAP_POST],
     );

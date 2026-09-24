@@ -30,6 +30,19 @@ declare global {
 
     /** §11.18 — Ed25519 PKCS#8 PEM minting the /t/{ticket}/ URLs; secret. */
     ARTIFACT_TICKET_SIGNING_KEY?: string;
+
+    /** §11.7.6 — Standard Webhooks whsec_… for the Replicate webhook; secret. */
+    REPLICATE_WEBHOOK_SECRET?: string;
+    /** §11.7.5 — fal JWKS endpoint (var) + verify-mode switch (var). */
+    FAL_WEBHOOK_JWKS_URL?: string;
+    MEDIA_WEBHOOK_VERIFY_MODE?: string;
+    /** §11.4 — 'true' binds the Replicate failover into the model picker. */
+    MEDIA_BACKEND_REPLICATE_ENABLED?: string;
+    /** §11.7.2 — the finalize-queue producer (media_finalize consumer). */
+    Q_MEDIA_FINALIZE?: Queue;
+    /** §11.7.3 — the jobs queue producer (idempotent submit retries land here
+     *  only when the edge can serve a job-lookup itself — not used today). */
+    Q_MEDIA?: Queue;
   }
 
   /** musebook-worker's SlateBuilder entrypoint over the MIXER service binding

@@ -28,6 +28,7 @@ allowBuilds:
   # core-js@2.x ships a postinstall ad for its maintainer; the polyfill itself
   # installs fine without the script — deny it like @swc/core above.
   core-js: false
+  "@contentauth/c2pa-node": true
 catalog:
   react: "19.3.0"
   react-dom: "19.3.0"
@@ -56,5 +57,14 @@ minimumReleaseAgeExclude:
   - miniflare@5.20260921.0-alpha
   - wrangler@4.136.0 || 4.136.1 || 4.136.3 || 4.137.0
   - "@cloudflare/unenv-preset@2.16.2"
+  - "@contentauth/c2pa-node@0.9.8"
+  - "@contentauth/c2pa-types@0.7.5"
+  - "@contentauth/c2pa-utilities@0.3.1"
 patchedDependencies:
   postgres@3.4.9: patches/postgres@3.4.9.patch
+
+# Native postinstalls the media package needs (sharp/c2pa-node binaries).
+onlyBuiltDependencies:
+  - sharp
+  - "@contentauth/c2pa-node"
+  - fluent-ffmpeg

@@ -5,7 +5,8 @@
     "outDir": "./dist",
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "module": "ESNext",
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "types": ["@cloudflare/workers-types", "node"]
   },
   "include": ["src/**/*.ts"],
   "references": [

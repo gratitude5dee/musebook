@@ -100,7 +100,7 @@ export async function distributeReconcile(env: Env): Promise<void> {
           await db.query(
             `update public.distribution_jobs
                 set state = 'succeeded', platform_post_url = $2,
-                    response_payload = response_payload || $3::jsonb
+                    response_payload = response_payload || ($3::text)::jsonb
               where id = $1::uuid`,
             [job.id, match.releaseURL ?? null, JSON.stringify({ reconcile: match })],
           );
@@ -110,7 +110,7 @@ export async function distributeReconcile(env: Env): Promise<void> {
           await db.query(
             `update public.distribution_jobs
                 set state = 'failed', last_error = $2,
-                    response_payload = response_payload || $3::jsonb
+                    response_payload = response_payload || ($3::text)::jsonb
               where id = $1::uuid`,
             [job.id, match.error ?? "postiz ERROR", JSON.stringify({ reconcile: match })],
           );

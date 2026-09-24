@@ -40,5 +40,14 @@ declare global {
      *  POSTs (§11.12 step 3's artifact ingest, §15.5's media provenance).
      *  Worker secret; MB_INTERNAL_KEY_ID/PUBLIC_KEYS are the vars pair. */
     MB_INTERNAL_SIGNING_KEY?: string;
+
+    /** §11.4 — fal.ai primary backend key; Worker secret. */
+    FAL_KEY?: string;
+    /** §11.4 — Replicate failover token; Worker secret. Absent ⇒ fal-only. */
+    REPLICATE_API_TOKEN?: string;
+    /** §11.7.6 — Standard Webhooks whsec_… the Replicate submit hands to the
+     *  provider so the inbound webhook verifies. Worker secret, echoed into
+     *  GenerateRequest.webhookSecret by the submit consumer. */
+    REPLICATE_WEBHOOK_SECRET?: string;
   }
 }

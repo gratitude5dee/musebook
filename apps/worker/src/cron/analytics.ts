@@ -82,7 +82,7 @@ export async function collectPlatformAnalytics(env: Env): Promise<void> {
            (channel_id, platform_post_id, post_id, collected_for,
             impressions, likes, comments, shares, reposts, saves, clicks, raw)
          select dj.channel_id, dj.postiz_post_id, dj.post_id, $2::date,
-                $3, $4, $5, $6, $7, $8, $9, $10::jsonb
+                $3, $4, $5, $6, $7, $8, $9, ($10::text)::jsonb
            from public.distribution_jobs dj
           where dj.id = $1::uuid
          on conflict (channel_id, platform_post_id, collected_for)

@@ -22,6 +22,11 @@ const nextConfig: NextConfig = {
     "@musebook/schema",
     "@musebook/x402",
   ],
+  // Native/node binaries under @musebook/media/node (the web provenance
+  // route's only import): c2pa-node ships a .node binary Turbopack cannot
+  // place in ESM chunks; sharp/fluent-ffmpeg are the same class. They run
+  // under node require at runtime instead.
+  serverExternalPackages: ["@contentauth/c2pa-node", "sharp", "fluent-ffmpeg", "@vercel/sandbox"],
   turbopack: {
     resolveAlias: {
       // Optional Solana path in @coinbase/cdp-sdk — never imported on the

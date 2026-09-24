@@ -8,20 +8,84 @@ import {
   hostsOf,
   type ConnectorManifest,
 } from "@musebook/connectors";
-import { pgFresh } from "../db.js";
+import { pgFresh, pgFreshJobs } from "../db.js";
 import { audit } from "../lib/audit.js";
+import {
+  backendByName,
+  createBackends,
+  type BackendName,
+  type GenerateJobRef,
+} from "@musebook/media";
+import { mediaModelStore } from "./media.js";
+import { providerUrlsFor } from "./media-finalize.js";
 
 export interface AgentCancelPayload {
   reservation_id?: string;
   delegation_id?: string;
   external_kind?: string;
+  /** media_job cancel path — the media_jobs row id (§10.7.5 payload). */
   external_ref?: string;
+  /** Legacy alias for external_ref on older queued messages. */
+  media_job_id?: string;
+}
+
+/** §11.7.7's cooperative cancel for in-flight generations: best-effort provider
+ *  cancel (false when already finished — harmless), then fail_media_job's
+ *  'cancelled' transition which releases the reservation. */
+async function cancelMediaJob(env: Env, mediaJobId: string): Promise<void> {
+  const db = await pgFreshJobs(env);
+  try {
+    const { rows } = await db.query<{
+      id: string;
+      backend: string | null;
+      model_id: string | null;
+      provider_request_id: string | null;
+      status: string;
+      estimated_cost_atomic: string;
+    }>("select * from media_jobs where id = $1::uuid", [mediaJobId]);
+    const job = rows[0];
+    if (job === undefined) return;
+    if (
+      job.status !== "cancelled" &&
+      job.backend !== null &&
+      job.model_id !== null &&
+      job.provider_request_id !== null
+    ) {
+      const store = mediaModelStore(db);
+      const backend = backendByName(createBackends(env, store), job.backend);
+      if (backend !== null) {
+        const urls = providerUrlsFor(job.backend, job.model_id, job.provider_request_id);
+        const ref: GenerateJobRef = {
+          jobId: job.id,
+          backend: job.backend as BackendName,
+          modelId: job.model_id,
+          providerRequestId: job.provider_request_id,
+          estimatedCostAtomic: job.estimated_cost_atomic,
+          statusUrl: urls.statusUrl,
+          cancelUrl: urls.cancelUrl,
+          resultUrl: urls.resultUrl,
+        };
+        await backend.cancel(ref).catch(() => false); // provider cancel is best-effort
+      }
+    }
+    await db.query(
+      "select * from public.fail_media_job($1::uuid, 'cancelled'::media_job_status, 'cancelled_by_owner')",
+      [mediaJobId],
+    );
+  } finally {
+    await db.end().catch(() => undefined);
+  }
 }
 
 /** Idempotent: a redelivered message re-runs revoke() on the same reservation,
  *  which adapters define as a no-op. */
 export async function runAgentCancel(env: Env, payload: Record<string, unknown>): Promise<void> {
   const p = payload as AgentCancelPayload;
+  if (p.external_kind === "media_job") {
+    const id = typeof p.external_ref === "string" ? p.external_ref : p.media_job_id;
+    if (typeof id === "string") await cancelMediaJob(env, id);
+    return;
+  }
   if (!p.reservation_id) return;
 
   const db = await pgFresh(env);

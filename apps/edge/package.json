@@ -18,6 +18,7 @@
     "@musebook/content": "workspace:*",
     "@musebook/distributor": "workspace:*",
     "@musebook/kernel": "workspace:*",
+    "@musebook/media": "workspace:*",
     "@musebook/schema": "workspace:*",
     "@musebook/telemetry": "workspace:*",
     "@musebook/x402": "workspace:*",

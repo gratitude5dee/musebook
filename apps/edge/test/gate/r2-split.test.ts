@@ -22,7 +22,12 @@ const FREE_POST = "44444444-4444-4444-8444-000000000004"; // seed-article-free
 const HFAP_POST = "44444444-4444-4444-8444-000000000005"; // seed-article-hfap
 const HFAP_KEY = "m/paid/2026/09/seed-hfap-image.avif";
 const HFAP_URL = `https://media.musebook.dev/${HFAP_KEY}`;
-const ARTIFACT_KEY = "a/artifacts/2026/09/seed-archive.zip";
+// M16's artifact scheme: /a/{artifactId}/{16-hex-version}/{path} rewrites
+// to the a/public/{version}/{path} key — the M6-era raw a/… key no longer
+// routes (serveArtifact guards the whole artifacts host now).
+const ARTIFACT_VERSION = "0123456789abcdef";
+const ARTIFACT_KEY = `a/public/${ARTIFACT_VERSION}/index.html`;
+const ARTIFACT_URL = `https://artifacts.musebook.dev/a/artifacts/${ARTIFACT_VERSION}/index.html`;
 
 const PAID_URL = `https://media.musebook.dev/${PAID_KEY}`;
 const FREE_URL = `https://media.musebook.dev/${FREE_KEY}`;
@@ -109,7 +114,7 @@ describe("the split media gate: public, paid and artifacts share one Worker", ()
 
     // artifacts.musebook.dev hits the same Worker but always through ARTIFACTS.
     // The asset is attached to a FREE post — pass-through, no payment dance.
-    const art = await SELF.fetch(`https://artifacts.musebook.dev/${ARTIFACT_KEY}`);
+    const art = await SELF.fetch(ARTIFACT_URL);
     expect(art.status).toBe(200);
     expect(await art.text()).toBe("ARTIFACT");
   });
