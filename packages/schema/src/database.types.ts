@@ -1374,14 +1374,20 @@ export type Database = {
           alt_text: string | null
           byte_len: number
           c2pa_manifest: Json | null
+          c2pa_sidecar_key: string | null
+          c2pa_signed_at: string | null
           content_type: string
           created_at: string
           duration_ms: number | null
+          generator: string | null
           height: number | null
           id: string
           object_key: string
           owner_user_id: string
+          phash: unknown
+          phash_frames: unknown[] | null
           sha256: string
+          source_kind: string
           storage: string
           url: string
           width: number | null
@@ -1390,14 +1396,20 @@ export type Database = {
           alt_text?: string | null
           byte_len: number
           c2pa_manifest?: Json | null
+          c2pa_sidecar_key?: string | null
+          c2pa_signed_at?: string | null
           content_type: string
           created_at?: string
           duration_ms?: number | null
+          generator?: string | null
           height?: number | null
           id?: string
           object_key: string
           owner_user_id: string
+          phash?: unknown
+          phash_frames?: unknown[] | null
           sha256: string
+          source_kind?: string
           storage: string
           url: string
           width?: number | null
@@ -1406,14 +1418,20 @@ export type Database = {
           alt_text?: string | null
           byte_len?: number
           c2pa_manifest?: Json | null
+          c2pa_sidecar_key?: string | null
+          c2pa_signed_at?: string | null
           content_type?: string
           created_at?: string
           duration_ms?: number | null
+          generator?: string | null
           height?: number | null
           id?: string
           object_key?: string
           owner_user_id?: string
+          phash?: unknown
+          phash_frames?: unknown[] | null
           sha256?: string
+          source_kind?: string
           storage?: string
           url?: string
           width?: number | null
@@ -2649,6 +2667,177 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      media_jobs: {
+        Row: {
+          actual_cost_atomic: number
+          asset_id: string | null
+          attempt: number
+          backend: string | null
+          completed_at: string | null
+          created_at: string
+          delegation_id: string | null
+          error: string | null
+          estimated_cost_atomic: number
+          id: string
+          idempotency_key: string
+          kind: string
+          model_id: string | null
+          params: Json
+          post_id: string | null
+          prompt: string
+          prompt_sha256: string
+          provider_request_id: string | null
+          requested_by_user_id: string | null
+          reservation_id: string | null
+          safety_verdict: Json
+          spend_settled: boolean
+          started_at: string | null
+          status: Database["public"]["Enums"]["media_job_status"]
+          webhook_delivery_count: number
+          webhook_first_seen_at: string | null
+        }
+        Insert: {
+          actual_cost_atomic?: number
+          asset_id?: string | null
+          attempt?: number
+          backend?: string | null
+          completed_at?: string | null
+          created_at?: string
+          delegation_id?: string | null
+          error?: string | null
+          estimated_cost_atomic?: number
+          id?: string
+          idempotency_key: string
+          kind: string
+          model_id?: string | null
+          params?: Json
+          post_id?: string | null
+          prompt: string
+          prompt_sha256: string
+          provider_request_id?: string | null
+          requested_by_user_id?: string | null
+          reservation_id?: string | null
+          safety_verdict?: Json
+          spend_settled?: boolean
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["media_job_status"]
+          webhook_delivery_count?: number
+          webhook_first_seen_at?: string | null
+        }
+        Update: {
+          actual_cost_atomic?: number
+          asset_id?: string | null
+          attempt?: number
+          backend?: string | null
+          completed_at?: string | null
+          created_at?: string
+          delegation_id?: string | null
+          error?: string | null
+          estimated_cost_atomic?: number
+          id?: string
+          idempotency_key?: string
+          kind?: string
+          model_id?: string | null
+          params?: Json
+          post_id?: string | null
+          prompt?: string
+          prompt_sha256?: string
+          provider_request_id?: string | null
+          requested_by_user_id?: string | null
+          reservation_id?: string | null
+          safety_verdict?: Json
+          spend_settled?: boolean
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["media_job_status"]
+          webhook_delivery_count?: number
+          webhook_first_seen_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_jobs_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_jobs_delegation_id_fkey"
+            columns: ["delegation_id"]
+            isOneToOne: false
+            referencedRelation: "delegations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_jobs_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_jobs_requested_by_user_id_fkey"
+            columns: ["requested_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_jobs_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "agent_spend_reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_models: {
+        Row: {
+          backend: string
+          created_at: string
+          enabled: boolean
+          id: string
+          kind: string
+          max_duration_s: number | null
+          model_id: string
+          notes: string | null
+          preference_rank: number
+          price_atomic: number | null
+          price_unit: string
+          slot: string
+          updated_at: string
+        }
+        Insert: {
+          backend: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          kind: string
+          max_duration_s?: number | null
+          model_id: string
+          notes?: string | null
+          preference_rank?: number
+          price_atomic?: number | null
+          price_unit: string
+          slot: string
+          updated_at?: string
+        }
+        Update: {
+          backend?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          kind?: string
+          max_duration_s?: number | null
+          model_id?: string
+          notes?: string | null
+          preference_rank?: number
+          price_atomic?: number | null
+          price_unit?: string
+          slot?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       model_registry: {
         Row: {
@@ -4716,6 +4905,40 @@ export type Database = {
       }
       erase_user_subject: { Args: { p_user_id: string }; Returns: Json }
       evaluate_alerts: { Args: never; Returns: undefined }
+      fail_media_job: {
+        Args: {
+          p_media_job_id: string
+          p_reason: string
+          p_status: Database["public"]["Enums"]["media_job_status"]
+          p_verdict?: Json
+        }
+        Returns: {
+          changed: boolean
+        }[]
+      }
+      finalize_media_job: {
+        Args: {
+          p_actual_cost_atomic: number
+          p_byte_len: number
+          p_content_type: string
+          p_duration_ms: number
+          p_height: number
+          p_media_job_id: string
+          p_object_key: string
+          p_phash: unknown
+          p_phash_frames: unknown[]
+          p_sha256: string
+          p_sidecar_key: string
+          p_storage: string
+          p_url: string
+          p_width: number
+        }
+        Returns: {
+          asset_id: string
+          finalized: boolean
+          reason: string
+        }[]
+      }
       fold_ops_counters: { Args: never; Returns: undefined }
       insert_draft_post: {
         Args: {
@@ -4779,6 +5002,14 @@ export type Database = {
           title: string
           train_ai: boolean
           updated_at: string
+        }[]
+      }
+      media_job_approved: {
+        Args: { p_media_job_id: string }
+        Returns: {
+          allowed: boolean
+          job_id: number
+          reason: string
         }[]
       }
       my_publishing_defaults: {
@@ -4868,6 +5099,26 @@ export type Database = {
           settled: boolean
         }[]
       }
+      submit_media_job: {
+        Args: {
+          p_delegation_id: string
+          p_estimate_atomic: number
+          p_idempotency_key: string
+          p_kind: string
+          p_model_id: string
+          p_params?: Json
+          p_prompt: string
+          p_prompt_sha256: string
+          p_user_id: string
+        }
+        Returns: {
+          allowed: boolean
+          job_id: number
+          media_job_id: string
+          reason: string
+          reservation_id: string
+        }[]
+      }
     }
     Enums: {
       action_kind:
@@ -4909,6 +5160,14 @@ export type Database = {
       approval_state: "pending" | "approved" | "rejected" | "expired"
       delegation_state: "active" | "paused" | "revoked" | "expired"
       job_state: "queued" | "running" | "succeeded" | "failed" | "dead"
+      media_job_status:
+        | "queued"
+        | "pending_approval"
+        | "running"
+        | "succeeded"
+        | "failed"
+        | "cancelled"
+        | "blocked_safety"
       post_kind:
         | "note"
         | "article"
@@ -5099,6 +5358,15 @@ export const Constants = {
       approval_state: ["pending", "approved", "rejected", "expired"],
       delegation_state: ["active", "paused", "revoked", "expired"],
       job_state: ["queued", "running", "succeeded", "failed", "dead"],
+      media_job_status: [
+        "queued",
+        "pending_approval",
+        "running",
+        "succeeded",
+        "failed",
+        "cancelled",
+        "blocked_safety",
+      ],
       post_kind: [
         "note",
         "article",

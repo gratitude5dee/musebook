@@ -65,8 +65,12 @@ export default defineProject({
           // Testnet facilitator for the M8 wire tier: the Sepolia tuple above
           // rules CDP out only by network, but the gate has no CDP secrets —
           // x402.org's facilitator is unauthenticated and testnet-only, which
-          // is exactly what this tier settles through.
-          X402_FACILITATOR_URL: process.env.X402_FACILITATOR_URL ?? "https://x402.org/facilitator",
+          // is exactly what this tier settles through. .env points
+          // X402_FACILITATOR_URL at the CDP mainnet facilitator for the prod
+          // shadow config, so this tier must not inherit it — CDP's auth
+          // requirement would turn every settle into a 503.
+          X402_FACILITATOR_URL:
+            process.env.X402_TEST_FACILITATOR_URL ?? "https://x402.org/facilitator",
           // The funded Sepolia payer for the M8.1/2/5 live checks (H9); the
           // test skips loudly when unset.
           X402_TEST_PAYER_KEY: process.env.X402_TEST_PAYER_KEY ?? "missing",

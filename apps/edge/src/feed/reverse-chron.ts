@@ -54,12 +54,15 @@ export async function reverseChronPage(
     // and positions dense from 0, which is all §13's ingest asks.
     const ttl = Number(env.MUSE_SLATE_TTL_SECONDS ?? 900);
     const { rows: slateRows } = await db.query<{ id: string }>(
-      "select app.write_reverse_chron_slate($1::uuid, $2::uuid, $3, $4::jsonb, $5, $6::uuid) as id",
+      // ($4::text)::jsonb — the array param must be stringify'ed first; a bare
+      // JS array binds as a Postgres array literal and the ::jsonb cast fails
+      // under node-pg (see telemetry/ingest.ts).
+      "select app.write_reverse_chron_slate($1::uuid, $2::uuid, $3, ($4::text)::jsonb, $5, $6::uuid) as id",
       [
         actor.plane === "human" ? actor.userId : null,
         actor.plane === "agent" ? actor.agentIdentityId : null,
         req.surface,
-        rows.map((r) => ({ post_id: r.post_id })),
+        JSON.stringify(rows.map((r) => ({ post_id: r.post_id }))),
         ttl,
         actor.plane === "human" ? actor.userId : null,
       ],

@@ -1828,6 +1828,62 @@ export const GATES = {
       run: checks.m18SingleIntegrationPoint,
     },
   ],
+  M19: [
+    {
+      id: "M19.1",
+      kind: "fn",
+      desc: "ten retried webhook deliveries → one outbox row, one asset, one settled reservation; racing finalize deletes the collision",
+      run: checks.m19IdempotentFinalize,
+    },
+    {
+      id: "M19.2",
+      kind: "fn",
+      desc: "safety-blocked job → blocked_safety, zero R2 objects",
+      run: checks.m19SafetyBlocked,
+    },
+    {
+      id: "M19.3",
+      kind: "fn",
+      desc: "fal 503 → Replicate failover; backend recorded; reservation stays singular",
+      run: checks.m19Failover,
+    },
+    {
+      id: "M19.4",
+      kind: "fn",
+      desc: "15-min cap structural: submit never awaits provider; finalize_media_job is the only finished-asset writer",
+      run: checks.m19SubmitAndCollect,
+    },
+    {
+      id: "M19.5",
+      kind: "fn",
+      desc: "both webhooks verify signatures — unsigned/wrong → 401 + nothing enqueued; fal JWKS via FAL_WEBHOOK_JWKS_URL",
+      run: checks.m19WebhookVerify,
+    },
+    {
+      id: "M19.6",
+      kind: "fn",
+      desc: "webhook lands on the Worker not Vercel: no apps/web/app/api/media + edge routes /api/media/webhook/{backend}",
+      run: checks.m19WebhookOnWorker,
+    },
+    {
+      id: "M19.7",
+      kind: "fn",
+      desc: "provenance round-trip: c2pa sign → manifest read-back; phash non-null; disabled flag still finalizes",
+      run: checks.m19ProvenanceRoundTrip,
+    },
+    {
+      id: "M19.8",
+      kind: "fn",
+      desc: "no @typesafe-ai/sdk anywhere in packages/media",
+      run: checks.m19NoTypeSafe,
+    },
+    {
+      id: "M19.9",
+      kind: "fn",
+      desc: "spend only via reserve/settle/release_agent_spend — zero direct delegation_spend writes",
+      run: checks.m19SpendOnlyViaFns,
+    },
+  ],
 };
 
 export const MILESTONE_TITLES = {

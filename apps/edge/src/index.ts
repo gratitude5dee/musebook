@@ -33,6 +33,13 @@ import {
 import { handleCreatorStats } from "./routes/creator-stats.js"; // §13.8
 import { handleNetworkStats } from "./routes/network-stats.js"; // §14.3 S9c
 import { routeUploads } from "./routes/uploads.js"; // §11.7.3
+import {
+  handleMediaGenerate,
+  handleMediaJobCancel,
+  handleMediaJobGet,
+  handleMediaWebhook,
+  handleProvenanceGet,
+} from "./routes/media.js"; // §11.7
 import { twin } from "./routes/twin.js"; // §7.11
 import { authorTwin } from "./routes/authors.js";
 import { authorFeed } from "./routes/feeds.js";
@@ -64,6 +71,7 @@ const API_ROUTES: Readonly<
   "/api/me/objection": handleMeObjection,
   "/api/creator/stats": handleCreatorStats,
   "/api/network/stats": handleNetworkStats,
+  "/api/media/generate": handleMediaGenerate,
 };
 
 export default {
@@ -124,6 +132,26 @@ export default {
     const publishPostId = publishMatch?.[1];
     if (publishPostId !== undefined) {
       return handlePublishPost(request, env, ctx, publishPostId);
+    }
+
+    // §11.7's media surfaces — webhook + job read/cancel, Worker-only.
+    const mediaWebhookMatch = url.pathname.match(/^\/api\/media\/webhook\/([a-z]+)$/);
+    if (mediaWebhookMatch?.[1] !== undefined) {
+      return handleMediaWebhook(request, env, ctx, mediaWebhookMatch[1]);
+    }
+    const mediaJobMatch = url.pathname.match(
+      /^\/api\/media\/jobs\/([0-9a-f-]{36})(\/cancel)?$/,
+    );
+    if (mediaJobMatch?.[1] !== undefined) {
+      return mediaJobMatch[2] === "/cancel"
+        ? handleMediaJobCancel(request, env, ctx, mediaJobMatch[1])
+        : handleMediaJobGet(request, env, ctx, mediaJobMatch[1]);
+    }
+    const provenanceMatch = url.pathname.match(
+      /^\/api\/provenance\/([0-9a-f-]{36})$/,
+    );
+    if (provenanceMatch?.[1] !== undefined) {
+      return handleProvenanceGet(request, env, provenanceMatch[1]);
     }
 
     // §11.18's activation and §11.17's fork — both on musebook.dev, never Vercel.

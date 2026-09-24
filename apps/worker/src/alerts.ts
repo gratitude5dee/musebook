@@ -161,7 +161,7 @@ export async function writeHeartbeat(env: Env, job: string, failures: string[]):
         );
         await db.query(
           `insert into public.ops_events (component, event_name, level, outcome, metadata)
-           values ('alerting', $1, 'error', 'partial', jsonb_build_object('failures', $2::jsonb))`,
+           values ('alerting', $1, 'error', 'partial', jsonb_build_object('failures', ($2::text)::jsonb))`,
           [`${job}.partial`, JSON.stringify(failures)],
         );
       }

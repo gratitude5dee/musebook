@@ -42,7 +42,10 @@ export async function enqueueJob(
   let jobId: number | null;
   try {
     const { rows } = await db.query<{ id: string | null }>(
-      "select app.enqueue_job($1, $2, $3::jsonb, $4::uuid) as id",
+      // ($3::text)::jsonb — the only bind form that lands a real jsonb object
+      // under both drivers: postgres.js double-encodes a bare ::jsonb string
+      // into a scalar, node-pg is fine with either.
+      "select app.enqueue_job($1, $2, ($3::text)::jsonb, $4::uuid) as id",
       [kind, dedupeKey, body, actorUserId],
     );
     jobId = rows[0]?.id === null || rows[0]?.id === undefined ? null : Number(rows[0].id);

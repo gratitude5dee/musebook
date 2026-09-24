@@ -209,5 +209,11 @@ async function ingestBatch(
       request_id: meta.requestId,
     };
   });
-  await db.query("select app.ingest_action_events($1::jsonb)", [rows]);
+  // ($1::text)::jsonb + stringify — a bound ARRAY becomes a Postgres array
+  // literal under node-pg and fails the jsonb cast; a bound object under
+  // postgres.js is fine but a bound STRING under it lands as a jsonb scalar.
+  // text-then-cast is the only form both drivers honor identically.
+  await db.query("select app.ingest_action_events(($1::text)::jsonb)", [
+    JSON.stringify(rows),
+  ]);
 }

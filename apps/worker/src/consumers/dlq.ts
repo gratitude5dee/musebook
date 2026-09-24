@@ -35,7 +35,7 @@ export async function consumeDlq(env: Env, msg: DlqMessage, component: string): 
     }
     // Non-outbox payloads (R2 object events land here on r2-events-dlq): the
     // alert row is the whole dead-letter record — there is no job to mark.
-    await db.query("select app.write_ops_event($1,$2,$3,$4,$5,$6::uuid,$7::jsonb,$8::uuid)", [
+    await db.query("select app.write_ops_event($1,$2,$3,$4,$5,$6::uuid,($7::text)::jsonb,$8::uuid)", [
       "queues",
       "dlq_message",
       "error",

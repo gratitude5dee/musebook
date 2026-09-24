@@ -10,6 +10,8 @@ import { handleR2ObjectCreated } from "./r2-events.js";
 import { runAgentCancel } from "./agent-cancel.js";
 import { runDistribute } from "./distribute.js";
 import { runDsar } from "./dsar.js";
+import { runMediaSubmit } from "./media.js";
+import { runMediaFinalize } from "./media-finalize.js";
 
 interface JobMessage {
   // postgres.js returns int8 as BigInt; producers JSON.stringify it away but a
@@ -115,12 +117,12 @@ export async function dispatch(batch: MessageBatch, env: Env): Promise<void> {
       });
     },
     "musebook-media": (m) =>
-      consume(env, m, "media", async () => {
-        // M8: transcode/derivatives for the media pipeline.
+      consume(env, m, "media", async (_db, payload) => {
+        await runMediaSubmit(env, String(payload.media_job_id));
       }),
     "musebook-media-finalize": (m) =>
-      consume(env, m, "media_finalize", async () => {
-        // M8: post-upload finalize — marks the asset readable.
+      consume(env, m, "media_finalize", async (_db, payload) => {
+        await runMediaFinalize(env, String(payload.media_job_id));
       }),
     "musebook-agent-cancel": (m) =>
       consume(env, m, "agent_cancel", async (_db, payload) => {

@@ -66,7 +66,7 @@ export async function refreshChannelConstraints(env: Env): Promise<void> {
         await db.query(
           `insert into public.channel_constraint_overrides
            (channel_id, max_chars, rules_text, settings_schema, tools, refreshed_at)
-         values ($1::uuid, $2, $3, $4::jsonb, $5::jsonb, now())
+         values ($1::uuid, $2, $3, ($4::text)::jsonb, ($5::text)::jsonb, now())
          on conflict (channel_id) do update set
            max_chars = excluded.max_chars, rules_text = excluded.rules_text,
            settings_schema = excluded.settings_schema, tools = excluded.tools,

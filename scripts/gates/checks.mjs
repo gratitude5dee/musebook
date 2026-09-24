@@ -5255,3 +5255,128 @@ export function m18SingleIntegrationPoint() {
     errors.push("webmcp-types missing from devDependencies");
   return { ok: errors.length === 0, errors };
 }
+
+// ---------------------------------------------------------------------------
+// M19 milestone checks — §16.12's acceptance set. The vitest splits are by
+// test-name prefix (-t "M19.x") across three projects: worker (submit +
+// finalize pipeline), edge (webhook 401 gate), media / media-workers (pure
+// package + provenance round-trip).
+// ---------------------------------------------------------------------------
+
+const WORKER_MEDIA_TEST = "pnpm vitest run --project worker test/media.test.ts";
+const EDGE_MEDIA_TEST = "pnpm vitest run --project edge test/media-webhook.test.ts";
+const MEDIA_PKG_TEST = "pnpm vitest run --project media --project media-workers test/m19.test.ts";
+const MEDIA_PROV_TEST = "pnpm vitest run --project media test/provenance.test.ts";
+
+// M19.1 — ten retried webhook deliveries → ONE outbox row, one asset, one
+// settled reservation; a racing finalize deletes its colliding R2 write.
+export function m19IdempotentFinalize() {
+  return vitestSlice(WORKER_MEDIA_TEST, "M19.1");
+}
+
+// M19.2 — a safety-blocked generation writes zero R2 objects and lands the
+// media_job in blocked_safety (and the submit arm reserves+replays correctly).
+export function m19SafetyBlocked() {
+  return vitestSlice(WORKER_MEDIA_TEST, "M19.2");
+}
+
+// M19.3 — fal 503 fails over to Replicate: media_jobs records backend +
+// provider_request_id, and the reservation stays singular (never re-held).
+export function m19Failover() {
+  return vitestSlice(WORKER_MEDIA_TEST, "M19.3");
+}
+
+// M19.4 — the 15-minute cap is STRUCTURAL: the submit consumer never calls
+// fetchResult (it submits + records + returns — the provider promise is never
+// awaited), and finalize_media_job() is the only finished-asset writer. The
+// second half is a grep invariant: no code path outside the migration's fn
+// sets media_jobs.status='succeeded' or writes assets rows for media jobs.
+export function m19SubmitAndCollect() {
+  const errors = [];
+  const submit = readFileSync(join(ROOT, "apps/worker/src/consumers/media.ts"), "utf8");
+  if (/fetchResult\s*\(/.test(submit))
+    errors.push("media.ts (submit consumer) calls fetchResult — it must submit+record+return");
+  if (!/backend\.submit\(/.test(submit)) errors.push("media.ts never calls backend.submit");
+  if (/provider_request_id|status.*running/.test(submit) === false)
+    errors.push("media.ts does not record backend/provider_request_id/status='running'");
+  for (const h of rg(String.raw`status\s*=\s*'succeeded'`, ["apps", "packages"]))
+    errors.push(`status='succeeded' written outside finalize_media_job: ${h}`);
+  for (const h of rg(String.raw`finalize_media_job\s*\(`, ["apps", "packages"], [
+    "-g", "*.ts",
+    "-g", "!**/test/**", "-g", "!**/dist/**", "-g", "!**/.next/**",
+  ])) {
+    if (!h.startsWith("apps/worker/src/consumers/media-finalize.ts:"))
+      errors.push(`finalize_media_job called outside the finalize consumer: ${h}`);
+  }
+  // The poll cron owns re-queueing only — it must not touch results either.
+  const poll = readFileSync(join(ROOT, "apps/worker/src/cron/media-poll.ts"), "utf8");
+  if (/fetchResult\s*\(/.test(poll))
+    errors.push("media-poll.ts calls fetchResult — polling only re-enqueues/fails stale rows");
+  return { ok: errors.length === 0, errors };
+}
+
+// M19.5 — both webhooks verify signatures: unsigned/wrong → 401 with nothing
+// enqueued (edge route test), plus the verifier unit matrix in packages/media
+// (unsigned/wrong/valid-signed for Replicate; absent headers for fal JWKS).
+export function m19WebhookVerify() {
+  const edge = vitestSlice(EDGE_MEDIA_TEST, "M19.5");
+  if (!edge.ok) return edge;
+  return vitestSlice(MEDIA_PKG_TEST, "M19.5");
+}
+
+// M19.6 — the webhook lands on the Worker, not Vercel: no apps/web route
+// handler exists for /api/media/*, and the edge routes the webhook path.
+export function m19WebhookOnWorker() {
+  const errors = [];
+  if (existsSync(join(ROOT, "apps/web/app/api/media")))
+    errors.push("apps/web/app/api/media exists — the webhook would land on Vercel");
+  const idx = readFileSync(join(ROOT, "apps/edge/src/index.ts"), "utf8");
+  if (!/mediaWebhookMatch|\/api\/media\/webhook/.test(idx))
+    errors.push("apps/edge/src/index.ts does not route /api/media/webhook/{backend}");
+  const routes = readFileSync(join(ROOT, "apps/edge/src/routes/media.ts"), "utf8");
+  if (!/handleMediaWebhook/.test(routes))
+    errors.push("apps/edge/src/routes/media.ts missing handleMediaWebhook");
+  return { ok: errors.length === 0, errors };
+}
+
+// M19.7 — provenance round-trip: a self-signed-cert chain signs a fixture
+// asset, c2pa-node reads the manifest back, and the perceptual hash lands.
+// Runs the node tier only — c2pa-node + sharp are node-native.
+export function m19ProvenanceRoundTrip() {
+  return vitestSlice(MEDIA_PROV_TEST, "");
+}
+
+// M19.8 — no TypeSafe SDK anywhere in packages/media (its pricing surface is
+// licensed; the media stack talks to fal/Replicate directly).
+export function m19NoTypeSafe() {
+  const errors = [];
+  for (const h of rg(String.raw`@typesafe-ai/sdk|typesafe-ai`, ["packages/media"]))
+    errors.push(`typesafe reference in packages/media: ${h}`);
+  const pkg = JSON.parse(readFileSync(join(ROOT, "packages/media/package.json"), "utf8"));
+  for (const d of Object.keys({ ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) }))
+    if (/typesafe/i.test(d)) errors.push(`typesafe dependency in packages/media: ${d}`);
+  return { ok: errors.length === 0, errors };
+}
+
+// M19.9 — spend only through the three reservation fns: nothing in
+// packages/media or the worker media files writes delegations/agent_spend/
+// delegation_spend directly.
+export function m19SpendOnlyViaFns() {
+  const errors = [];
+  for (const h of rg(
+    String.raw`delegations[\s\S]{0,40}spent|delegation_spend|agent_spend_reservations`,
+    ["packages/media"],
+  ))
+    errors.push(`direct spend write in packages/media: ${h}`);
+  for (const h of rg(
+    String.raw`delegation_spend|agent_spend_reservations`,
+    ["apps/worker/src"],
+    ["-g", "*.ts", "-g", "!**/lib/spend.ts"],
+  )) {
+    // The finalize/migration glue may NAME the reservation column but may
+    // never write it — only the SQL fns do.
+    if (/insert|update|delete|into|set\s/i.test(h.split(":").slice(2).join(":")))
+      errors.push(`direct spend write in worker media path: ${h}`);
+  }
+  return { ok: errors.length === 0, errors };
+}

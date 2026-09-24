@@ -207,7 +207,7 @@ export async function runAeRollup(env: Env, day: string): Promise<void> {
           pass === "post_stats"
             ? "app.apply_ae_post_stats_daily"
             : "app.apply_ae_agent_stats_daily";
-        const r = await sql.query<{ n: number }>(`select ${fn}($1::date, $2::jsonb) as n`, [
+        const r = await sql.query<{ n: number }>(`select ${fn}($1::date, ($2::text)::jsonb) as n`, [
           day,
           JSON.stringify(chunk),
         ]);
