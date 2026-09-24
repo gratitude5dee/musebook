@@ -21,16 +21,16 @@
     "@musebook/ui": "workspace:*",
     "@musebook/x402": "workspace:*",
     "@supabase/supabase-js": "catalog:",
-    "@vercel/sandbox": "3.3.0",
     "@tailwindcss/postcss": "4.3.3",
+    "@vercel/sandbox": "3.3.0",
     "geist": "1.7.2",
     "jose": "catalog:",
     "next": "16.3.5",
-    "react-markdown": "10.1.0",
-    "remark-gfm": "4.0.1",
     "next-themes": "0.4.6",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1",
     "server-only": "catalog:",
     "tailwindcss": "4.3.3",
     "thirdweb": "catalog:",
@@ -45,6 +45,7 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "webmcp-types": "0.1.9"
   }
 }

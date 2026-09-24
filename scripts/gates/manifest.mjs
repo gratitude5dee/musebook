@@ -1734,6 +1734,100 @@ export const GATES = {
       run: checks.m16ArtifactsSealed,
     },
   ],
+  M17: [
+    {
+      id: "M17.1",
+      kind: "fn",
+      desc: "held-out corpus: model beats deterministic pass rate, recorded with date (.gate/m17-comparison.json < 1 day old)",
+      run: checks.m17Comparison,
+    },
+    {
+      id: "M17.2",
+      kind: "fn",
+      desc: "validator gates model output identically; never-validating proposals end deterministic",
+      run: checks.m17ValidatorGates,
+    },
+    {
+      id: "M17.3",
+      kind: "fn",
+      desc: "gateway 503 → deterministic variant still produced; release_agent_spend returns the reservation",
+      run: checks.m17GatewayDown,
+    },
+    {
+      id: "M17.4",
+      kind: "fn",
+      desc: "zero unverified/null limits_source; every limits_checked_at within 90 days",
+      run: checks.m17Provenance,
+    },
+    {
+      id: "M17.5",
+      kind: "fn",
+      desc: "counter parity re-run across the widened platform set (all seeded rows)",
+      run: checks.m17CounterParity,
+    },
+    {
+      id: "M17.6",
+      kind: "fn",
+      desc: "new channels' deterministic variants are full ports; unpaywalled-copy consequence restated in fan-out review surface",
+      run: checks.m17FullPorts,
+    },
+    {
+      id: "M17.7",
+      kind: "fn",
+      desc: "REFORMAT_MODEL/REFORMAT_MAX_REPAIRS in manifest+wrangler vars; AI_GATEWAY_API_KEY a manifest secret, never a var",
+      run: checks.m17EnvManifest,
+    },
+  ],
+  M18: [
+    {
+      id: "M18.1",
+      kind: "fn",
+      desc: "WebMcpTools mounted as last child of /p/[slug]; import resolves @/components/post/webmcp-tools",
+      run: checks.m18Mounted,
+    },
+    {
+      id: "M18.2",
+      kind: "fn",
+      desc: "provider-present playwright: five post tools registered, all aborted on navigation",
+      run: checks.m18Provider,
+    },
+    {
+      id: "M18.3",
+      kind: "fn",
+      desc: "no provider: component contributes zero DOM (byte-identical by construction)",
+      run: checks.m18Provider,
+    },
+    {
+      id: "M18.4",
+      kind: "fn",
+      desc: "origin-trial meta renders only when NEXT_PUBLIC_WEBMCP_OT_TOKEN set; var in manifest on Vercel scope",
+      run: checks.m18OriginTrial,
+    },
+    {
+      id: "M18.5",
+      kind: "fn",
+      desc: "§7.20 checks 16+17: no-provider playwright green; zero navigator.modelContext hits",
+      run: checks.m18Section720,
+    },
+    {
+      id: "M18.6",
+      kind: "fn",
+      desc: "cite_passage writes exactly one citations row bound to content_hash + one agent_cite action_events row",
+      run: checks.m18CiteWrites,
+    },
+    {
+      id: "M18.7",
+      kind: "fn",
+      desc: "cite against ungranted post: 402, zero passage bytes (SECRET_MARKER), zero rows",
+      run: checks.m18CiteDenied,
+    },
+    {
+      id: "M18.8",
+      kind: "fn",
+      desc: "exactly one WebMCP integration point: component + register + mount only (set-equality)",
+      run: checks.m18SingleIntegrationPoint,
+    },
+  ],
 };
 
 export const MILESTONE_TITLES = {
@@ -1755,6 +1849,6 @@ export const MILESTONE_TITLES = {
   M15: "Learned ranker v1.1",
   M16: "Artifacts surface + sandbox",
   M17: "LLM reformat pass + remaining channels",
-  M18: "WebMCP + agent citations",
+  M18: "WebMCP progressive enhancement + agent citations",
   M19: "Media generation",
 };

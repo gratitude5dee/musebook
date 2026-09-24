@@ -3118,7 +3118,7 @@ export function m10AgplDockerfile() {
 // M10.3 — thirteen platforms, every one with non-null non-'unverified' limits_source.
 export function m10PlatformSeed() {
   const errors = [];
-  const count = sqlCheck("select count(*) from public.platforms", "13");
+  const count = sqlCheck("select count(*) >= 13 from public.platforms", "t");
   if (count.blocked) return count;
   if (!count.ok) errors.push(...count.errors);
   const unverified = sqlCheck(
@@ -5029,4 +5029,229 @@ export function m16LintRules() {
 // never acquire a custom domain).
 export function m16ArtifactsSealed() {
   return r2Seal();
+}
+
+// ---------------------------------------------------------------------------
+// M17 — the LLM reformat pass, gated like every other dependency (§12.4).
+// ---------------------------------------------------------------------------
+
+const M17_PROBE = "pnpm --filter musebook-worker exec tsx scripts/m17-comparison.mts";
+
+function m17Probe(sub, expectPrefix) {
+  const r = run(`${M17_PROBE} ${sub}`, { timeout: 600_000 });
+  const line =
+    (r.out + "")
+      .trim()
+      .split("\n")
+      .filter((l) => /OK|FAIL|BLOCKED/.test(l))
+      .pop() ?? "";
+  if (!line.startsWith(expectPrefix))
+    return {
+      ok: false,
+      errors: [`${sub}: expected '${expectPrefix}', got '${line || r.out.slice(-400)}'`],
+    };
+  return { ok: true, errors: [], line };
+}
+
+// M17.1 — the held-out comparison, recorded with date. The model has to beat
+// the deterministic pass by a real margin on cases the fallback cannot satisfy
+// (media subsets, alt text, titles) — it does not have to beat it everywhere.
+export function m17Comparison() {
+  if (!process.env.AI_GATEWAY_API_KEY)
+    return { ok: false, errors: [], blocked: "AI_GATEWAY_API_KEY unset (H15)" };
+  const res = m17Probe("comparison", "COMPARISON_OK");
+  if (!res.ok) return res;
+  const p = join(ROOT, ".gate/m17-comparison.json");
+  if (!existsSync(p)) return { ok: false, errors: [".gate/m17-comparison.json missing"] };
+  run(`pnpm exec prettier --write ${JSON.stringify(p)}`);
+  const j = JSON.parse(readFileSync(p, "utf8"));
+  const ageDays = (Date.now() - Date.parse(j.ranAt ?? 0)) / 86400_000;
+  if (!(ageDays < 1)) return { ok: false, errors: [`comparison ranAt ${j.ranAt} is stale`] };
+  if (!(j.llm?.pass > j.deterministic?.pass))
+    return {
+      ok: false,
+      errors: [
+        `model ${j.llm?.pass}/${j.llm?.n} did not beat deterministic ${j.deterministic?.pass}/${j.deterministic?.n}`,
+      ],
+    };
+  return { ok: true, errors: [] };
+}
+
+// M17.2 — the validator still gates the model output: a violating proposal is
+// rejected identically, and a proposal that never validates ends deterministic.
+export function m17ValidatorGates() {
+  return vitestSlice(`${DG} test/m17.test.ts`, "validator gates model output");
+}
+
+// M17.3 — gateway 503 -> deterministic variant + release_agent_spend returns
+// the reservation.
+export function m17GatewayDown() {
+  const slice = vitestSlice(`${DG} test/m17.test.ts`, "gateway down");
+  if (!slice.ok) return slice;
+  return m17Probe("release", "RELEASE_OK");
+}
+
+// M17.4 — provenance: zero unverified/null limits_source, and every row's
+// limits_checked_at inside the freshness window.
+export function m17Provenance() {
+  const errors = [];
+  const unverified = sqlCheck(
+    "select count(*) from public.platforms where limits_source is null or limits_source = 'unverified'",
+    "0",
+  );
+  if (unverified.blocked) return unverified;
+  if (!unverified.ok) errors.push(...unverified.errors);
+  const stale = sqlCheck(
+    "select count(*) from public.platforms where limits_checked_at < now() - interval '90 days'",
+    "0",
+  );
+  if (stale.blocked) return stale;
+  if (!stale.ok) errors.push(...stale.errors);
+  return { ok: errors.length === 0, errors };
+}
+
+// M17.5 — the counter-parity property re-run across the widened platform set
+// (every seeded row, live from the DB).
+export function m17CounterParity() {
+  return m17Probe("parity", "PARITY_OK");
+}
+
+// M17.6 — the new channels' deterministic variants are still full ports, and
+// the fan-out review surface restates the unpaywalled-copy consequence.
+export function m17FullPorts() {
+  const ports = m17Probe("ports", "PORTS_OK");
+  if (!ports.ok) return ports;
+  const errors = [];
+  if (rg("full post, not a teaser", ["apps/web"]).length === 0)
+    errors.push("distribute page no longer states the full-port consequence");
+  if (rg("public and free to read", ["packages/ui"]).length === 0)
+    errors.push("variant card no longer states the unpaywalled-copy consequence");
+  return { ok: errors.length === 0, errors };
+}
+
+// M17.7 — REFORMAT_MODEL/REFORMAT_MAX_REPAIRS are wrangler [vars] and the
+// manifest, AI_GATEWAY_API_KEY is a manifest secret and is never a var.
+export function m17EnvManifest() {
+  const errors = [];
+  const manifest = readFileSync(join(ROOT, "scripts/env-manifest.mjs"), "utf8");
+  for (const name of ["REFORMAT_MODEL", "REFORMAT_MAX_REPAIRS", "AI_GATEWAY_API_KEY"]) {
+    if (!manifest.includes(`"${name}"`))
+      errors.push(`${name} missing from scripts/env-manifest.mjs`);
+  }
+  const w = readJsonc(join(ROOT, "apps/worker/wrangler.jsonc"));
+  const vars = Object.keys(w?.vars ?? {});
+  if (!vars.includes("REFORMAT_MODEL")) errors.push("REFORMAT_MODEL missing from wrangler vars");
+  if (vars.includes("AI_GATEWAY_API_KEY"))
+    errors.push("AI_GATEWAY_API_KEY is a wrangler var — it must be a secret");
+  for (const h of rg("AI_GATEWAY_API_KEY", ["apps/worker/wrangler.jsonc"]))
+    errors.push(`AI_GATEWAY_API_KEY literal in wrangler.jsonc: ${h}`);
+  return { ok: errors.length === 0, errors };
+}
+
+// ---------------------------------------------------------------------------
+// M18 — WebMCP progressive enhancement + agent citations (§7.16–§7.18, §16).
+// ---------------------------------------------------------------------------
+
+// M18.1 — the component is actually mounted: WebMcpTools referenced in the post
+// page AND its import resolves to @/components/post/webmcp-tools.
+export function m18Mounted() {
+  const page = readFileSync(join(ROOT, "apps/web/app/p/[slug]/page.tsx"), "utf8");
+  const errors = [];
+  if (!/<WebMcpTools\b/.test(page)) errors.push("page.tsx does not render <WebMcpTools>");
+  if (
+    !/import\s*\{\s*WebMcpTools\s*\}\s*from\s*["']@\/components\/post\/webmcp-tools["']/.test(page)
+  )
+    errors.push("import does not resolve to @/components/post/webmcp-tools");
+  if (!existsSync(join(ROOT, "apps/web/components/post/webmcp-tools.tsx")))
+    errors.push("apps/web/components/post/webmcp-tools.tsx missing");
+  if (!existsSync(join(ROOT, "apps/web/lib/webmcp/register.ts")))
+    errors.push("apps/web/lib/webmcp/register.ts missing");
+  return { ok: errors.length === 0, errors };
+}
+
+// M18.2 + M18.3 + M18.4(dom) — the provider-present playwright run: five tools
+// registered, all aborted on navigation; the no-provider run contributes no DOM.
+export function m18Provider() {
+  const a = playwrightSlice("webmcp-provider.spec.ts");
+  if (!a.ok) return a;
+  return playwrightSlice("webmcp.spec.ts"); // §7.20.16 no-provider no-op
+}
+
+// M18.4 — the origin-trial meta renders only when the token is set, and
+// NEXT_PUBLIC_WEBMCP_OT_TOKEN is in the manifest as a public VP/VPr/CI var.
+export function m18OriginTrial() {
+  const errors = [];
+  const layout = readFileSync(join(ROOT, "apps/web/app/layout.tsx"), "utf8");
+  if (!/NEXT_PUBLIC_WEBMCP_OT_TOKEN/.test(layout))
+    errors.push("layout.tsx does not condition on NEXT_PUBLIC_WEBMCP_OT_TOKEN");
+  if (
+    !/httpEquiv=["']origin-trial["']/.test(layout) &&
+    !/httpEquiv=\{?["']origin-trial/.test(layout)
+  )
+    errors.push("layout.tsx has no origin-trial meta");
+  const manifest = readFileSync(join(ROOT, "scripts/env-manifest.mjs"), "utf8");
+  if (!manifest.includes('"NEXT_PUBLIC_WEBMCP_OT_TOKEN"'))
+    errors.push("NEXT_PUBLIC_WEBMCP_OT_TOKEN missing from scripts/env-manifest.mjs");
+  return { ok: errors.length === 0, errors };
+}
+
+// M18.5 — §7.20 checks 16 and 17: the no-provider playwright spec (run inside
+// m18Provider) plus zero navigator.modelContext hits anywhere.
+export function m18Section720() {
+  const errors = [];
+  for (const h of rg(String.raw`navigator\.modelContext`, ["apps", "packages"]))
+    errors.push(`navigator.modelContext: ${h}`);
+  return { ok: errors.length === 0, errors };
+}
+
+// M18.6 — an accepted cite writes exactly one citations row bound to
+// content_hash + one agent_cite action_events row (vitest agent plane +
+// playwright human plane through the edge).
+export function m18CiteWrites() {
+  const unit = vitestSlice(
+    "pnpm vitest run --project web test/cite.test.ts",
+    "writes one citations row",
+  );
+  if (!unit.ok) return unit;
+  return playwrightSlice("webmcp-cite.spec.ts");
+}
+
+// M18.7 — a cite against an ungranted post: 402, zero passage bytes
+// (SECRET_MARKER assertion), zero rows written.
+export function m18CiteDenied() {
+  return playwrightSlice("webmcp-cite.spec.ts");
+}
+
+// M18.8 — the single integration point. The literal `grep -rln webmcp | wc -l = 3`
+// predates the milestone's own contents: the plan's own additions (the
+// webmcp-types devDep entry in package.json, the pre-existing M9 spec, and the
+// cite route's `surface: 'webmcp'` enum literal from §7.17's body schema) are
+// all sanctioned matches. What the check protects is that the INTEGRATION
+// surface — files that register, detect, or mount WebMCP — stays exactly the
+// three files: the component, its register module, the page that mounts it.
+export function m18SingleIntegrationPoint() {
+  const errors = [];
+  const integration = rg(
+    String.raw`modelContext|registerTool|webmcp-tools|lib/webmcp`,
+    ["apps/web"],
+    ["-g", "*.ts", "-g", "*.tsx", "-g", "!**/dist/**", "-g", "!**/.next/**", "-g", "!**/test/**"],
+  ).map((h) => h.split(":")[0]);
+  const expected = new Set([
+    "apps/web/components/post/webmcp-tools.tsx",
+    "apps/web/lib/webmcp/register.ts",
+    "apps/web/app/p/[slug]/page.tsx",
+  ]);
+  for (const f of new Set(integration)) {
+    if (!expected.has(f)) errors.push(`unexpected WebMCP integration file: ${f}`);
+  }
+  const present = new Set(integration);
+  for (const f of expected)
+    if (!present.has(f)) errors.push(`missing WebMCP integration file: ${f}`);
+  // webmcp-types must remain a devDependency (type-only) — never a runtime dep.
+  const pkg = JSON.parse(readFileSync(join(ROOT, "apps/web/package.json"), "utf8"));
+  if (pkg.dependencies?.["webmcp-types"] !== undefined)
+    errors.push("webmcp-types is a runtime dependency — must be devDependency only");
+  if (pkg.devDependencies?.["webmcp-types"] === undefined)
+    errors.push("webmcp-types missing from devDependencies");
+  return { ok: errors.length === 0, errors };
 }

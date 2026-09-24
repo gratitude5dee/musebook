@@ -71,6 +71,9 @@ function systemPrompt(c: PlatformConstraint, rules: string | null): string {
     c.requiresAltText
       ? `- Alt text is REQUIRED for every attached image.`
       : `- Alt text is optional but strongly preferred.`,
+    `- Attachments: at least ${c.minMedia}, at most ${c.maxImages} image(s) and ${c.maxVideos} video(s).`,
+    `  Pick mediaIndexes accordingly; drop media rather than exceed a cap.`,
+    `  Structured media rules: ${JSON.stringify(c.mediaRules)}.`,
     c.maxTitleChars === null
       ? `- title MUST be null.`
       : `- title: 2 to ${c.maxTitleChars} characters, required.`,

@@ -45,6 +45,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       suppressHydrationWarning
       className={`${GeistSans.variable} ${GeistMono.variable} ${instrumentSerif.variable}`}
     >
+      <head>
+        {/* §7.18: the origin-trial token renders only when present — absent is
+            a supported state; the provider surface is simply absent. */}
+        {process.env.NEXT_PUBLIC_WEBMCP_OT_TOKEN ? (
+          <meta httpEquiv="origin-trial" content={process.env.NEXT_PUBLIC_WEBMCP_OT_TOKEN} />
+        ) : null}
+      </head>
       <body className="bg-background text-foreground antialiased">
         <Providers>
           <a
