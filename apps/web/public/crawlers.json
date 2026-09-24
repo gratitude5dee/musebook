@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "updated": "2026-09-24",
+  "description": "Verified AI crawler registry for musebook.dev. Entries are accepted by forward-confirmed reverse DNS (FCrDNS): the user agent below must match AND the client IP must reverse-resolve to one of the listed suffixes with a matching forward lookup. Verified crawlers are classified as agents by the Worker; unsigned traffic is served as human.",
+  "payment": {
+    "protocol": "x402",
+    "version": 2,
+    "headers": {
+      "402": "PAYMENT-REQUIRED",
+      "retry": "PAYMENT-SIGNATURE",
+      "200": "PAYMENT-RESPONSE"
+    },
+    "network": "eip155:8453",
+    "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "scheme": "exact",
+    "mcp": "https://mcp.musebook.dev"
+  },
+  "identity": {
+    "scheme": "web_bot_auth",
+    "spec": "RFC 9421 + Signature-Agent",
+    "note": "Signed requests are charged once per post per content_hash where the creator chose that mode."
+  },
+  "verified_crawlers": [
+    { "agent_slug": "gptbot", "ua_match": "GPTBot", "fcrdns_suffixes": [".openai.com"] },
+    {
+      "agent_slug": "oai-searchbot",
+      "ua_match": "OAI-SearchBot",
+      "fcrdns_suffixes": [".openai.com"]
+    },
+    { "agent_slug": "claudebot", "ua_match": "ClaudeBot", "fcrdns_suffixes": [".anthropic.com"] },
+    {
+      "agent_slug": "perplexitybot",
+      "ua_match": "PerplexityBot",
+      "fcrdns_suffixes": [".perplexity.ai"]
+    },
+    {
+      "agent_slug": "googlebot",
+      "ua_match": "Googlebot",
+      "fcrdns_suffixes": [".googlebot.com", ".google.com"]
+    },
+    { "agent_slug": "bingbot", "ua_match": "bingbot", "fcrdns_suffixes": [".search.msn.com"] }
+  ],
+  "always_free": [
+    "/robots.txt",
+    "/sitemap.xml",
+    "/llms.txt",
+    "/llms-full.txt",
+    "/security.txt",
+    "/.well-known/*",
+    "/crawlers.json"
+  ],
+  "contact": "security@musebook.dev"
+}
