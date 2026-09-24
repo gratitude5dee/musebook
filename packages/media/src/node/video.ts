@@ -5,6 +5,7 @@
 // production extraction runs inside the pinned `MEDIA_SANDBOX_IMAGE` Vercel
 // Sandbox (networkPolicy 'deny-all'), reached from the provenance endpoint;
 // local dev/tests fall back to the system ffmpeg binary via fluent-ffmpeg.
+import type { Buffer } from "buffer";
 import { perceptualHash } from "./provenance";
 
 export interface VideoFrameEnv {
@@ -137,7 +138,8 @@ async function extractVideoFramesSandbox(
         ],
       });
       if (run.exitCode !== 0) continue;
-      out.push(Buffer.from(await sandbox.readFile({ path: `/vercel/sandbox/${name}` })));
+      const frame = await sandbox.readFileToBuffer({ path: `/vercel/sandbox/${name}` });
+      if (frame) out.push(frame);
     }
     return out;
   } finally {

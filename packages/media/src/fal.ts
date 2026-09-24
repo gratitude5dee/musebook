@@ -84,12 +84,12 @@ export function createFalBackend(
         throw err;
       }
 
-      const json = (await res.json()) as {
+      const json: {
         request_id: string;
         status_url: string;
         cancel_url: string;
         response_url: string;
-      };
+      } = await res.json();
       return {
         backend: "fal",
         modelId,
@@ -104,7 +104,7 @@ export function createFalBackend(
     async poll(ref) {
       const res = await fetch(ref.statusUrl!, { headers: headers() });
       if (!res.ok) return { status: "failed", error: `fal status ${res.status}` };
-      const json = (await res.json()) as { status: string; queue_position?: number };
+      const json: { status: string; queue_position?: number } = await res.json();
       if (json.status === "IN_QUEUE") {
         return { status: "queued", queuePosition: json.queue_position ?? null };
       }
@@ -115,7 +115,7 @@ export function createFalBackend(
     async fetchResult(ref) {
       const res = await fetch(ref.resultUrl!, { headers: headers() });
       if (!res.ok) return { status: "failed", error: `fal result ${res.status}` };
-      const json = (await res.json()) as {
+      const json: {
         images?: {
           url: string;
           width?: number;
@@ -124,7 +124,7 @@ export function createFalBackend(
         }[];
         video?: { url: string; content_type?: string };
         has_nsfw_concepts?: boolean[];
-      };
+      } = await res.json();
       if (json.images?.length) {
         return {
           status: "succeeded",
@@ -155,7 +155,7 @@ export function createFalBackend(
 
     verifyWebhook: jwksUrl
       ? (headers, rawBody) => verifyFalWebhook(headers, rawBody, jwksUrl)
-      : async () => null,
+      : () => Promise.resolve(null),
   };
 
   return backend;

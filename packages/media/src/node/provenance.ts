@@ -1,6 +1,7 @@
 // packages/media/src/node/provenance.ts — §11.10 verbatim.
 // NODE ONLY — imported by apps/web ONLY (§11.1). c2pa-node needs a native
 // binding that workerd cannot load; sharp is a libvips binding.
+import type { Buffer } from "buffer";
 import { Builder, LocalSigner, Reader } from "@contentauth/c2pa-node";
 import type { DestinationBufferAsset } from "@contentauth/c2pa-node";
 import type { Manifest } from "@contentauth/c2pa-types";
@@ -81,8 +82,8 @@ export async function signAsset(input: ProvenanceInput): Promise<ProvenanceOutpu
 
   const builder = await Builder.withJsonAsync(manifest);
   const signer = LocalSigner.newSigner(
-    Buffer.from(process.env.C2PA_SIGNING_CERT_PEM!, "utf8"),
-    Buffer.from(process.env.C2PA_SIGNING_KEY_PEM!, "utf8"),
+    new TextEncoder().encode(process.env.C2PA_SIGNING_CERT_PEM),
+    new TextEncoder().encode(process.env.C2PA_SIGNING_KEY_PEM),
     "es256",
     process.env.C2PA_TSA_URL,
   );
@@ -105,7 +106,7 @@ export async function readProvenance(
   mimeType: string,
 ): Promise<Record<string, unknown> | null> {
   const reader = await Reader.fromAsset({ buffer: bytes, mimeType });
-  return reader ? (reader.json() as Record<string, unknown>) : null;
+  return reader ? (reader.json()) : null;
 }
 
 /** 64-bit DCT pHash. Returns a 64-character '0'/'1' string for Postgres bit(64). */

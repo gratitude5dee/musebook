@@ -123,7 +123,7 @@ interface ProvenanceResponse {
   width: number | null;
   height: number | null;
   durationMs: number | null;
-  manifestJson: unknown | null;
+  manifestJson: unknown;
 }
 
 function toB64(bytes: Uint8Array): string {
@@ -193,7 +193,8 @@ async function callProvenance(
     signal: AbortSignal.timeout(120_000),
   });
   if (!res.ok) throw new Error(`provenance_failed: HTTP ${res.status}`);
-  return (await res.json()) as ProvenanceResponse;
+  const prov: ProvenanceResponse = await res.json();
+  return prov;
 }
 
 export async function runMediaFinalize(env: Env, mediaJobId: string): Promise<void> {
@@ -326,7 +327,7 @@ export async function runMediaFinalize(env: Env, mediaJobId: string): Promise<vo
     const key = objectKey(tier, sha256, contentType);
     const sideKey = sidecarKey(key);
     const bucket: MediaBucketLike =
-      tier === "paid" ? (env.PAID_MEDIA as MediaBucketLike) : (env.PUBLIC_MEDIA as MediaBucketLike);
+      tier === "paid" ? env.PAID_MEDIA : env.PUBLIC_MEDIA;
     const objectBytes = prov?.signedBase64 ? fromB64(prov.signedBase64) : bytes;
     await putBytes(bucket, key, objectBytes, contentType);
     if (prov?.sidecarBase64) {

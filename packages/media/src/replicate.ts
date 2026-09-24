@@ -58,7 +58,7 @@ export function createReplicateBackend(
     const url = ref.resultUrl ?? `${REPLICATE_API}/predictions/${ref.providerRequestId}`;
     const res = await fetch(url, { headers: headers(), signal: AbortSignal.timeout(20_000) });
     if (!res.ok) return null;
-    return (await res.json()) as ReplicatePrediction;
+    return (await res.json());
   };
 
   const toResult = (p: ReplicatePrediction): PollResult => {
@@ -104,10 +104,7 @@ export function createReplicateBackend(
         err.httpStatus = res.status;
         throw err;
       }
-      const json = (await res.json()) as {
-        id: string;
-        urls: { get: string; cancel: string };
-      };
+      const json: { id: string; urls: { get: string; cancel: string } } = await res.json();
       return {
         backend: "replicate",
         modelId,
@@ -140,6 +137,6 @@ export function createReplicateBackend(
 
     verifyWebhook: webhookSecret
       ? (h, b) => verifyReplicateWebhook(h, b, webhookSecret)
-      : async () => null,
+      : () => Promise.resolve(null),
   };
 }

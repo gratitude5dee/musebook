@@ -11,7 +11,7 @@ async function falPublicKeys(jwksUrl: string, force = false): Promise<CryptoKey[
   if (!force && cache && Date.now() - cache.fetchedAt < 86_400_000) return cache.keys;
   const res = await fetch(jwksUrl, { signal: AbortSignal.timeout(5_000) });
   if (!res.ok) throw new Error(`fal jwks ${res.status}`);
-  const jwks = (await res.json()) as { keys: { x: string }[] };
+  const jwks: { keys: { x: string }[] } = await res.json();
   const keys = await Promise.all(
     jwks.keys.map((k) =>
       crypto.subtle.importKey(
