@@ -5062,7 +5062,9 @@ export function m17Comparison() {
   if (!(j.llm?.pass > j.deterministic?.pass))
     return {
       ok: false,
-      errors: [`model ${j.llm?.pass}/${j.llm?.n} did not beat deterministic ${j.deterministic?.pass}/${j.deterministic?.n}`],
+      errors: [
+        `model ${j.llm?.pass}/${j.llm?.n} did not beat deterministic ${j.deterministic?.pass}/${j.deterministic?.n}`,
+      ],
     };
   return { ok: true, errors: [] };
 }
@@ -5137,4 +5139,3 @@ export function m17EnvManifest() {
     errors.push(`AI_GATEWAY_API_KEY literal in wrangler.jsonc: ${h}`);
   return { ok: errors.length === 0, errors };
 }
-
