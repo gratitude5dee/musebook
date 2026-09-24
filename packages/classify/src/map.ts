@@ -41,6 +41,7 @@ export function toNarrowRow(
   answers: BatteryAnswers,
   taxonomy: TaxonomyResult,
   meta: {
+    provider?: "typesafe_jev" | "ai_gateway";
     model: string;
     inputTokens: number;
     requestId: string | null;
@@ -65,7 +66,7 @@ export function toNarrowRow(
   // post_classifications' primary key (§8.9).
   return {
     content_hash: contentHash,
-    provider: "typesafe_jev" as const,
+    provider: meta.provider ?? "typesafe_jev",
     model: meta.model,
     question_set_version: QUESTION_SET_VERSION,
     taxonomy_version: TAXONOMY_VERSION,
