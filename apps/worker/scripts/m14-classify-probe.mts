@@ -50,12 +50,11 @@ async function versions() {
       rows: [missing],
     } = await admin.query<{ n: number }>(
       `select count(*)::int as n from public.post_classifications
-        where provider = 'typesafe_jev'
+        where provider in ('typesafe_jev','ai_gateway')
           and (question_set_version is null or question_set_version = ''
             or taxonomy_version is null or taxonomy_version = '')`,
     );
-    if (missing.n !== 0)
-      throw new Error(`${missing.n} typesafe_jev rows carry empty version stamps`);
+    if (missing.n !== 0) throw new Error(`${missing.n} classifier rows carry empty version stamps`);
     console.log("VERSIONS_OK");
   } finally {
     await admin.end();
@@ -63,9 +62,13 @@ async function versions() {
 }
 
 async function battery() {
-  const key = process.env.TYPESAFE_API_KEY;
+  const provider = process.env.CLASSIFY_PROVIDER ?? "typesafe";
+  const key =
+    provider === "gateway" ? process.env.AI_GATEWAY_API_KEY : process.env.TYPESAFE_API_KEY;
   if (!key) {
-    console.log("BATTERY_BLOCKED no TYPESAFE_API_KEY");
+    console.log(
+      `BATTERY_BLOCKED no ${provider === "gateway" ? "AI_GATEWAY_API_KEY" : "TYPESAFE_API_KEY"}`,
+    );
     process.exit(2);
   }
   const worker = new pg.Client({ connectionString: WORKER_URL });
@@ -75,17 +78,22 @@ async function battery() {
     const { rows: posts } = await admin.query<{ content_hash: string }>(
       `select content_hash from public.posts
         where status = 'published' and deleted_at is null
+          and title like 'Seed %'          -- the deterministic corpus; gate-test litter is out of scope
         order by created_at`,
     );
     if (posts.length === 0) throw new Error("no published posts seeded");
     const env = {
-      TYPESAFE_API_KEY: key,
+      CLASSIFY_PROVIDER: provider,
+      TYPESAFE_API_KEY: process.env.TYPESAFE_API_KEY,
       TYPESAFE_DEFAULT_MODEL: process.env.TYPESAFE_DEFAULT_MODEL ?? "jev-latest",
+      AI_GATEWAY_API_KEY: process.env.AI_GATEWAY_API_KEY,
+      CLASSIFY_MODEL: process.env.CLASSIFY_MODEL ?? "anthropic/claude-haiku-4.5",
       CLASSIFY_TAXONOMY_MODE: process.env.CLASSIFY_TAXONOMY_MODE ?? "walk",
       ...(process.env.TYPESAFE_BASE_URL
         ? { TYPESAFE_BASE_URL: process.env.TYPESAFE_BASE_URL }
         : {}),
     };
+    const modelSlug = provider === "gateway" ? env.CLASSIFY_MODEL : env.TYPESAFE_DEFAULT_MODEL;
     const client = makeClient(env);
     const misses: string[] = [];
     for (const { content_hash } of posts) {
@@ -97,7 +105,7 @@ async function battery() {
           content_hash,
           QUESTION_SET_VERSION,
           TAXONOMY_VERSION,
-          env.TYPESAFE_DEFAULT_MODEL,
+          modelSlug,
           true, // force — the probe measures the battery, not the cache
         ],
       );

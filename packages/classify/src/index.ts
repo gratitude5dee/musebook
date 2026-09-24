@@ -1,5 +1,5 @@
 // packages/classify/src/index.ts
-import { choice, type TypeSafeClient } from "@typesafe-ai/sdk";
+import { choice } from "@typesafe-ai/sdk";
 import {
   POST_BATTERY,
   POST_BATTERY_LABELS,
@@ -7,6 +7,7 @@ import {
   QUESTION_SET_VERSION,
 } from "./battery.js";
 import type { ClassifyEnv } from "./client.js";
+import type { ClassifyClient } from "./gateway.js";
 import { isQuestionSetError } from "./errors.js";
 import type { BatteryAnswers } from "./map.js";
 import { toNarrowRow } from "./map.js";
@@ -18,6 +19,7 @@ export * from "./battery.js";
 export * from "./client.js";
 export * from "./errors.js";
 export * from "./features.js";
+export * from "./gateway.js";
 export * from "./heuristic.js";
 export * from "./map.js";
 export * from "./state.js";
@@ -50,7 +52,7 @@ export const POST_BATTERY_FLAT: FlatBattery = {
 type CallRecord = { inputTokens: number; requestIds: (string | undefined)[] };
 
 async function batteryResult(
-  client: TypeSafeClient,
+  client: ClassifyClient,
   state: PostState,
   questions: FlatBattery | typeof POST_BATTERY,
   record: CallRecord,
@@ -85,7 +87,7 @@ async function batteryResult(
  * clock and the write.
  */
 export async function classifyOne(
-  client: TypeSafeClient,
+  client: ClassifyClient,
   env: ClassifyEnv,
   contentHash: string,
   state: PostState,
@@ -125,6 +127,7 @@ export async function classifyOne(
   }
 
   const narrow = toNarrowRow(contentHash, answers, taxonomy, {
+    provider: env.CLASSIFY_PROVIDER === "gateway" ? "ai_gateway" : "typesafe_jev",
     model,
     inputTokens: record.inputTokens,
     requestId: record.requestIds.filter((id): id is string => id != null).join(",") || null,

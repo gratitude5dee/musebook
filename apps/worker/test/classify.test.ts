@@ -35,6 +35,7 @@ beforeEach(async () => {
   await resetSeed();
   calls = [];
   env.TYPESAFE_API_KEY = "test";
+  env.CLASSIFY_PROVIDER = "typesafe"; // tests stub the Jev endpoint, not the gateway
   env.CLASSIFY_DAILY_TOKEN_BUDGET = "0"; // 0 disables the budget check.
   vi.stubGlobal("fetch", stubJev(calls));
 });
