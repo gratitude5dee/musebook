@@ -1,4 +1,4 @@
-// apps/web/lib/auth/read-session.ts — resolves the mb_session cookie to a users
+// apps/web/lib/auth/read-session.ts — resolves the __Host-mb_session cookie to a users
 // row over PostgREST. It is NOT resolveActor: no Actor is constructed on this
 // plane, and Authorization is never read — so a delegation token can never mint
 // a session, a Supabase JWT, or another delegation through these routes.
@@ -27,7 +27,7 @@ const cookieValue = (req: Request, name: string): string | null => {
 };
 
 export async function readSession(req: Request): Promise<WebSession | null> {
-  const raw = cookieValue(req, "mb_session");
+  const raw = cookieValue(req, "__Host-mb_session");
   if (!raw) return null;
 
   const { data: session } = await serviceDb

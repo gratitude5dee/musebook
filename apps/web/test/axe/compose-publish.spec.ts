@@ -9,7 +9,7 @@ const uniq = Math.random().toString(36).slice(2, 10);
 
 test.beforeEach(async ({ context }) => {
   await context.addCookies([
-    { name: "mb_session", value: "musebook-seed-session-token-0001", url: EDGE_ORIGIN },
+    { name: "__Host-mb_session", value: "musebook-seed-session-token-0001", url: EDGE_ORIGIN },
   ]);
 });
 

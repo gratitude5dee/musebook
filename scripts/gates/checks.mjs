@@ -4781,3 +4781,252 @@ export function m15NotDwelled() {
 export function m15ReadPathOneRead() {
   return m13ReadNotScore();
 }
+
+// ---------------------------------------------------------------------------
+// M16 milestone checks — §16 GATE M16 verbatim.
+// ---------------------------------------------------------------------------
+
+const ARTIFACTS_PKG_TEST = "pnpm vitest run --project artifacts test/budgets.test.ts";
+const EDGE_ARTIFACTS_TEST = "pnpm vitest run --project edge test/artifacts.test.ts";
+const UI_PKG_TEST = "pnpm vitest run --project ui";
+const LINT_RULES_TEST =
+  "pnpm --dir tools/eslint-plugin-musebook exec vitest run rules/later-rules.test.ts";
+
+/** Runs eslint on a fixture and asserts it produces exactly one problem from
+ *  expectedRule — or, with expectedRule null, that the file lints clean. */
+const eslintFixture = (file, expectedRule) => {
+  const r = run(`pnpm eslint ${file} --format json`);
+  let problems;
+  try {
+    const parsed = JSON.parse(r.out.match(/\[[\s\S]*\]/)?.[0] ?? "[]");
+    problems = parsed[0]?.messages ?? [];
+  } catch {
+    return [`eslint JSON output unparseable for ${file}:\n${r.out.slice(0, 800)}`];
+  }
+  if (expectedRule === null)
+    return problems.length
+      ? [`${file}: expected clean, got ${JSON.stringify(problems.map((m) => m.ruleId))}`]
+      : [];
+  const hits = problems.filter((m) => m.ruleId === expectedRule);
+  return hits.length === 1
+    ? []
+    : [
+        `${file}: expected exactly one ${expectedRule} problem, got ${hits.length} (all: ${JSON.stringify(problems.map((m) => m.ruleId))})`,
+      ];
+};
+
+// M16.1 — sandbox attribute byte-exact on the rendered markup, no
+// allow-same-origin anywhere in the component, and the rule bites a fixture
+// that adds srcDoc back.
+export function m16SandboxAttr() {
+  const errors = [];
+  const hits = rg('sandbox="allow-scripts allow-pointer-lock"', [
+    "packages/ui/src/ArtifactFrame.tsx",
+  ]);
+  if (hits.length !== 1)
+    errors.push(
+      `ArtifactFrame sandbox attribute is not the §2.8 verbatim string (${hits.length} hits)`,
+    );
+  for (const bad of ["allow-same-origin", "allow-top-navigation", "allow-forms", "srcDoc"]) {
+    // Comments naming the forbidden token are documentation, not a grant —
+    // only a hit on a non-comment line is a violation.
+    const b = rg(bad, ["packages/ui/src/ArtifactFrame.tsx"]).filter(
+      (h) =>
+        !h
+          .replace(/^(?:[^:]+:\d+:|\d+:)/, "")
+          .trim()
+          .startsWith("//"),
+    );
+    if (b.length) errors.push(`ArtifactFrame grants ${bad}: ${b.join(" | ")}`);
+  }
+  errors.push(
+    ...eslintFixture(
+      "tools/eslint-plugin-musebook/test/fixtures/apps/web/bad-srcdoc.tsx",
+      "musebook/no-same-origin-artifact-sandbox",
+    ),
+  );
+  const slice = vitestSlice(UI_PKG_TEST, "never grants");
+  if (!slice.ok) return { ok: false, errors: errors.concat(slice.errors) };
+  return { ok: errors.length === 0, errors };
+}
+
+// M16.2 — the §2.8 header set asserted on a real Response through the real
+// fetch path (SELF.fetch into the workers pool), not on the constant.
+export function m16CspHeaders() {
+  return vitestSlice(EDGE_ARTIFACTS_TEST, "M16.2");
+}
+
+// M16.3 — an over-budget GLB is refused at ingest, the number reported, and
+// the rejection happens before any publish: enforceBudget is a throw inside
+// runIngest, which returns { rejection } — the worker only writes
+// artifact_versions on report.ok (the grep asserts no write precedes ok).
+export function m16OverBudgetGlb() {
+  const slice = vitestSlice(ARTIFACTS_PKG_TEST, "M16.3");
+  if (!slice.ok) return slice;
+  const src = readFileSync(
+    new URL("../../apps/worker/src/consumers/r2-events.ts", import.meta.url),
+    "utf8",
+  );
+  const okPos = src.indexOf("!report.ok");
+  const pubPos = src.indexOf("publish_artifact_version");
+  if (okPos === -1 || pubPos === -1 || okPos > pubPos)
+    return {
+      ok: false,
+      errors: ["the ingest path does not gate publish_artifact_version behind report.ok"],
+    };
+  return { ok: true, errors: [] };
+}
+
+// M16.4 — MAX_LIVE_CONTEXTS = 2 holds (§14 acceptance row 4).
+export function m16WebglBudget() {
+  return vitestSlice(UI_PKG_TEST, "webgl");
+}
+
+// M16.5 — ticket verification does no database read: HYPERDRIVE absent from
+// the serving module, and the runtime path mints/verifies with R2 only.
+export function m16TicketNoDb() {
+  const hits = rg("HYPERDRIVE", ["apps/edge/src/artifacts.ts"], ["-l"]);
+  if (hits.length)
+    return {
+      ok: false,
+      errors: [`HYPERDRIVE referenced in the artifact read path: ${hits.join(" | ")}`],
+    };
+  return vitestSlice(EDGE_ARTIFACTS_TEST, "M16.5");
+}
+
+// M16.6 — no session reaches the frame: __Host-mb_session is set with no
+// Domain= attribute, and the sandboxed-frame spec asserts document.cookie is
+// empty and cross-origin reads fail from inside the frame.
+export function m16NoSessionInFrame() {
+  const errors = [];
+  const named = rg('"__Host-mb_session"', [
+    "apps/web/app/api/auth/login/route.ts",
+    "apps/web/app/api/auth/logout/route.ts",
+    "apps/web/lib/auth/read-session.ts",
+  ]);
+  if (named.length < 3) errors.push(`__Host-mb_session missing a site: ${named.length} hits`);
+  const domain = rg("domain\\s*:", ["apps/web/app/api/auth/login/route.ts"]);
+  if (domain.length) errors.push(`login route sets a Domain attribute: ${domain.join(" | ")}`);
+  if (errors.length) return { ok: false, errors };
+  const spec = playwrightSlice("sandboxed-artifact.spec.ts");
+  if (!spec.ok) return { ok: false, errors: errors.concat(spec.errors) };
+  return { ok: true, errors: [] };
+}
+
+// M16.7 — remix_root_id correct post-backfill: build a real fork chain
+// through app.fork_artifact, assert transitive roots, roll back via RAISE so
+// re-runs are idempotent and the fixture never persists.
+export function m16RemixRoot() {
+  // Dollar-quoted DO blocks cannot survive the docker exec quoting layer
+  // (any $tag expands in the shell), so the fixture runs as plain statements:
+  // CTEs capture generated ids into a temp table, and the final SELECT folds
+  // the assertion and the cleanup into one statement — re-runnable, and the
+  // fixture deletes itself regardless of the outcome.
+  const sql = `
+delete from public.posts where slug in ('m16gate-base','m16gate-child','m16gate-grand');
+delete from public.post_bodies where content_hash in (
+  app.sha256_hex('# m16 gate fixture'),
+  app.sha256_hex('# m16 child'), app.sha256_hex('# m16 grand'));
+create temp table _m16ids(k text primary key, v uuid);
+insert into _m16ids select 'u', '11111111-1111-4111-8111-000000000002'::uuid;
+insert into public.post_bodies (content_hash, canonical_markdown, byte_len)
+  values (app.sha256_hex('# m16 gate fixture'),
+    '# m16 gate fixture', 18)
+  on conflict do nothing;
+with ins as (
+  insert into public.posts (
+      author_user_id, kind, status, publish_mode, slug, title,
+      content_hash, license_spdx, published_at)
+    select v, 'app'::post_kind, 'published'::post_status, 'free'::publish_mode,
+      'm16gate-base', 'm16 gate base',
+      app.sha256_hex('# m16 gate fixture'),
+      'CC-BY-4.0', now() from _m16ids where k='u'
+    returning id)
+insert into _m16ids select 'pbase', id from ins;
+with ins as (
+  insert into public.artifacts (post_id, kind, bundle_url, entry_path, sha256,
+      byte_len, current_version, status)
+    select v, 'html_bundle', 'https://artifacts.musebook.dev/a/x/', 'index.html',
+      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 42,
+      '0123456789abcdef', 'live' from _m16ids where k='pbase'
+    returning id)
+insert into _m16ids select 'abase', id from ins;
+insert into public.artifact_versions (
+    artifact_id, version, manifest, base_path, visibility, entry_path,
+    poster_url, total_bytes, file_count)
+  select v, '0123456789abcdef', '{}'::jsonb, 'a/private/0123456789abcdef/',
+    'private', 'index.html', 'https://cdn.musebook.dev/t/m16gate.webp', 42, 1
+  from _m16ids where k='abase';
+with f as (
+  select artifact_id, post_id from app.fork_artifact(
+    (select v from _m16ids where k='abase'),
+    (select v from _m16ids where k='u'), null,
+    'm16gate-child', 'm16 child', '# m16 child'))
+insert into _m16ids select 'achild', artifact_id from f;
+with f as (
+  select artifact_id, post_id from app.fork_artifact(
+    (select v from _m16ids where k='achild'),
+    (select v from _m16ids where k='u'), null,
+    'm16gate-grand', 'm16 grand', '# m16 grand'))
+insert into _m16ids select 'agrand', artifact_id from f;
+with viol as (
+  select count(*)::int n from public.artifacts a
+  where a.id in (select v from _m16ids where k in ('abase','achild','agrand'))
+    and a.remix_root_id is distinct from (select v from _m16ids where k='abase')),
+  d1 as (delete from public.posts
+    where slug in ('m16gate-base','m16gate-child','m16gate-grand')),
+  d2 as (delete from public.post_bodies where content_hash in (
+    app.sha256_hex('# m16 gate fixture'),
+    app.sha256_hex('# m16 child'), app.sha256_hex('# m16 grand')))
+select n from viol;`;
+  const r = sqlRun(sql);
+  if (r.code !== 0) return { ok: false, errors: [r.out.slice(-2000)] };
+  const violations = r.out.trim().split(/\s+/).pop();
+  if (violations !== "0")
+    return { ok: false, errors: [`${violations} artifact(s) with wrong remix_root_id`] };
+  return { ok: true, errors: [] };
+}
+
+// M16.8 — both new lint rules registered: index.js exports five rules, the
+// config sets all five to error, and each new rule fails a fixture and
+// passes its counterpart.
+export function m16LintRules() {
+  const errors = [];
+
+  for (const rule of [
+    "no-publish-mode-outside-kernel",
+    "no-platform-imports-in-mixer",
+    "no-action-events-at-serve-time",
+    "no-node-native-in-worker",
+    "no-same-origin-artifact-sandbox",
+  ]) {
+    const exp = rg(rule, ["tools/eslint-plugin-musebook/index.js"]);
+    if (!exp.length) errors.push(`index.js does not export ${rule}`);
+    const en = rg(`"musebook/${rule}":\\s*"error"`, ["eslint.config.mjs"]);
+    if (!en.length) errors.push(`eslint.config.mjs does not set ${rule} to error`);
+  }
+  errors.push(
+    ...eslintFixture(
+      "tools/eslint-plugin-musebook/test/fixtures/apps/edge/src/bad-node-native.ts",
+      "musebook/no-node-native-in-worker",
+    ),
+    ...eslintFixture(
+      "tools/eslint-plugin-musebook/test/fixtures/apps/edge/src/good-node-crypto.ts",
+      null,
+    ),
+    ...eslintFixture(
+      "tools/eslint-plugin-musebook/test/fixtures/apps/web/bad-srcdoc.tsx",
+      "musebook/no-same-origin-artifact-sandbox",
+    ),
+    ...eslintFixture("tools/eslint-plugin-musebook/test/fixtures/apps/web/good-iframe.tsx", null),
+  );
+  if (errors.length) return { ok: false, errors };
+  return vitestSlice(LINT_RULES_TEST, "");
+}
+
+// M16.9 — musebook-artifacts stays sealed: G-R2-SEAL re-run plus the
+// custom-domain check scoped to the artifacts bucket (free artifact bytes
+// never acquire a custom domain).
+export function m16ArtifactsSealed() {
+  return r2Seal();
+}

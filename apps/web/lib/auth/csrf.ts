@@ -1,5 +1,5 @@
 // apps/web/lib/auth/csrf.ts — same-origin check for the mutating web routes.
-// The mb_session cookie is SameSite=Lax, which already blocks cross-site POSTs
+// The __Host-mb_session cookie is SameSite=Lax, which already blocks cross-site POSTs
 // carrying it; this is the second layer for the JSON fetch calls the app makes
 // itself, which Lax does not govern. musebook.dev and *.vercel.app previews are
 // the only allowed origins — an unexpected Origin/Referer is rejected outright.

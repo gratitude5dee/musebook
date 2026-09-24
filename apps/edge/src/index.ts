@@ -6,6 +6,8 @@ import type { Actor, Resource } from "@musebook/schema";
 import { actorOrResponse, asIdentityEnv } from "./auth/resolve-actor.js"; // §5.6.1
 import { portsFor } from "./kernel/configure.js";
 import { serveMedia } from "./media.js"; // §6.12.4
+import { serveArtifact } from "./artifacts.js"; // §11.11/§11.18
+import { handleArtifactFork, handleArtifactTicket } from "./routes/artifacts.js"; // §11.17/§11.18
 import { bound, fresh, release } from "./db/client.js";
 import { applyCacheHeaders } from "./http/cache.js"; // §6.12.5
 import { renderedToResponse, notFound, withSettlement } from "./http.js";
@@ -98,8 +100,12 @@ export default {
       return toOrigin(request, env);
     }
 
-    // media.musebook.dev and artifacts.musebook.dev have their own gate (§6.12.4).
-    if (url.hostname === env.MEDIA_HOST || url.hostname === env.ARTIFACT_HOST) {
+    // media.musebook.dev has the paid-media gate (§6.12.4); artifacts.
+    // musebook.dev has the key-prefix gate with no database at all (§11.11).
+    if (url.hostname === env.ARTIFACT_HOST) {
+      return serveArtifact(request, env, ctx);
+    }
+    if (url.hostname === env.MEDIA_HOST) {
       return serveMedia(request, env, ctx);
     }
 
@@ -118,6 +124,16 @@ export default {
     const publishPostId = publishMatch?.[1];
     if (publishPostId !== undefined) {
       return handlePublishPost(request, env, ctx, publishPostId);
+    }
+
+    // §11.18's activation and §11.17's fork — both on musebook.dev, never Vercel.
+    const artifactMatch = url.pathname.match(
+      /^\/api\/artifacts\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/(ticket|fork)$/,
+    );
+    if (artifactMatch?.[1] !== undefined) {
+      return artifactMatch[2] === "ticket"
+        ? handleArtifactTicket(request, env, ctx, artifactMatch[1])
+        : handleArtifactFork(request, env, ctx, artifactMatch[1]);
     }
 
     // §12.2.6: secret carried in the path (Postiz webhooks are unsigned).

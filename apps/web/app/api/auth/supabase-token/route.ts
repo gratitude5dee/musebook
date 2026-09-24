@@ -7,7 +7,7 @@ import { readSession } from "@/lib/auth/read-session";
 const TTL_SECONDS = 600;
 
 export async function GET(req: Request) {
-  // readSession resolves the mb_session cookie through PostgREST and returns a
+  // readSession resolves the __Host-mb_session cookie through PostgREST and returns a
   // users row. It is NOT resolveActor: no Actor is constructed on this plane,
   // and a bearer token is never accepted here (§5.4.3).
   const s = await readSession(req);

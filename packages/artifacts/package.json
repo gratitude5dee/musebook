@@ -4,7 +4,10 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./node/sandbox": "./src/node/sandbox.ts",
+    "./node/ingest-2d": "./src/node/ingest-2d.ts",
+    "./node/ingest-3d": "./src/node/ingest-3d.ts"
   },
   "scripts": {
     "build": "tsc --build --pretty",
@@ -14,10 +17,15 @@
   },
   "dependencies": {
     "@musebook/schema": "workspace:*",
-    "@musebook/content": "workspace:*"
+    "@musebook/content": "workspace:*",
+    "zod": "4.6.5"
   },
   "devDependencies": {
+    "@gltf-transform/core": "4.5.0",
+    "@gltf-transform/extensions": "4.5.0",
+    "@gltf-transform/functions": "4.5.0",
     "@types/node": "26.6.2",
+    "@vercel/sandbox": "3.3.0",
     "@vitest/coverage-v8": "catalog:",
     "@cloudflare/vitest-plugin": "catalog:",
     "typescript": "catalog:",

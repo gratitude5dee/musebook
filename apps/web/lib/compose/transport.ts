@@ -1,6 +1,6 @@
 // apps/web/lib/compose/transport.ts — the two verbs that ride
 // musebook-edge directly from the browser: publish hits /api/posts/{id}/publish
-// (mb_session cookie → human_creator), uploads hit the presign trio (§11.7.3).
+// (__Host-mb_session cookie → human_creator), uploads hit the presign trio (§11.7.3).
 // The browser hashes the file itself so the markdown can name the final
 // content-addressed key BEFORE the promotion consumer runs.
 "use client";

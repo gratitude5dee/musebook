@@ -45,9 +45,9 @@ export default tseslint.config(
       //   M11 (§13): on — no action_events write on a serve path.
       "musebook/no-action-events-at-serve-time": "error",
       //   M16 (§11): flip to "error" — no node: native binding in a Worker.
-      "musebook/no-node-native-in-worker": "off",
+      "musebook/no-node-native-in-worker": "error",
       //   M16 (§11): flip to "error" — artifacts never share the page origin.
-      "musebook/no-same-origin-artifact-sandbox": "off",
+      "musebook/no-same-origin-artifact-sandbox": "error",
 
       "@typescript-eslint/no-floating-promises": "error",
       "@typescript-eslint/no-misused-promises": "error",

@@ -15,18 +15,26 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@google/model-viewer": "4.3.1",
+    "@musebook/artifacts": "workspace:*",
     "@musebook/content": "workspace:*",
     "@musebook/distributor": "workspace:*",
     "@musebook/schema": "workspace:*",
+    "@react-three/drei": "10.7.8",
+    "@react-three/fiber": "9.7.0",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "thirdweb": "catalog:"
+    "thirdweb": "catalog:",
+    "three": "0.186.0",
+    "zod": "4.6.5",
+    "three-stdlib": "2.36.1"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "catalog:",
     "@types/node": "26.6.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "@types/three": "0.186.0",
     "@vitest/coverage-v8": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

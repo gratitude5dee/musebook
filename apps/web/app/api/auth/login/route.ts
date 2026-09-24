@@ -106,7 +106,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "session_create_failed" }, { status: 500 });
   }
 
-  (await cookies()).set("mb_session", raw, {
+  (await cookies()).set("__Host-mb_session", raw, {
     httpOnly: true,
     secure: true,
     sameSite: "lax",

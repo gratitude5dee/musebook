@@ -12,3 +12,15 @@ export type {
   SavedDraft,
 } from "./compose/types";
 export { UnlockGate, type UnlockGateProps, type UnlockState } from "./UnlockGate";
+export { ArtifactFrame } from "./ArtifactFrame";
+export { ArtifactCanvas, type ArtifactCanvasProps } from "./ArtifactCanvas";
+export { ArtifactViewer3D } from "./ArtifactViewer3D";
+export { ModelCard } from "./ModelCard";
+export { listenToArtifact, type ArtifactMessage } from "./artifactBridge";
+export {
+  acquireWebglSlot,
+  attachContextLossGuard,
+  MAX_LIVE_CONTEXTS,
+  onWebglSlotFreed,
+  releaseWebglSlot,
+} from "./webglBudget";

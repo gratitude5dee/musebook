@@ -43,7 +43,7 @@ const supabaseSecret = (): string => {
 };
 
 export const EDGE_ORIGIN = EDGE_BASE;
-export const SEED_COOKIE = "mb_session=musebook-seed-session-token-0001";
+export const SEED_COOKIE = "__Host-mb_session=musebook-seed-session-token-0001";
 
 export default defineConfig({
   testDir: ".",

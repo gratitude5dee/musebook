@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     });
   }
 
-  (await cookies()).set("mb_session", "", {
+  (await cookies()).set("__Host-mb_session", "", {
     httpOnly: true,
     secure: true,
     sameSite: "lax",

@@ -489,6 +489,750 @@ export type Database = {
         }
         Relationships: []
       }
+      action_events_agent_20260924: {
+        Row: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
+          client: Json
+          comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
+          dwell_ms: number | null
+          event_id: string
+          ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
+          model_version: string
+          occurred_at: string
+          outcome: string
+          position: number
+          post_id: string | null
+          request_id: string | null
+          settlement_id: string | null
+          slate_id: string
+          surface: string
+          view_session_id: string | null
+          viewer_user_id: string | null
+          weights_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version: string
+          occurred_at?: string
+          outcome?: string
+          position: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id: string
+          surface: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version?: string
+          occurred_at?: string
+          outcome?: string
+          position?: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id?: string
+          surface?: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version?: string
+        }
+        Relationships: []
+      }
+      action_events_agent_20260925: {
+        Row: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
+          client: Json
+          comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
+          dwell_ms: number | null
+          event_id: string
+          ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
+          model_version: string
+          occurred_at: string
+          outcome: string
+          position: number
+          post_id: string | null
+          request_id: string | null
+          settlement_id: string | null
+          slate_id: string
+          surface: string
+          view_session_id: string | null
+          viewer_user_id: string | null
+          weights_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version: string
+          occurred_at?: string
+          outcome?: string
+          position: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id: string
+          surface: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version?: string
+          occurred_at?: string
+          outcome?: string
+          position?: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id?: string
+          surface?: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version?: string
+        }
+        Relationships: []
+      }
+      action_events_agent_20260926: {
+        Row: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
+          client: Json
+          comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
+          dwell_ms: number | null
+          event_id: string
+          ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
+          model_version: string
+          occurred_at: string
+          outcome: string
+          position: number
+          post_id: string | null
+          request_id: string | null
+          settlement_id: string | null
+          slate_id: string
+          surface: string
+          view_session_id: string | null
+          viewer_user_id: string | null
+          weights_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version: string
+          occurred_at?: string
+          outcome?: string
+          position: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id: string
+          surface: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version?: string
+          occurred_at?: string
+          outcome?: string
+          position?: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id?: string
+          surface?: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version?: string
+        }
+        Relationships: []
+      }
+      action_events_agent_20260927: {
+        Row: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
+          client: Json
+          comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
+          dwell_ms: number | null
+          event_id: string
+          ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
+          model_version: string
+          occurred_at: string
+          outcome: string
+          position: number
+          post_id: string | null
+          request_id: string | null
+          settlement_id: string | null
+          slate_id: string
+          surface: string
+          view_session_id: string | null
+          viewer_user_id: string | null
+          weights_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version: string
+          occurred_at?: string
+          outcome?: string
+          position: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id: string
+          surface: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version?: string
+          occurred_at?: string
+          outcome?: string
+          position?: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id?: string
+          surface?: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version?: string
+        }
+        Relationships: []
+      }
+      action_events_agent_20260928: {
+        Row: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
+          client: Json
+          comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
+          dwell_ms: number | null
+          event_id: string
+          ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
+          model_version: string
+          occurred_at: string
+          outcome: string
+          position: number
+          post_id: string | null
+          request_id: string | null
+          settlement_id: string | null
+          slate_id: string
+          surface: string
+          view_session_id: string | null
+          viewer_user_id: string | null
+          weights_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version: string
+          occurred_at?: string
+          outcome?: string
+          position: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id: string
+          surface: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version?: string
+          occurred_at?: string
+          outcome?: string
+          position?: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id?: string
+          surface?: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version?: string
+        }
+        Relationships: []
+      }
+      action_events_agent_20260929: {
+        Row: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
+          client: Json
+          comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
+          dwell_ms: number | null
+          event_id: string
+          ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
+          model_version: string
+          occurred_at: string
+          outcome: string
+          position: number
+          post_id: string | null
+          request_id: string | null
+          settlement_id: string | null
+          slate_id: string
+          surface: string
+          view_session_id: string | null
+          viewer_user_id: string | null
+          weights_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version: string
+          occurred_at?: string
+          outcome?: string
+          position: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id: string
+          surface: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version?: string
+          occurred_at?: string
+          outcome?: string
+          position?: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id?: string
+          surface?: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version?: string
+        }
+        Relationships: []
+      }
+      action_events_agent_20260930: {
+        Row: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
+          client: Json
+          comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
+          dwell_ms: number | null
+          event_id: string
+          ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
+          model_version: string
+          occurred_at: string
+          outcome: string
+          position: number
+          post_id: string | null
+          request_id: string | null
+          settlement_id: string | null
+          slate_id: string
+          surface: string
+          view_session_id: string | null
+          viewer_user_id: string | null
+          weights_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version: string
+          occurred_at?: string
+          outcome?: string
+          position: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id: string
+          surface: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version?: string
+          occurred_at?: string
+          outcome?: string
+          position?: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id?: string
+          surface?: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version?: string
+        }
+        Relationships: []
+      }
+      action_events_agent_20261001: {
+        Row: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
+          client: Json
+          comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
+          dwell_ms: number | null
+          event_id: string
+          ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
+          model_version: string
+          occurred_at: string
+          outcome: string
+          position: number
+          post_id: string | null
+          request_id: string | null
+          settlement_id: string | null
+          slate_id: string
+          surface: string
+          view_session_id: string | null
+          viewer_user_id: string | null
+          weights_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version: string
+          occurred_at?: string
+          outcome?: string
+          position: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id: string
+          surface: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version?: string
+          occurred_at?: string
+          outcome?: string
+          position?: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id?: string
+          surface?: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version?: string
+        }
+        Relationships: []
+      }
       action_events_daily: {
         Row: {
           action: Database["public"]["Enums"]["action_kind"]
@@ -798,6 +1542,750 @@ export type Database = {
         }
         Relationships: []
       }
+      action_events_human_20260924: {
+        Row: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
+          client: Json
+          comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
+          dwell_ms: number | null
+          event_id: string
+          ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
+          model_version: string
+          occurred_at: string
+          outcome: string
+          position: number
+          post_id: string | null
+          request_id: string | null
+          settlement_id: string | null
+          slate_id: string
+          surface: string
+          view_session_id: string | null
+          viewer_user_id: string | null
+          weights_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version: string
+          occurred_at?: string
+          outcome?: string
+          position: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id: string
+          surface: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version?: string
+          occurred_at?: string
+          outcome?: string
+          position?: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id?: string
+          surface?: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version?: string
+        }
+        Relationships: []
+      }
+      action_events_human_20260925: {
+        Row: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
+          client: Json
+          comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
+          dwell_ms: number | null
+          event_id: string
+          ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
+          model_version: string
+          occurred_at: string
+          outcome: string
+          position: number
+          post_id: string | null
+          request_id: string | null
+          settlement_id: string | null
+          slate_id: string
+          surface: string
+          view_session_id: string | null
+          viewer_user_id: string | null
+          weights_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version: string
+          occurred_at?: string
+          outcome?: string
+          position: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id: string
+          surface: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version?: string
+          occurred_at?: string
+          outcome?: string
+          position?: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id?: string
+          surface?: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version?: string
+        }
+        Relationships: []
+      }
+      action_events_human_20260926: {
+        Row: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
+          client: Json
+          comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
+          dwell_ms: number | null
+          event_id: string
+          ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
+          model_version: string
+          occurred_at: string
+          outcome: string
+          position: number
+          post_id: string | null
+          request_id: string | null
+          settlement_id: string | null
+          slate_id: string
+          surface: string
+          view_session_id: string | null
+          viewer_user_id: string | null
+          weights_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version: string
+          occurred_at?: string
+          outcome?: string
+          position: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id: string
+          surface: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version?: string
+          occurred_at?: string
+          outcome?: string
+          position?: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id?: string
+          surface?: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version?: string
+        }
+        Relationships: []
+      }
+      action_events_human_20260927: {
+        Row: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
+          client: Json
+          comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
+          dwell_ms: number | null
+          event_id: string
+          ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
+          model_version: string
+          occurred_at: string
+          outcome: string
+          position: number
+          post_id: string | null
+          request_id: string | null
+          settlement_id: string | null
+          slate_id: string
+          surface: string
+          view_session_id: string | null
+          viewer_user_id: string | null
+          weights_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version: string
+          occurred_at?: string
+          outcome?: string
+          position: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id: string
+          surface: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version?: string
+          occurred_at?: string
+          outcome?: string
+          position?: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id?: string
+          surface?: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version?: string
+        }
+        Relationships: []
+      }
+      action_events_human_20260928: {
+        Row: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
+          client: Json
+          comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
+          dwell_ms: number | null
+          event_id: string
+          ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
+          model_version: string
+          occurred_at: string
+          outcome: string
+          position: number
+          post_id: string | null
+          request_id: string | null
+          settlement_id: string | null
+          slate_id: string
+          surface: string
+          view_session_id: string | null
+          viewer_user_id: string | null
+          weights_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version: string
+          occurred_at?: string
+          outcome?: string
+          position: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id: string
+          surface: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version?: string
+          occurred_at?: string
+          outcome?: string
+          position?: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id?: string
+          surface?: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version?: string
+        }
+        Relationships: []
+      }
+      action_events_human_20260929: {
+        Row: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
+          client: Json
+          comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
+          dwell_ms: number | null
+          event_id: string
+          ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
+          model_version: string
+          occurred_at: string
+          outcome: string
+          position: number
+          post_id: string | null
+          request_id: string | null
+          settlement_id: string | null
+          slate_id: string
+          surface: string
+          view_session_id: string | null
+          viewer_user_id: string | null
+          weights_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version: string
+          occurred_at?: string
+          outcome?: string
+          position: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id: string
+          surface: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version?: string
+          occurred_at?: string
+          outcome?: string
+          position?: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id?: string
+          surface?: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version?: string
+        }
+        Relationships: []
+      }
+      action_events_human_20260930: {
+        Row: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
+          client: Json
+          comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
+          dwell_ms: number | null
+          event_id: string
+          ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
+          model_version: string
+          occurred_at: string
+          outcome: string
+          position: number
+          post_id: string | null
+          request_id: string | null
+          settlement_id: string | null
+          slate_id: string
+          surface: string
+          view_session_id: string | null
+          viewer_user_id: string | null
+          weights_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version: string
+          occurred_at?: string
+          outcome?: string
+          position: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id: string
+          surface: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version?: string
+          occurred_at?: string
+          outcome?: string
+          position?: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id?: string
+          surface?: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version?: string
+        }
+        Relationships: []
+      }
+      action_events_human_20261001: {
+        Row: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint: string | null
+          amount_atomic: number | null
+          anon_id: string | null
+          bytes_served: number | null
+          client: Json
+          comment_id: string | null
+          completion_pct: number | null
+          content_hash: string | null
+          dwell_ms: number | null
+          event_id: string
+          ip_hash: string | null
+          max_scroll_pct: number | null
+          mcp_tool: string | null
+          model_version: string
+          occurred_at: string
+          outcome: string
+          position: number
+          post_id: string | null
+          request_id: string | null
+          settlement_id: string | null
+          slate_id: string
+          surface: string
+          view_session_id: string | null
+          viewer_user_id: string | null
+          weights_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version: string
+          occurred_at?: string
+          outcome?: string
+          position: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id: string
+          surface: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action_kind"]
+          actor_agent_id?: string | null
+          actor_plane?: Database["public"]["Enums"]["actor_plane"]
+          agent_key_thumbprint?: string | null
+          amount_atomic?: number | null
+          anon_id?: string | null
+          bytes_served?: number | null
+          client?: Json
+          comment_id?: string | null
+          completion_pct?: number | null
+          content_hash?: string | null
+          dwell_ms?: number | null
+          event_id?: string
+          ip_hash?: string | null
+          max_scroll_pct?: number | null
+          mcp_tool?: string | null
+          model_version?: string
+          occurred_at?: string
+          outcome?: string
+          position?: number
+          post_id?: string | null
+          request_id?: string | null
+          settlement_id?: string | null
+          slate_id?: string
+          surface?: string
+          view_session_id?: string | null
+          viewer_user_id?: string | null
+          weights_version?: string
+        }
+        Relationships: []
+      }
       agent_appeals: {
         Row: {
           created_at: string
@@ -859,6 +2347,7 @@ export type Database = {
           id: string
           is_blocked: boolean
           last_seen_at: string | null
+          model: string | null
           moltbook_id: string | null
           owner_user_id: string | null
           registry_token_id: number | null
@@ -878,6 +2367,7 @@ export type Database = {
           id?: string
           is_blocked?: boolean
           last_seen_at?: string | null
+          model?: string | null
           moltbook_id?: string | null
           owner_user_id?: string | null
           registry_token_id?: number | null
@@ -897,6 +2387,7 @@ export type Database = {
           id?: string
           is_blocked?: boolean
           last_seen_at?: string | null
+          model?: string | null
           moltbook_id?: string | null
           owner_user_id?: string | null
           registry_token_id?: number | null
@@ -1143,44 +2634,206 @@ export type Database = {
           },
         ]
       }
+      artifact_forks: {
+        Row: {
+          created_at: string
+          fork_artifact_id: string
+          forked_by_agent_id: string | null
+          forked_by_user_id: string
+          id: string
+          source_artifact_id: string
+          source_version: string
+        }
+        Insert: {
+          created_at?: string
+          fork_artifact_id: string
+          forked_by_agent_id?: string | null
+          forked_by_user_id: string
+          id?: string
+          source_artifact_id: string
+          source_version: string
+        }
+        Update: {
+          created_at?: string
+          fork_artifact_id?: string
+          forked_by_agent_id?: string | null
+          forked_by_user_id?: string
+          id?: string
+          source_artifact_id?: string
+          source_version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artifact_forks_fork_artifact_id_fkey"
+            columns: ["fork_artifact_id"]
+            isOneToOne: true
+            referencedRelation: "artifacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artifact_forks_forked_by_agent_id_fkey"
+            columns: ["forked_by_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_identities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artifact_forks_forked_by_user_id_fkey"
+            columns: ["forked_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artifact_forks_source_artifact_id_fkey"
+            columns: ["source_artifact_id"]
+            isOneToOne: false
+            referencedRelation: "artifacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artifact_versions: {
+        Row: {
+          artifact_id: string
+          base_path: string
+          created_at: string
+          created_by_user_id: string | null
+          draw_call_estimate: number | null
+          entry_path: string
+          file_count: number
+          gzip_bytes: number | null
+          ingest_report: Json
+          manifest: Json
+          poster_url: string
+          texture_bytes: number | null
+          total_bytes: number
+          triangle_count: number | null
+          version: string
+          visibility: string
+        }
+        Insert: {
+          artifact_id: string
+          base_path: string
+          created_at?: string
+          created_by_user_id?: string | null
+          draw_call_estimate?: number | null
+          entry_path: string
+          file_count: number
+          gzip_bytes?: number | null
+          ingest_report?: Json
+          manifest: Json
+          poster_url: string
+          texture_bytes?: number | null
+          total_bytes: number
+          triangle_count?: number | null
+          version: string
+          visibility?: string
+        }
+        Update: {
+          artifact_id?: string
+          base_path?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          draw_call_estimate?: number | null
+          entry_path?: string
+          file_count?: number
+          gzip_bytes?: number | null
+          ingest_report?: Json
+          manifest?: Json
+          poster_url?: string
+          texture_bytes?: number | null
+          total_bytes?: number
+          triangle_count?: number | null
+          version?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artifact_versions_artifact_id_fkey"
+            columns: ["artifact_id"]
+            isOneToOne: false
+            referencedRelation: "artifacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artifact_versions_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artifacts: {
         Row: {
           bundle_url: string
           byte_len: number
           created_at: string
           csp_profile: string
+          current_version: string | null
           entry_path: string
+          fork_count: number
+          fork_of_artifact_id: string | null
+          fork_of_version: string | null
           id: string
           kind: string
           post_id: string
           poster_asset_id: string | null
+          remix_allowed: boolean
+          remix_root_id: string | null
+          runtime: string | null
           sha256: string
+          status: string
         }
         Insert: {
           bundle_url: string
           byte_len: number
           created_at?: string
           csp_profile?: string
+          current_version?: string | null
           entry_path?: string
+          fork_count?: number
+          fork_of_artifact_id?: string | null
+          fork_of_version?: string | null
           id?: string
           kind: string
           post_id: string
           poster_asset_id?: string | null
+          remix_allowed?: boolean
+          remix_root_id?: string | null
+          runtime?: string | null
           sha256: string
+          status?: string
         }
         Update: {
           bundle_url?: string
           byte_len?: number
           created_at?: string
           csp_profile?: string
+          current_version?: string | null
           entry_path?: string
+          fork_count?: number
+          fork_of_artifact_id?: string | null
+          fork_of_version?: string | null
           id?: string
           kind?: string
           post_id?: string
           poster_asset_id?: string | null
+          remix_allowed?: boolean
+          remix_root_id?: string | null
+          runtime?: string | null
           sha256?: string
+          status?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "artifacts_fork_of_artifact_id_fkey"
+            columns: ["fork_of_artifact_id"]
+            isOneToOne: false
+            referencedRelation: "artifacts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "artifacts_post_id_fkey"
             columns: ["post_id"]
@@ -1193,6 +2846,13 @@ export type Database = {
             columns: ["poster_asset_id"]
             isOneToOne: false
             referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artifacts_remix_root_id_fkey"
+            columns: ["remix_root_id"]
+            isOneToOne: false
+            referencedRelation: "artifacts"
             referencedColumns: ["id"]
           },
         ]
@@ -1484,6 +3144,27 @@ export type Database = {
           },
         ]
       }
+      classify_versions: {
+        Row: {
+          question_set_version: string
+          singleton: boolean
+          taxonomy_version: string
+          updated_at: string
+        }
+        Insert: {
+          question_set_version: string
+          singleton?: boolean
+          taxonomy_version: string
+          updated_at?: string
+        }
+        Update: {
+          question_set_version?: string
+          singleton?: boolean
+          taxonomy_version?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           actor_agent_id: string | null
@@ -1689,6 +3370,35 @@ export type Database = {
           {
             foreignKeyName: "consent_events_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_clusters: {
+        Row: {
+          cluster_id: number
+          computed_at: string
+          creator_user_id: string
+          weight: number
+        }
+        Insert: {
+          cluster_id: number
+          computed_at?: string
+          creator_user_id: string
+          weight: number
+        }
+        Update: {
+          cluster_id?: number
+          computed_at?: string
+          creator_user_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_clusters_creator_user_id_fkey"
+            columns: ["creator_user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -2926,50 +4636,113 @@ export type Database = {
       }
       post_classifications: {
         Row: {
+          agent_value: number | null
+          agent_value_confidence: number | null
+          audience_level: number | null
+          audience_level_label: string | null
           classified_at: string
           commercial_intent: number | null
           content_hash: string
+          input_tokens: number | null
           is_ai_generated: boolean | null
           is_nsfw: boolean
           language_code: string | null
           latency_ms: number | null
+          medium: string | null
+          medium_confidence: number | null
           model: string
+          p_ai_generated: number | null
+          p_brand_unsafe: number | null
+          p_contains_pii: number | null
+          p_discloses_ai: number | null
+          p_nsfw: number | null
+          p_unsafe: number | null
           primary_topic: string | null
           provider: string
           quality: number | null
+          question_set_version: string | null
+          request_id: string | null
           spam: number | null
+          taxonomy_leaf: string | null
+          taxonomy_path: string[]
+          taxonomy_score: number | null
+          taxonomy_version: string | null
+          tone: string | null
+          topic_probabilities: Json
           topics: string[]
           toxicity: number | null
         }
         Insert: {
+          agent_value?: number | null
+          agent_value_confidence?: number | null
+          audience_level?: number | null
+          audience_level_label?: string | null
           classified_at?: string
           commercial_intent?: number | null
           content_hash: string
+          input_tokens?: number | null
           is_ai_generated?: boolean | null
           is_nsfw?: boolean
           language_code?: string | null
           latency_ms?: number | null
+          medium?: string | null
+          medium_confidence?: number | null
           model: string
+          p_ai_generated?: number | null
+          p_brand_unsafe?: number | null
+          p_contains_pii?: number | null
+          p_discloses_ai?: number | null
+          p_nsfw?: number | null
+          p_unsafe?: number | null
           primary_topic?: string | null
           provider?: string
           quality?: number | null
+          question_set_version?: string | null
+          request_id?: string | null
           spam?: number | null
+          taxonomy_leaf?: string | null
+          taxonomy_path?: string[]
+          taxonomy_score?: number | null
+          taxonomy_version?: string | null
+          tone?: string | null
+          topic_probabilities?: Json
           topics?: string[]
           toxicity?: number | null
         }
         Update: {
+          agent_value?: number | null
+          agent_value_confidence?: number | null
+          audience_level?: number | null
+          audience_level_label?: string | null
           classified_at?: string
           commercial_intent?: number | null
           content_hash?: string
+          input_tokens?: number | null
           is_ai_generated?: boolean | null
           is_nsfw?: boolean
           language_code?: string | null
           latency_ms?: number | null
+          medium?: string | null
+          medium_confidence?: number | null
           model?: string
+          p_ai_generated?: number | null
+          p_brand_unsafe?: number | null
+          p_contains_pii?: number | null
+          p_discloses_ai?: number | null
+          p_nsfw?: number | null
+          p_unsafe?: number | null
           primary_topic?: string | null
           provider?: string
           quality?: number | null
+          question_set_version?: string | null
+          request_id?: string | null
           spam?: number | null
+          taxonomy_leaf?: string | null
+          taxonomy_path?: string[]
+          taxonomy_score?: number | null
+          taxonomy_version?: string | null
+          tone?: string | null
+          topic_probabilities?: Json
           topics?: string[]
           toxicity?: number | null
         }
@@ -4049,6 +5822,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "viewer_recent_actions_viewer_user_id_fkey"
+            columns: ["viewer_user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      viewer_seen_bloom: {
+        Row: {
+          filter_json: Json
+          iso_week: string
+          prev_filter_json: Json | null
+          recent_ids: string[]
+          updated_at: string
+          viewer_user_id: string
+        }
+        Insert: {
+          filter_json: Json
+          iso_week: string
+          prev_filter_json?: Json | null
+          recent_ids?: string[]
+          updated_at?: string
+          viewer_user_id: string
+        }
+        Update: {
+          filter_json?: Json
+          iso_week?: string
+          prev_filter_json?: Json | null
+          recent_ids?: string[]
+          updated_at?: string
+          viewer_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "viewer_seen_bloom_viewer_user_id_fkey"
             columns: ["viewer_user_id"]
             isOneToOne: true
             referencedRelation: "users"

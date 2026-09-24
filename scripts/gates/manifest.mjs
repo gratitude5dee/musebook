@@ -1678,6 +1678,62 @@ export const GATES = {
       run: checks.m15ReadPathOneRead,
     },
   ],
+  M16: [
+    {
+      id: "M16.1",
+      kind: "fn",
+      desc: "sandbox attribute byte-exact (allow-scripts allow-pointer-lock), never allow-same-origin; rule bites a srcDoc fixture",
+      run: checks.m16SandboxAttr,
+    },
+    {
+      id: "M16.2",
+      kind: "fn",
+      desc: "§2.8's five headers asserted on a real response through the Worker fetch path (SELF.fetch), incl. 404s",
+      run: checks.m16CspHeaders,
+    },
+    {
+      id: "M16.3",
+      kind: "fn",
+      desc: "over-budget GLB refused at ingest with the number reported; publish_artifact_version gated behind report.ok",
+      run: checks.m16OverBudgetGlb,
+    },
+    {
+      id: "M16.4",
+      kind: "fn",
+      desc: "MAX_LIVE_CONTEXTS = 2 holds — third acquireWebglSlot refused while two held, freed on release",
+      run: checks.m16WebglBudget,
+    },
+    {
+      id: "M16.5",
+      kind: "fn",
+      desc: "ticket verification does no database read — HYPERDRIVE absent from the artifact read path; Ed25519 mint/verify slice",
+      run: checks.m16TicketNoDb,
+    },
+    {
+      id: "M16.6",
+      kind: "fn",
+      desc: "no session reaches the frame — __Host-mb_session has no Domain=; sandboxed-frame spec asserts empty cookie + failed cross-origin reads",
+      run: checks.m16NoSessionInFrame,
+    },
+    {
+      id: "M16.7",
+      kind: "fn",
+      desc: "remix_root_id correct post-backfill — transitive root over a real app.fork_artifact chain; non-fork is self",
+      run: checks.m16RemixRoot,
+    },
+    {
+      id: "M16.8",
+      kind: "fn",
+      desc: "both new lint rules registered — index.js exports five, config all error, fixtures bite and counterparts pass",
+      run: checks.m16LintRules,
+    },
+    {
+      id: "M16.9",
+      kind: "fn",
+      desc: "musebook-artifacts still sealed — G-R2-SEAL re-run",
+      run: checks.m16ArtifactsSealed,
+    },
+  ],
 };
 
 export const MILESTONE_TITLES = {

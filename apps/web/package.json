@@ -12,6 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@musebook/artifacts": "workspace:*",
     "@musebook/content": "workspace:*",
     "@musebook/distributor": "workspace:*",
     "@musebook/kernel": "workspace:*",
@@ -20,6 +21,7 @@
     "@musebook/ui": "workspace:*",
     "@musebook/x402": "workspace:*",
     "@supabase/supabase-js": "catalog:",
+    "@vercel/sandbox": "3.3.0",
     "@tailwindcss/postcss": "4.3.3",
     "geist": "1.7.2",
     "jose": "catalog:",
