@@ -4824,7 +4824,11 @@ export function m16SandboxAttr() {
     // Comments naming the forbidden token are documentation, not a grant —
     // only a hit on a non-comment line is a violation.
     const b = rg(bad, ["packages/ui/src/ArtifactFrame.tsx"]).filter(
-      (h) => !h.replace(/^(?:[^:]+:\d+:|\d+:)/, "").trim().startsWith("//"),
+      (h) =>
+        !h
+          .replace(/^(?:[^:]+:\d+:|\d+:)/, "")
+          .trim()
+          .startsWith("//"),
     );
     if (b.length) errors.push(`ArtifactFrame grants ${bad}: ${b.join(" | ")}`);
   }
