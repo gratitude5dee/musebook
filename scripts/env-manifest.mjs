@@ -368,6 +368,21 @@ export const GROUPS = [
       },
       { name: "CLASSIFY_TAXONOMY_MODE", scope: ["J", "L"], kind: "var", local: "walk" },
       {
+        name: "CLASSIFY_PROVIDER",
+        scope: ["J", "L"],
+        kind: "var",
+        local: "typesafe",
+        comment:
+          "'typesafe' hits Jev's /v1/systemone; 'gateway' serves the same battery through the Vercel AI Gateway (D156).",
+      },
+      {
+        name: "CLASSIFY_MODEL",
+        scope: ["J", "L"],
+        kind: "var",
+        local: "anthropic/claude-haiku-4.5",
+        comment: "AI Gateway model slug used only when CLASSIFY_PROVIDER=gateway.",
+      },
+      {
         name: "CLASSIFY_DAILY_TOKEN_BUDGET",
         scope: ["J", "L"],
         kind: "var",
@@ -375,7 +390,7 @@ export const GROUPS = [
         comment:
           "Token budget, not dollars — §8.9 pricing is UNVERIFIED. Over-budget defers the batch with an ops_events row + degraded counter (A14).",
       },
-      { name: "AI_GATEWAY_API_KEY", scope: ["J"], kind: "secret" },
+      { name: "AI_GATEWAY_API_KEY", scope: ["J", "L"], kind: "secret" },
       { name: "GEN_MODEL", scope: ["J"], kind: "var", local: "anthropic/claude-opus-5" },
       { name: "REFORMAT_MODEL", scope: ["J"], kind: "var", local: "anthropic/claude-sonnet-5" },
       { name: "REFORMAT_MAX_REPAIRS", scope: ["J"], kind: "var", local: "2" },

@@ -1,5 +1,6 @@
 // packages/classify/src/walk.ts
-import { choice, type TypeSafeClient } from "@typesafe-ai/sdk";
+import { choice } from "@typesafe-ai/sdk";
+import type { ClassifyClient } from "./gateway.js";
 import { MUSEBOOK_TAXONOMY, type TaxonomyNode } from "./taxonomy.js";
 
 export const BEAM_MAX_WIDTH = 2; // never more than 2 questions per level
@@ -47,7 +48,7 @@ function selectEdges(probabilities: Record<string, number>): [string, number][] 
  *                  was `none_of_these` (in which case no walk is performed).
  */
 export async function walkTaxonomy(
-  client: TypeSafeClient,
+  client: ClassifyClient,
   state: unknown,
   rootLabel: string | null,
   rootProbability: number,
