@@ -26,6 +26,6 @@ export function attachContextLossGuard(canvas: HTMLCanvasElement, onLost: () => 
     event.preventDefault(); // allows a later restore
     onLost();
   };
-  canvas.addEventListener('webglcontextlost', handler);
-  return () => canvas.removeEventListener('webglcontextlost', handler);
+  canvas.addEventListener("webglcontextlost", handler);
+  return () => canvas.removeEventListener("webglcontextlost", handler);
 }

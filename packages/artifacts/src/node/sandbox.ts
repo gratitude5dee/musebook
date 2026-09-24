@@ -1,16 +1,21 @@
 // packages/artifacts/src/node/sandbox.ts — imported by apps/web ONLY (11.1).
-import { Sandbox } from '@vercel/sandbox';
+import { Sandbox } from "@vercel/sandbox";
 
 export interface IngestReportFile {
   readonly path: string;
   readonly sha256: string;
   readonly contentType: string;
-  readonly bytes: string;           // base64 — returned, never written on Vercel
+  readonly bytes: string; // base64 — returned, never written on Vercel
 }
 
 export interface IngestReport {
   readonly ok: boolean;
-  readonly rejection?: { readonly code: string; readonly path?: string; readonly measured?: number; readonly limit?: number };
+  readonly rejection?: {
+    readonly code: string;
+    readonly path?: string;
+    readonly measured?: number;
+    readonly limit?: number;
+  };
   readonly version?: string;
   readonly manifest?: unknown;
   readonly files?: readonly IngestReportFile[];
@@ -27,7 +32,7 @@ export interface IngestReport {
 export class IngestError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'IngestError';
+    this.name = "IngestError";
   }
 }
 
@@ -78,23 +83,28 @@ const out = {
 console.log(JSON.stringify(out));
 `;
 
-export async function runIngest(tarballBytes: Uint8Array, artifactId: string): Promise<IngestReport> {
+export async function runIngest(
+  tarballBytes: Uint8Array,
+  artifactId: string,
+): Promise<IngestReport> {
   await using sandbox = await Sandbox.create({
     // `runtime` is deprecated in @vercel/sandbox@3.x; use a VCR image.
-    image: process.env.MEDIA_SANDBOX_IMAGE ?? 'vercel/sandbox/node:24',
+    image: process.env.MEDIA_SANDBOX_IMAGE ?? "vercel/sandbox/node:24",
     timeout: 120_000,
     resources: { vcpus: 2 },
     // camelCase in the TypeScript SDK; the snake_case spelling is the Python SDK's.
-    networkPolicy: 'deny-all',
+    networkPolicy: "deny-all",
     env: { ARTIFACT_ID: artifactId },
   });
 
   await sandbox.writeFiles([
-    { path: '/work/ingest.mjs', content: INGEST_SCRIPT },
-    { path: '/work/bundle.tar.gz', content: Buffer.from(tarballBytes) },  // WRITTEN IN, not downloaded
+    { path: "/work/ingest.mjs", content: INGEST_SCRIPT },
+    { path: "/work/bundle.tar.gz", content: Buffer.from(tarballBytes) }, // WRITTEN IN, not downloaded
   ]);
   const result = await sandbox.runCommand({
-    cmd: 'node', args: ['/work/ingest.mjs', '/work/bundle.tar.gz'], cwd: '/work',
+    cmd: "node",
+    args: ["/work/ingest.mjs", "/work/bundle.tar.gz"],
+    cwd: "/work",
   });
   if (result.exitCode !== 0) throw new IngestError(await result.stderr());
   return JSON.parse(await result.stdout()) as IngestReport;

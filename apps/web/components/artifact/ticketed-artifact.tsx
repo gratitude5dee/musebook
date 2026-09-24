@@ -7,9 +7,7 @@ import { useEffect, useState } from "react";
 import { ArtifactFrame } from "@musebook/ui";
 
 export function TicketedArtifact({ artifactId, title }: { artifactId: string; title: string }) {
-  const [state, setState] = useState<{ url?: string | undefined; error?: string | undefined }>(
-    {},
-  );
+  const [state, setState] = useState<{ url?: string | undefined; error?: string | undefined }>({});
 
   useEffect(() => {
     let cancelled = false;

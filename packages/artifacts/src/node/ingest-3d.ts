@@ -1,9 +1,15 @@
 // packages/artifacts/src/node/ingest-3d.ts — apps/web ONLY (11.1).
-import { NodeIO } from '@gltf-transform/core';
-import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
-import { inspect } from '@gltf-transform/functions';
-import { stat } from 'node:fs/promises';
-import { BUDGETS, BudgetError, enforceBudget, type BudgetTier, type SceneMetrics } from '../budgets';
+import { NodeIO } from "@gltf-transform/core";
+import { ALL_EXTENSIONS } from "@gltf-transform/extensions";
+import { inspect } from "@gltf-transform/functions";
+import { stat } from "node:fs/promises";
+import {
+  BUDGETS,
+  BudgetError,
+  enforceBudget,
+  type BudgetTier,
+  type SceneMetrics,
+} from "../budgets";
 
 export { BUDGETS, BudgetError, enforceBudget, type BudgetTier, type SceneMetrics };
 

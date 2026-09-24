@@ -3,11 +3,7 @@
 // can reach the artifact origin's trust boundary.
 import { env, SELF } from "cloudflare:test";
 import { describe, expect, it } from "vitest";
-import {
-  importTicketSigningKey,
-  mintTicket,
-  type TicketClaims,
-} from "@musebook/artifacts";
+import { importTicketSigningKey, mintTicket, type TicketClaims } from "@musebook/artifacts";
 import { serveArtifact } from "../src/artifacts.js";
 
 const VERSION = "0123456789abcdef";
@@ -40,9 +36,7 @@ async function putArtifact(key: string, body: string, contentType = "text/html")
 describe("M16.2 — §2.8 headers on real responses", () => {
   it("stamps all five headers on a public artifact response", async () => {
     await putArtifact(`a/public/${VERSION}/index.html`, "<html>hi</html>");
-    const res = await SELF.fetch(
-      `https://${env.ARTIFACT_HOST}/a/${ART_ID}/${VERSION}/index.html`,
-    );
+    const res = await SELF.fetch(`https://${env.ARTIFACT_HOST}/a/${ART_ID}/${VERSION}/index.html`);
     expect(res.status).toBe(200);
     assertArtifactHeaders(res);
     expect(res.headers.get("cache-control")).toBe("public, max-age=31536000, immutable");
@@ -85,7 +79,11 @@ describe("M16.5 — ticket arm, no database", () => {
   it("serves a private artifact to a valid ticket, 404s forged/expired/wrong artifact", async () => {
     const { signing, pubPem } = await ephemeralKeys();
     const e = envWith(pubPem);
-    const ctx = { exports: {}, waitUntil() {}, passThroughOnException() {} } as unknown as ExecutionContext;
+    const ctx = {
+      exports: {},
+      waitUntil() {},
+      passThroughOnException() {},
+    } as unknown as ExecutionContext;
     const key = `a/private/${VERSION}/index.html`;
     await putArtifact(key, "<html>paid</html>", "text/html");
 

@@ -46,11 +46,7 @@ export async function generateMetadata({
   return { title, robots: { index: false } };
 }
 
-export default async function ArtifactPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function ArtifactPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const artifact = await loadArtifact(id);
   if (artifact === null || artifact.status !== "live" || artifact.current_version === null) {

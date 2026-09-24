@@ -4782,7 +4782,8 @@ export function m15ReadPathOneRead() {
 const ARTIFACTS_PKG_TEST = "pnpm vitest run --project artifacts test/budgets.test.ts";
 const EDGE_ARTIFACTS_TEST = "pnpm vitest run --project edge test/artifacts.test.ts";
 const UI_PKG_TEST = "pnpm vitest run --project ui";
-const LINT_RULES_TEST = "pnpm --dir tools/eslint-plugin-musebook exec vitest run rules/later-rules.test.ts";
+const LINT_RULES_TEST =
+  "pnpm --dir tools/eslint-plugin-musebook exec vitest run rules/later-rules.test.ts";
 
 /** Runs eslint on a fixture and asserts it produces exactly one problem from
  *  expectedRule — or, with expectedRule null, that the file lints clean. */
@@ -4802,7 +4803,9 @@ const eslintFixture = (file, expectedRule) => {
   const hits = problems.filter((m) => m.ruleId === expectedRule);
   return hits.length === 1
     ? []
-    : [`${file}: expected exactly one ${expectedRule} problem, got ${hits.length} (all: ${JSON.stringify(problems.map((m) => m.ruleId))})`];
+    : [
+        `${file}: expected exactly one ${expectedRule} problem, got ${hits.length} (all: ${JSON.stringify(problems.map((m) => m.ruleId))})`,
+      ];
 };
 
 // M16.1 — sandbox attribute byte-exact on the rendered markup, no
@@ -4814,9 +4817,15 @@ export function m16SandboxAttr() {
     "packages/ui/src/ArtifactFrame.tsx",
   ]);
   if (hits.length !== 1)
-    errors.push(`ArtifactFrame sandbox attribute is not the §2.8 verbatim string (${hits.length} hits)`);
+    errors.push(
+      `ArtifactFrame sandbox attribute is not the §2.8 verbatim string (${hits.length} hits)`,
+    );
   for (const bad of ["allow-same-origin", "allow-top-navigation", "allow-forms", "srcDoc"]) {
-    const b = rg(bad, ["packages/ui/src/ArtifactFrame.tsx"]);
+    // Comments naming the forbidden token are documentation, not a grant —
+    // only a hit on a non-comment line is a violation.
+    const b = rg(bad, ["packages/ui/src/ArtifactFrame.tsx"]).filter(
+      (h) => !h.split(":", 3).slice(2).join(":").trim().startsWith("//"),
+    );
     if (b.length) errors.push(`ArtifactFrame grants ${bad}: ${b.join(" | ")}`);
   }
   errors.push(
@@ -4867,7 +4876,10 @@ export function m16WebglBudget() {
 export function m16TicketNoDb() {
   const hits = rg("HYPERDRIVE", ["apps/edge/src/artifacts.ts"], ["-l"]);
   if (hits.length)
-    return { ok: false, errors: [`HYPERDRIVE referenced in the artifact read path: ${hits.join(" | ")}`] };
+    return {
+      ok: false,
+      errors: [`HYPERDRIVE referenced in the artifact read path: ${hits.join(" | ")}`],
+    };
   return vitestSlice(EDGE_ARTIFACTS_TEST, "M16.5");
 }
 
@@ -4895,7 +4907,7 @@ export function m16NoSessionInFrame() {
 // re-runs are idempotent and the fixture never persists.
 export function m16RemixRoot() {
   const sql = `
-do $$
+do $m16$
 declare
   u uuid := '11111111-1111-4111-8111-000000000001';
   v_post uuid; v_art uuid; v_child uuid; v_grand uuid;
@@ -4954,7 +4966,7 @@ begin
       'm16gate0000000000000000000000000000000000000000000000000000000000',
       app.sha256_hex('# m16 child'),
       app.sha256_hex('# m16 grand'));
-end $$;`;
+end $m16$;`;
   const r = sqlRun(sql);
   if (r.code !== 0) return { ok: false, errors: [r.out.slice(-2000)] };
   return { ok: true, errors: [] };
@@ -4991,10 +5003,7 @@ export function m16LintRules() {
       "tools/eslint-plugin-musebook/test/fixtures/apps/web/bad-srcdoc.tsx",
       "musebook/no-same-origin-artifact-sandbox",
     ),
-    ...eslintFixture(
-      "tools/eslint-plugin-musebook/test/fixtures/apps/web/good-iframe.tsx",
-      null,
-    ),
+    ...eslintFixture("tools/eslint-plugin-musebook/test/fixtures/apps/web/good-iframe.tsx", null),
   );
   if (errors.length) return { ok: false, errors };
   return vitestSlice(LINT_RULES_TEST, "");
@@ -5004,5 +5013,5 @@ export function m16LintRules() {
 // custom-domain check scoped to the artifacts bucket (free artifact bytes
 // never acquire a custom domain).
 export function m16ArtifactsSealed() {
-  return gR2Seal();
+  return r2Seal();
 }

@@ -9,9 +9,8 @@ export default function ArtifactsPage() {
       <p className="mt-4 text-neutral-400">Your agent can ship an app here.</p>
       <p className="mt-2 text-sm text-neutral-500">
         Publish a 2D bundle (<code>kind: &apos;app&apos;</code>) or a 3D model (
-        <code>kind: &apos;model3d&apos;</code>) through{" "}
-        <code>submit_post</code> — it lands here, sandboxed, at
-        artifacts.musebook.dev.
+        <code>kind: &apos;model3d&apos;</code>) through <code>submit_post</code> — it lands here,
+        sandboxed, at artifacts.musebook.dev.
       </p>
       <Link href="/feed" className="mt-8 inline-block text-sm underline underline-offset-4">
         Browse the feed instead

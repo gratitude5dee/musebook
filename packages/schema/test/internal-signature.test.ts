@@ -2,10 +2,7 @@
 // Generate the keypair per run — the private half never lives in the repo.
 import { generateKeyPairSync } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import {
-  signInternalRequest,
-  verifyInternalRequest,
-} from "../src/internal-signature";
+import { signInternalRequest, verifyInternalRequest } from "../src/internal-signature";
 
 const { privateKey, publicKey } = generateKeyPairSync("ed25519");
 const PRIV_B64 = privateKey.export({ format: "der", type: "pkcs8" }).toString("base64");
@@ -52,21 +49,31 @@ describe("internal-signature", () => {
   });
 
   it("rejects a body tamper as digest_mismatch", () => {
-    expect(verify(signedHeaders(), URL_, '{"job":"render","id":"XYZ"}'))
-      .toEqual({ ok: false, reason: "digest_mismatch" });
+    expect(verify(signedHeaders(), URL_, '{"job":"render","id":"XYZ"}')).toEqual({
+      ok: false,
+      reason: "digest_mismatch",
+    });
   });
 
   it("rejects a path tamper as bad_signature", () => {
-    expect(verify(signedHeaders(), "https://musebook.dev/api/sandbox/evil"))
-      .toEqual({ ok: false, reason: "bad_signature" });
+    expect(verify(signedHeaders(), "https://musebook.dev/api/sandbox/evil")).toEqual({
+      ok: false,
+      reason: "bad_signature",
+    });
   });
 
   it("rejects an unknown keyid", () => {
     const { privateKey: p2, publicKey: q2 } = generateKeyPairSync("ed25519");
-    const h = signedHeaders({ privateKeyPkcs8B64: p2.export({ format: "der", type: "pkcs8" }).toString("base64"), keyId: "key-2" });
+    const h = signedHeaders({
+      privateKeyPkcs8B64: p2.export({ format: "der", type: "pkcs8" }).toString("base64"),
+      keyId: "key-2",
+    });
     expect(
       verifyInternalRequest({
-        method: "POST", url: URL_, body: BODY, headers: h,
+        method: "POST",
+        url: URL_,
+        body: BODY,
+        headers: h,
         publicKeys: { "key-2": q2.export({ format: "der", type: "spki" }).toString("base64") },
         now: NOW + 10_000,
       }),
@@ -75,13 +82,19 @@ describe("internal-signature", () => {
   });
 
   it("rejects expired and skewed signatures", () => {
-    expect(verify(signedHeaders(), URL_, BODY, NOW + 400_000))
-      .toEqual({ ok: false, reason: "expired" });
-    expect(verify(signedHeaders({ ttlSeconds: 60 }), URL_, BODY, NOW + 400_000))
-      .toEqual({ ok: false, reason: "expired" });
+    expect(verify(signedHeaders(), URL_, BODY, NOW + 400_000)).toEqual({
+      ok: false,
+      reason: "expired",
+    });
+    expect(verify(signedHeaders({ ttlSeconds: 60 }), URL_, BODY, NOW + 400_000)).toEqual({
+      ok: false,
+      reason: "expired",
+    });
     // created far in the future vs the verifier's clock
-    expect(verify(signedHeaders({ now: NOW + 400_000 }), URL_, BODY, NOW))
-      .toEqual({ ok: false, reason: "skewed" });
+    expect(verify(signedHeaders({ now: NOW + 400_000 }), URL_, BODY, NOW)).toEqual({
+      ok: false,
+      reason: "skewed",
+    });
   });
 
   it("rejects missing headers", () => {

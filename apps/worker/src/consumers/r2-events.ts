@@ -219,9 +219,7 @@ async function ingestArtifactBundle(env: Env, key: string, eventSize: number): P
     const digest = new crypto.DigestStream("SHA-256");
     await new Response(posterBytes).body!.pipeTo(digest);
     const sum = await digest.digest;
-    const posterSha = [...new Uint8Array(sum)]
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
+    const posterSha = [...new Uint8Array(sum)].map((b) => b.toString(16).padStart(2, "0")).join("");
     const posterKey = `t/${posterSha}/1200.webp`;
     await env.PUBLIC_MEDIA.put(posterKey, posterBytes, {
       httpMetadata: { contentType: report.poster.content_type },

@@ -13,7 +13,7 @@ export function ArtifactFrame({ src, title }: { src: string; title: string }) {
       // `credentialless` attribute reaches the DOM. Section 2.8 flags its
       // cross-browser support as UNVERIFIED and additive: drop it if it causes
       // problems, never the sandbox attribute.
-      {...{ credentialless: 'true' }}
+      {...{ credentialless: "true" }}
       loading="lazy"
       title={title}
     />

@@ -6,10 +6,7 @@ import "server-only";
 import { verifyInternalRequest } from "@musebook/schema/internal-signature";
 import { serviceDb } from "@/lib/db/service";
 
-export async function requireSignedInternal(
-  req: Request,
-  body: string,
-): Promise<Response | null> {
+export async function requireSignedInternal(req: Request, body: string): Promise<Response | null> {
   const publicKeys = JSON.parse(process.env.MB_INTERNAL_PUBLIC_KEYS ?? "{}") as Record<
     string,
     string

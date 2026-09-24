@@ -21,10 +21,7 @@ const MAX_BODY = 20 * 1024 * 1024; // a 12 MB GLB is ~16 MB base64 — reject ea
 export async function handleArtifactIngest(req: Request): Promise<Response> {
   const length = Number(req.headers.get("content-length") ?? "0");
   if (length > MAX_BODY) {
-    return Response.json(
-      { ok: false, rejection: { code: "bundle_too_large" } },
-      { status: 413 },
-    );
+    return Response.json({ ok: false, rejection: { code: "bundle_too_large" } }, { status: 413 });
   }
   const body = await req.text();
   const denied = await requireSignedInternal(req, body);

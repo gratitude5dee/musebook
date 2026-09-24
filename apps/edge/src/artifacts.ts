@@ -4,12 +4,7 @@
 // so neither arm can read Postgres — visibility is a key prefix, not a check.
 // The five §2.8 headers are set here in Worker code on every response, because
 // R2 stores httpMetadata and not security headers.
-import {
-  artifactKey,
-  importTicketPublicKey,
-  verifyTicket,
-  VERSION_RE,
-} from "@musebook/artifacts";
+import { artifactKey, importTicketPublicKey, verifyTicket, VERSION_RE } from "@musebook/artifacts";
 import { bound } from "./db/client.js";
 import { passthrough } from "./http.js";
 
@@ -87,9 +82,7 @@ async function publicArtifact(
   const res = await (ctx.exports.PaidMedia as Fetcher).fetch(upstream);
   // Range (206) and conditional (304) answers pass through with the §2.8
   // headers stamped on top — the bucket prefix is what scopes this arm.
-  return withArtifactHeaders(
-    new Response(res.body, { status: res.status, headers: res.headers }),
-  );
+  return withArtifactHeaders(new Response(res.body, { status: res.status, headers: res.headers }));
 }
 
 /** The paid arm: the ticket certifies the decision mintTicket's caller already
@@ -131,13 +124,14 @@ async function privateArtifact(
   // Range/conditional headers are forwarded only when present: workerd treats
   // a passed-but-empty Headers as a range request and would answer 206.
   const ranged = request.headers.has("range") || request.headers.has("if-none-match");
-  const object = ranged
+  const object: R2Object | R2ObjectBody | null = ranged
     ? await bucket.get(key, { range: request.headers, onlyIf: request.headers })
     : await bucket.get(key);
   if (object === null || !("body" in object)) {
     const status = request.headers.has("if-none-match") ? 304 : 412;
     return withArtifactHeaders(new Response(null, { status }));
   }
+  const body = object.body as ReadableStream;
   const headers = new Headers();
   object.writeHttpMetadata(headers);
   headers.set("accept-ranges", "bytes");
@@ -153,6 +147,6 @@ async function privateArtifact(
   // shapes report a range field on a plain get.
   const status = request.headers.has("range") && object.range !== undefined ? 206 : 200;
   return withArtifactHeaders(
-    new Response(request.method === "HEAD" ? null : object.body, { status, headers }),
+    new Response(request.method === "HEAD" ? null : body, { status, headers }),
   );
 }

@@ -1,14 +1,22 @@
 // packages/ui/src/ModelCard.tsx — §11.16's feed card renderer.
-'use client';
-import { useEffect, useRef, useState } from 'react';
-import { acquireWebglSlot, releaseWebglSlot } from './webglBudget';
+"use client";
+import { useEffect, useRef, useState } from "react";
+import { acquireWebglSlot, releaseWebglSlot } from "./webglBudget";
 
-export function ModelCard({ lodUrl, posterUrl, title }: { lodUrl: string; posterUrl: string; title: string }) {
+export function ModelCard({
+  lodUrl,
+  posterUrl,
+  title,
+}: {
+  lodUrl: string;
+  posterUrl: string;
+  title: string;
+}) {
   const [live, setLive] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    void import('@google/model-viewer');
+    void import("@google/model-viewer");
   }, []);
 
   useEffect(() => {
@@ -24,7 +32,7 @@ export function ModelCard({ lodUrl, posterUrl, title }: { lodUrl: string; poster
           setLive(false);
         }
       },
-      { rootMargin: '200px' },
+      { rootMargin: "200px" },
     );
     io.observe(el);
     return () => {
