@@ -28,7 +28,7 @@ allowBuilds:
   # core-js@2.x ships a postinstall ad for its maintainer; the polyfill itself
   # installs fine without the script — deny it like @swc/core above.
   core-js: false
-  "@contentauth/c2pa-node": set this to true or false
+  "@contentauth/c2pa-node": true
 catalog:
   react: "19.3.0"
   react-dom: "19.3.0"
